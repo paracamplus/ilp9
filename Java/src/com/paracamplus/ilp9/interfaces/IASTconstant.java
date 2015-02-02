@@ -4,5 +4,5 @@ public abstract interface IASTconstant extends IASTexpression {
 	/** The accurate description of the constant */
     String getDescription();
     /** The constant as an accurate Java value */
-    abstract Object getValue ();
+    Object getValue ();
 }

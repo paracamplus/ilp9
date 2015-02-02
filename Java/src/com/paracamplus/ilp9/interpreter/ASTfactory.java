@@ -30,14 +30,13 @@ import com.paracamplus.ilp9.parser.IParserFactory;
 public class ASTfactory implements IParserFactory {
 
     public IASTprogram newProgram(IASTfunctionDefinition[] functions,
-            IASTclassDefinition[] clazzes, IASTexpression expression) {
-        // TODO Auto-generated method stub
-        return null;
+                                  IASTclassDefinition[] clazzes, 
+                                  IASTexpression expression) {
+        return new ASTprogram(functions, clazzes, expression);
     }
 
     public IASTsequence newSequence(IASTexpression[] asts) {
-        // TODO Auto-generated method stub
-        return null;
+        return new ASTsequence(asts);
     }
 
     public IASTalternative newAlternative(IASTexpression condition,
@@ -75,8 +74,7 @@ public class ASTfactory implements IParserFactory {
     }
 
     public IASTinteger newIntegerConstant(String value) {
-        // TODO Auto-generated method stub
-        return null;
+        return new ASTinteger(value); 
     }
 
     public IASTfloat newFloatConstant(String value) {

@@ -12,6 +12,7 @@ import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
+import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
 import com.paracamplus.ilp9.parser.AbstractExtensibleParser;
@@ -23,6 +24,8 @@ public class Parser extends AbstractExtensibleParser {
 	public Parser(IParserFactory factory) {
 		super(factory);
         addMethod("alternative", Parser.class);
+        addMethod("sequence", Parser.class);
+        addMethod("integer", Parser.class);
 	}
 
     public static IASTexpression narrowToIASTexpression (IAST iast) 
@@ -64,7 +67,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newProgram(defs, clazzes, body);
     }
 
-	protected IASTalternative alternative (Element e) throws ParseException {
+	public IASTalternative alternative (Element e) throws ParseException {
         final NodeList nl = e.getChildNodes();
         IAST iastc = findThenParseChildAsUnique(nl, "condition");
         IASTexpression condition = narrowToIASTexpression(iastc);
@@ -80,6 +83,23 @@ public class Parser extends AbstractExtensibleParser {
                     condition, consequence, null);
         }
     }
+	
+	public IASTsequence sequence (Element e) throws ParseException {
+	    final IAST[] iasts = parseAll(e.getChildNodes());
+	    List<IASTexpression> exprs = new Vector<>();
+	    for ( IAST iast : iasts ) {
+	        if ( iast instanceof IASTexpression ) {
+	            exprs.add((IASTexpression) iast);
+	        }
+	    }
+	    IASTexpression[] expressions = exprs.toArray(new IASTexpression[0]);
+	    return getFactory().newSequence(expressions);
+	}
+	
+	public IASTinteger integer (Element e) throws ParseException {
+	    final String description = e.getAttribute("value");
+	    return getFactory().newIntegerConstant(description);
+	}
 
 
 }
