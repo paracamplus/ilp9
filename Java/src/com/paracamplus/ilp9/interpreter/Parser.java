@@ -1,41 +1,85 @@
 package com.paracamplus.ilp9.interpreter;
 
+import java.util.List;
 import java.util.Vector;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.paracamplus.ilp9.interfaces.IAST;
+import com.paracamplus.ilp9.interfaces.IASTalternative;
+import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
 import com.paracamplus.ilp9.parser.AbstractExtensibleParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
+import com.paracamplus.ilp9.parser.ParseException;
 
 public class Parser extends AbstractExtensibleParser {
 
 	public Parser(IParserFactory factory) {
 		super(factory);
-        addParser("alternative",         ASTalternative.class);
-        addParser("sequence",            ASTsequence.class);
-        addParser("loop",                ASTwhile.class);
-        addParser("assignment",          ASTassignment.class);
-        addParser("functionDefinition",  ASTfunctionDefinition.class);
-        addParser("block",               ASTblock.class);
-        addParser("variable",            ASTreference.class);
-        addParser("invocation",          ASTinvocation.class);
-        addParser("unaryOperation",      ASTunaryOperation.class);
-        addParser("binaryOperation",     ASTbinaryOperation.class);
-        addParser("integer",             ASTinteger.class);
-        addParser("float",               ASTfloat.class);
-        addParser("boolean",             ASTboolean.class);
-        addParser("string",              ASTstring.class);
-        addParser("try",                 ASTtry.class);
+        addMethod("alternative", Parser.class);
 	}
+
+    public static IASTexpression narrowToIASTexpression (IAST iast) 
+            throws ParseException {
+        if ( iast != null && iast instanceof IASTexpression ) {
+            return (IASTexpression) iast;
+        } else {
+            final String msg = "Not an ASTexpression " + iast;
+            throw new ParseException(msg);
+        }
+    }
+    
+    public IASTprogram parse (Document d) throws ParseException {
+        final Element e = d.getDocumentElement();
+        final IAST[] iasts = parseAll(e.getChildNodes());
+        final List<IASTfunctionDefinition> functionDefinitions = new Vector<>();
+        final List<IASTclassDefinition> classDefinitions = new Vector<>();
+        final List<IASTexpression> expressions = new Vector<>();
+        for ( IAST iast : iasts ) {
+            if ( iast instanceof IASTfunctionDefinition ) {
+                functionDefinitions.add((IASTfunctionDefinition) iast);
+            } else if ( iast instanceof IASTclassDefinition ) {
+                classDefinitions.add((IASTclassDefinition) iast);
+            } else if ( iast instanceof IASTexpression ) {
+                expressions.add((IASTexpression) iast);
+            } else {
+                final String msg = "Should never occur!";
+                assert false : msg;
+                throw new ParseException(msg);
+            }
+        }
+        IASTfunctionDefinition[] defs =
+            functionDefinitions.toArray(new IASTfunctionDefinition[0]);
+        IASTclassDefinition[] clazzes =
+            classDefinitions.toArray(new IASTclassDefinition[0]);
+        IASTexpression[] exprs = 
+            expressions.toArray(new IASTexpression[0]);
+        IASTsequence body = getFactory().newSequence(exprs);
+        return getFactory().newProgram(defs, clazzes, body);
+    }
+
+	protected IASTalternative alternative (Element e) throws ParseException {
+        final NodeList nl = e.getChildNodes();
+        IAST iastc = findThenParseChildAsUnique(nl, "condition");
+        IASTexpression condition = narrowToIASTexpression(iastc);
+        IAST iaste = findThenParseChildAsSequence(nl, "consequence");
+        IASTexpression consequence = narrowToIASTexpression(iaste);
+        IAST iasta = findThenParseChildAsSequence(nl, "alternant");
+        try {
+            IASTexpression alternant = narrowToIASTexpression(iasta);
+            return getFactory().newAlternative(
+                    condition, consequence, alternant);
+        } catch (ParseException exc) {
+            return getFactory().newAlternative(
+                    condition, consequence, null);
+        }
+    }
+
+
 }

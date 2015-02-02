@@ -12,7 +12,7 @@ public interface IParserFactory {
 
     IASTalternative newAlternative(
             IASTexpression condition,
-            IASTexpression consequent,
+            IASTexpression consequence,
             IASTexpression alternant);
 
     IASTvariable newVariable(String name);

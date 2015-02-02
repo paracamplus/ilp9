@@ -22,17 +22,10 @@ public abstract class AbstractParser implements IParser {
 	}
 	private final IParserFactory factory;
 	
-
     // Parsing entry points:
     
-	public IASTprogram parse(Document dom) throws ParseException {
-        return parse(dom, this);
-	}
-	
-	abstract IASTprogram parse(Document e, IParser parser)
-			throws ParseException;
-	abstract IAST parse(Node e, IParser parser)
-			throws ParseException;
+	public abstract IASTprogram parse(Document dom) throws ParseException;	
+	public abstract IAST parse(Node e) throws ParseException;
 
 	// Common utilities
 	
@@ -53,7 +46,7 @@ public abstract class AbstractParser implements IParser {
             case Node.ELEMENT_NODE: {
                 final Element e = (Element) nd;
                 if ( childName.equals(e.getTagName()) ) {
-                    return this.parse(e, this);
+                    return this.parse(e);
                 }
                 break;
             }
@@ -130,7 +123,7 @@ public abstract class AbstractParser implements IParser {
 
                 case Node.ELEMENT_NODE: {
                 	final Element e = (Element) nd;
-                    final IAST p = this.parse(e, this);
+                    final IAST p = this.parse(e);
                     result.add(p);
                     continue LOOP;
                 }

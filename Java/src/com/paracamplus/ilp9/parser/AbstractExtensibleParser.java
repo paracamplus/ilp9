@@ -22,45 +22,38 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
         this.parsers.put(name, method);
     }
 
-    /** When parsing an XML element named 'name', invoke the static
-     * method clazz.parse(e, parser). */
-
-    public void addParser (String name, Class<?> clazz) {
-      try {
-        for ( Method m : clazz.getMethods() ) {
-            if ( ! "parse".equals(m.getName()) ) {
-                continue;
-            }
-            if ( ! Modifier.isStatic(m.getModifiers()) ) {
-                continue;
-            }
-            Class<?>[] parameterTypes = m.getParameterTypes();
-            if ( parameterTypes.length != 2 ) {
-                continue;
-            }
-            if ( ! Element.class.isAssignableFrom(parameterTypes[0]) ) {
-                continue;
-            }
-            if ( ! IParser.class.isAssignableFrom(parameterTypes[1]) ) {
-                continue;
-            }
-            addParser(name, m);
-            return;
+    public void addMethod (String name, Class<?> clazz) {
+        try {
+          for ( Method m : clazz.getMethods() ) {
+              if ( ! name.equals(m.getName()) ) {
+                  continue;
+              }
+              if ( Modifier.isStatic(m.getModifiers()) ) {
+                  continue;
+              }
+              Class<?>[] parameterTypes = m.getParameterTypes();
+              if ( parameterTypes.length != 1 ) {
+                  continue;
+              }
+              if ( ! Element.class.isAssignableFrom(parameterTypes[0]) ) {
+                  continue;
+              }
+              addParser(name, m);
+              return;
+          }
+          if ( Object.class == clazz ) {
+              final String msg = "Cannot find suitable parsing method!";
+              throw new RuntimeException(msg);
+          } else {
+              addMethod(name, clazz.getSuperclass());
+          }
+        } catch (SecurityException e1) {
+          final String msg = "Cannot access parsing method!";
+          throw new RuntimeException(msg);
         }
-        if ( Object.class == clazz ) {
-            final String msg = "Cannot find suitable static parse() method!";
-            throw new RuntimeException(msg);
-        } else {
-            addParser(name, clazz.getSuperclass());
-        }
-      } catch (SecurityException e1) {
-        final String msg = "Cannot access static parse() method!";
-        throw new RuntimeException(msg);
-      }
     }
-
-    public IAST parse (final Node n, IParser parser)
-      throws ParseException {
+    
+    public IAST parse (final Node n) throws ParseException {
       switch ( n.getNodeType() ) {
       case Node.ELEMENT_NODE: {
         final Element e = (Element) n;
@@ -69,7 +62,7 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
         if ( parsers.containsKey(name) ) {
             final Method method = parsers.get(name);
             try {
-              Object result = method.invoke(null, new Object[]{e, this});
+              Object result = method.invoke(this, new Object[]{e});
               if ( result instanceof IAST ) {
             	  return (IAST) result;
               } else {
