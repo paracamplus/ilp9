@@ -1,23 +1,13 @@
 package com.paracamplus.ilp9.tools;
 
-import java.util.List;
-
-import com.paracamplus.ilp9.interfaces.IAST;
-
-interface IASTlink<K, V> extends IAST {
-	K getKey();
-	V getValue();
-}
-
-public interface IEnvironment<K,V> extends List<IASTlink<K,V>> {
-	
+public interface IEnvironment<K,V,T extends Throwable> {
 	/** is the key present in the environment ? */
 	boolean isPresent(K key);
-	IEnvironment<K,V> extend(K key, V value);
-	void update(K key, V value);
-	V getValue(K key);
+	IEnvironment<K,V,T> extend(K key, V value);
+	K getKey() throws T;
+	V getValue(K key) throws T;
+    void update(K key, V value) throws T;
 	// Low level interface:
 	boolean isEmpty();
-	IASTlink<K,V> getFirstLink();
-	IEnvironment<K,V> getOtherLinks();
+	IEnvironment<K,V,T> getNext() throws T;
 }

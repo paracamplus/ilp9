@@ -1,11 +1,12 @@
 package com.paracamplus.ilp9.interfaces;
 
-interface IASTBinding extends IAST {
-	IASTvariable getVariable();
-	IASTexpression getInitialization();
-}
-
 public interface IASTblock extends IASTexpression {
-	IASTBinding[] getBindings();
+    
+    interface IASTbinding extends IAST {
+        IASTvariable getVariable();
+        IASTexpression getInitialisation();
+    }
+
+	IASTbinding[] getBindings();
 	IASTexpression getBody();
 }

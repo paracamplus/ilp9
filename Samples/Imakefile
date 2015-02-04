@@ -1,0 +1,4 @@
+work : nothing 
+clean :: cleanMakefile
+
+# end of Imakefile

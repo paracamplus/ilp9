@@ -1,0 +1,32 @@
+package com.paracamplus.ilp9.interpreter;
+
+public abstract class Operator implements IOperator {
+
+    public Operator (String name) {
+        this.name = name;
+    }
+    private final String name;
+    
+    public String getName() {
+        return this.name;
+    }
+    
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
+ 
+    @Override
+    public boolean equals(Object obj) {
+        if ( this == obj ) {
+            return true;
+        }
+        if (obj == null ) {
+            return false;
+        }
+        if ( obj instanceof Operator ) {
+            return ((Operator) obj).getName().equals(this.name);
+        }
+        return false;
+    }
+}

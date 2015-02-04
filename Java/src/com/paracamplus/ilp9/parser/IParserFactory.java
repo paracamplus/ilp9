@@ -1,6 +1,34 @@
 package com.paracamplus.ilp9.parser;
 
-import com.paracamplus.ilp9.interfaces.*;
+import com.paracamplus.ilp9.interfaces.IASTalternative;
+import com.paracamplus.ilp9.interfaces.IASTassignment;
+import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
+import com.paracamplus.ilp9.interfaces.IASTblock;
+import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
+import com.paracamplus.ilp9.interfaces.IASTboolean;
+import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
+import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfloat;
+import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
+import com.paracamplus.ilp9.interfaces.IASTinstantiation;
+import com.paracamplus.ilp9.interfaces.IASTinteger;
+import com.paracamplus.ilp9.interfaces.IASTinvocation;
+import com.paracamplus.ilp9.interfaces.IASTlambda;
+import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASToperator;
+import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.interfaces.IASTreadField;
+import com.paracamplus.ilp9.interfaces.IASTreference;
+import com.paracamplus.ilp9.interfaces.IASTself;
+import com.paracamplus.ilp9.interfaces.IASTsend;
+import com.paracamplus.ilp9.interfaces.IASTsequence;
+import com.paracamplus.ilp9.interfaces.IASTstring;
+import com.paracamplus.ilp9.interfaces.IASTsuper;
+import com.paracamplus.ilp9.interfaces.IASTtry;
+import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
+import com.paracamplus.ilp9.interfaces.IASTvariable;
+import com.paracamplus.ilp9.interfaces.IASTwriteField;
 
 public interface IParserFactory {
     IASTprogram newProgram(
@@ -15,6 +43,8 @@ public interface IParserFactory {
             IASTexpression consequence,
             IASTexpression alternant);
 
+    IASToperator newOperator(String name);
+    
     IASTvariable newVariable(String name);
 
     IASTreference newReference(IASTvariable variable);
@@ -24,11 +54,11 @@ public interface IParserFactory {
             IASTexpression[] arguments);
 
     IASTunaryOperation newUnaryOperation(
-            String operatorName,
+            IASToperator operator,
             IASTexpression operand);
 
     IASTbinaryOperation newBinaryOperation(
-            String operatorName,
+            IASToperator operator,
             IASTexpression leftOperand,
             IASTexpression rightOperand);
 
@@ -40,24 +70,29 @@ public interface IParserFactory {
 
     IASTboolean newBooleanConstant(String value);
 
-    IASTassignment newAssignment(
-            IASTvariable variable,
-            IASTexpression value);
+    IASTassignment newAssignment(IASTvariable variable,
+                                 IASTexpression value);
 
-    IASTblock newBlock(
-            IASTvariable[] variables,
-            IASTexpression[] initialisations,
-            IASTexpression body);
+    IASTblock newBlock(IASTbinding[] binding,
+                       IASTexpression body);
 
-    IASTloop newLoop(
-            IASTexpression condition,
-            IASTexpression body);
+    IASTbinding newBinding(IASTvariable v, IASTexpression exp);
+    
+    IASTloop newLoop(IASTexpression condition,
+                     IASTexpression body);
 
     IASTfunctionDefinition newFunctionDefinition(
             String functionName,
             IASTvariable[] variables,
             IASTexpression body);
     
+    IASTtry newTry (IASTexpression body,
+                    IASTlambda catcher,
+                    IASTexpression finallyer );
+
+    IASTlambda newLambda (IASTvariable[] variables,
+                          IASTexpression body );
+        
     IASTclassDefinition newClassDefinition(
             String className,
             String superClassName,
@@ -90,4 +125,5 @@ public interface IParserFactory {
             IASTexpression[] arguments );
     
     IASTsuper newSuper();
+
 }

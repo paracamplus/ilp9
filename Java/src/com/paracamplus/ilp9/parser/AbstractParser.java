@@ -1,5 +1,6 @@
 package com.paracamplus.ilp9.parser;
 
+import java.util.List;
 import java.util.Vector;
 
 import org.w3c.dom.Document;
@@ -10,7 +11,6 @@ import org.w3c.dom.NodeList;
 import com.paracamplus.ilp9.interfaces.IAST;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTsequence;
 
 public abstract class AbstractParser implements IParser {
 
@@ -29,14 +29,12 @@ public abstract class AbstractParser implements IParser {
 
 	// Common utilities
 	
-    public IAST
-    	findThenParseChild (final Node n, final String childName)
-    throws ParseException {
-        return findThenParseChild(n.getChildNodes(), childName);
-    }
-
-    public IAST
-    	findThenParseChild (final NodeList nl, final String childName)
+	public Element findChild (final Node n, final String childName)
+	throws ParseException {
+	    return findChild(n.getChildNodes(), childName);
+	}
+	
+	public Element findChild (final NodeList nl, final String childName)
     throws ParseException {
         final int n = nl.getLength();
         for ( int i = 0 ; i<n ; i++ ) {
@@ -46,20 +44,69 @@ public abstract class AbstractParser implements IParser {
             case Node.ELEMENT_NODE: {
                 final Element e = (Element) nd;
                 if ( childName.equals(e.getTagName()) ) {
-                    return this.parse(e);
+                    return e;
                 }
                 break;
             }
 
             default: {
-            	// Just ignore everything but XML element.
+                // Just ignore everything but XML element.
             }
             }
         }
         final String msg = "No such child element " + childName;
         throw new ParseException(msg);
+	}
+	
+    public IAST	findThenParseChild (final Node n, final String childName)
+    throws ParseException {
+        return findThenParseChild(n.getChildNodes(), childName);
     }
 
+    public IAST	findThenParseChild (final NodeList nl, final String childName)
+    throws ParseException {
+        Element e = findChild(nl, childName);
+        return this.parse(e);
+    }
+
+    public IAST findThenParseChildContent (final Node n, final String childName)
+    throws ParseException {
+        return findThenParseChildContent(n.getChildNodes(), childName);
+    }
+
+    public IAST findThenParseChildContent (final NodeList nl, final String childName)
+    throws ParseException {
+        IAST[] iast = findThenParseChildAsArray(nl, childName);
+        if ( iast.length == 1 ) {
+            return iast[0];
+        } else {
+            String msg = "Non single content " + nl;
+            throw new ParseException(msg);
+        }
+    }
+  
+    public IASTexpression[] findThenParseChildAsExpressions (
+            final Node n, final String childName)
+    throws ParseException {
+        return findThenParseChildAsExpressions(n.getChildNodes(), childName);
+    }
+
+    public IASTexpression[] findThenParseChildAsExpressions (
+            final NodeList nl, final String childName)
+    throws ParseException {
+        IAST[] iasts = findThenParseChildAsArray(nl, childName);
+        final List<IASTexpression> result = new Vector<>();
+        for ( IAST iast : iasts ) {
+            if ( iast instanceof IASTexpression ) {
+                result.add((IASTexpression) iast);
+            } else {
+                String msg = "Not an IASTexpression " + iast;
+                throw new ParseException(msg);
+            }
+        }
+        return result.toArray(new IASTexpression[0]);
+    }
+    
     public IAST[] findThenParseChildAsArray (
             final Node n, final String childName)
     throws ParseException {
@@ -69,52 +116,13 @@ public abstract class AbstractParser implements IParser {
     public IAST[] findThenParseChildAsArray (
             final NodeList nl, final String childName)
     throws ParseException {
-        final int n = nl.getLength();
-        for ( int i = 0 ; i<n ; i++ ) {
-            final Node nd = nl.item(i);
-            switch ( nd.getNodeType() ) {
-
-            case Node.ELEMENT_NODE: {
-                final Element e = (Element) nd;
-                if ( childName.equals(e.getTagName()) ) {
-                    return this.parseAll(e.getChildNodes());
-                }
-                break;
-            }
-
-            default: {
-            	// Just ignore everything but XML element.
-            }
-            }
-        }
-        final String msg = "No such node " + childName;
-        throw new ParseException(msg);
+        Element e = findChild(nl, childName);
+        return this.parseAll(e.getChildNodes());
     }
-    
-    public IAST findThenParseChildAsUnique (
-            final Node n,
-            final String childName)
-            throws ParseException {
-        return findThenParseChildAsUnique(n.getChildNodes(), childName);
-    }
-
-    public IAST findThenParseChildAsUnique (
-            final NodeList nl,
-            final String childName)
-            throws ParseException {
-        final IAST[] results =
-            findThenParseChildAsArray(nl, childName);
-        if ( 1 == results.length ) {
-            return results[0];
-        } else {
-            final String msg = "Should be an unique DOM node!";
-            throw new ParseException(msg);
-        }
-    }
-    
+ 
     public IAST[] parseAll (NodeList nl)
     throws ParseException {
-        final Vector<IAST> result = new Vector<>();
+        final List<IAST> result = new Vector<>();
         final int n = nl.getLength();
         LOOP:
             for ( int i = 0 ; i<n ; i++ ) {
@@ -134,44 +142,5 @@ public abstract class AbstractParser implements IParser {
                 }
             }
         return result.toArray(new IAST[0]);
-    }
-    
-    public IASTsequence findThenParseChildAsSequence (
-            NodeList nl, String childName)
-    throws ParseException {
-        IAST[] iasts = findThenParseChildAsArray(nl, childName);
-        Vector<IASTexpression> viasts = new Vector<>();
-        for (IAST iast : iasts) {
-        	if (iast instanceof IASTexpression) {
-        		viasts.add((IASTexpression) iast);
-        	} else {
-        		final String msg = "Not an IASTexpression " + iast;
-        		throw new ParseException(msg);
-        	}
-        }
-        IASTexpression[] v = viasts.toArray(new IASTexpression[0]);
-        return getFactory().newSequence(v);
-    }
-
-    public IASTsequence findThenParseChildAsSequence (
-            Node n, String childName)
-    throws ParseException {
-        return findThenParseChildAsSequence(n.getChildNodes(), childName);
-    }
-    
-    public IASTsequence parseChildrenAsSequence (NodeList nl)
-    throws ParseException {
-        IAST[] iasts = parseAll(nl);
-        Vector<IASTexpression> viasts = new Vector<>();
-        for (IAST iast : iasts) {
-        	if ( iast instanceof IASTexpression) {
-        		viasts.add((IASTexpression) iast);
-        	} else {
-        		final String msg = "Not an IASTexpression " + iast;
-        		throw new ParseException(msg);
-        	}
-        }
-        IASTexpression[] v = viasts.toArray(new IASTexpression[0]);
-        return getFactory().newSequence(v);
     }
 }

@@ -23,6 +23,13 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
     }
 
     public void addMethod (String name, Class<?> clazz) {
+        addParser(name, findMethod(name, clazz));
+    }
+    public void addMethod (String name, Class<?> clazz, String tagName) {
+        addParser(tagName, findMethod(name, clazz));
+    }
+    
+    public Method findMethod (String name, Class<?> clazz) {
         try {
           for ( Method m : clazz.getMethods() ) {
               if ( ! name.equals(m.getName()) ) {
@@ -38,14 +45,13 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
               if ( ! Element.class.isAssignableFrom(parameterTypes[0]) ) {
                   continue;
               }
-              addParser(name, m);
-              return;
+              return m;
           }
           if ( Object.class == clazz ) {
               final String msg = "Cannot find suitable parsing method!";
               throw new RuntimeException(msg);
           } else {
-              addMethod(name, clazz.getSuperclass());
+              return findMethod(name, clazz.getSuperclass());
           }
         } catch (SecurityException e1) {
           final String msg = "Cannot access parsing method!";
@@ -63,7 +69,7 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
             final Method method = parsers.get(name);
             try {
               Object result = method.invoke(this, new Object[]{e});
-              if ( result instanceof IAST ) {
+              if ( result != null && result instanceof IAST ) {
             	  return (IAST) result;
               } else {
             	  final String msg = "Not an IAST " + result;

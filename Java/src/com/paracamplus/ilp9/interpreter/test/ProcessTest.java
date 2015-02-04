@@ -16,6 +16,15 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.interpreter.GlobalVariableEnvironment;
+import com.paracamplus.ilp9.interpreter.GlobalVariableStuff;
+import com.paracamplus.ilp9.interpreter.IGlobalVariableEnvironment;
+import com.paracamplus.ilp9.interpreter.ILexicalEnvironment;
+import com.paracamplus.ilp9.interpreter.IOperatorEnvironment;
+import com.paracamplus.ilp9.interpreter.Interpreter;
+import com.paracamplus.ilp9.interpreter.LexicalEnvironment;
+import com.paracamplus.ilp9.interpreter.OperatorEnvironment;
+import com.paracamplus.ilp9.interpreter.OperatorStuff;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
 import com.paracamplus.ilp9.tools.IProcess;
@@ -27,13 +36,13 @@ public class ProcessTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
-    protected static String pattern = "u\\w*-[\\d+]";
+    protected static String pattern = "u[0-7]\\d*-[12345]";
     
     public ProcessTest(final File file) {
         this.file = file;
         this.process = new com.paracamplus.ilp9.interpreter.Process();
-        IParserFactory factory = new com.paracamplus.ilp9.interpreter.ASTfactory();
-        this.parser = new com.paracamplus.ilp9.interpreter.Parser(factory);
+        IParserFactory factory = new com.paracamplus.ilp9.ast.ASTfactory();
+        this.parser = new com.paracamplus.ilp9.ast.Parser(factory);
     }
     protected File file;
     
@@ -57,8 +66,16 @@ public class ProcessTest {
         process.setGrammar(rngFile);
         process.setParser(parser);
         IASTprogram program = process.getProgram();
-        // eval program !!!!!!!!!!!!!!
-        System.err.println(program);
+        
+        IGlobalVariableEnvironment gve = new GlobalVariableEnvironment();
+        GlobalVariableStuff.fillGlobalVariables(gve);
+        IOperatorEnvironment oe = new OperatorEnvironment();
+        OperatorStuff.fillUnaryOperators(oe);
+        OperatorStuff.fillBinaryOperators(oe);
+        Interpreter interpreter = new Interpreter(gve, oe);
+        ILexicalEnvironment lexenv = LexicalEnvironment.EMPTY;
+        Object value = interpreter.visit(program, lexenv);
+        System.err.println(value);
     }
     
     @Parameters(name = "{0}")
