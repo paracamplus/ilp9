@@ -9,7 +9,7 @@ import com.paracamplus.ilp9.interpreter.EvaluationException;
 public class Equal extends BinaryOperator {
     
     public Equal () {
-        super("=");
+        super("==");
     }
     
     public Object apply (Object arg1, Object arg2) 

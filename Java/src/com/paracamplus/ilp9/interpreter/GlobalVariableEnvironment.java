@@ -3,8 +3,6 @@ package com.paracamplus.ilp9.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.paracamplus.ilp9.interfaces.IASTvariable;
-
 public class GlobalVariableEnvironment implements IGlobalVariableEnvironment {
 
     public GlobalVariableEnvironment () {
@@ -12,16 +10,16 @@ public class GlobalVariableEnvironment implements IGlobalVariableEnvironment {
     }
     private final Map<String, Object> globalVariableEnvironment;
     
-    public Object getGlobalVariableValue(IASTvariable variable) {
-        Object value = globalVariableEnvironment.get(variable.getName());
+    public Object getGlobalVariableValue(String variableName) {
+        Object value = globalVariableEnvironment.get(variableName);
         return value;
     }
 
-    public void addGlobalVariableValue(IASTvariable variable, Object value) {
-        globalVariableEnvironment.put(variable.getName(), value);
+    public void addGlobalVariableValue(String variableName, Object value) {
+        globalVariableEnvironment.put(variableName, value);
     }
     
-    public void updateGlobalVariableValue(IASTvariable variable, Object value) {
-        globalVariableEnvironment.put(variable.getName(), value);
+    public void updateGlobalVariableValue(String variableName, Object value) {
+        globalVariableEnvironment.put(variableName, value);
     }
 }

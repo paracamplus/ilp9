@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface IASTprogram extends IAST {
 	IASTexpression getBody();
-	Map<String, IASTfunctionDefinition> getFunctionDefinitions();
+	IASTfunctionDefinition[] getFunctionDefinitions();
 	Map<String, IASTclassDefinition> getClassDefinitions();
 }

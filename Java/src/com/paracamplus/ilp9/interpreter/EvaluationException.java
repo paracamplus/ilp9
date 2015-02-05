@@ -6,4 +6,8 @@ public class EvaluationException extends Exception {
     public EvaluationException(String msg) {
         super(msg);
     }
+
+    public EvaluationException(Exception e) {
+        super(e);
+    }
 }
