@@ -295,6 +295,16 @@
                           (xmlize* (cdr fns+body)) ) ) ) )
          'letrec  )
    (list (lambda (e)
+         (tag "lambda"
+              ""
+              (tag "variables"
+                   ""
+                   (gather (map xmlize (cadr e))) )
+              (tag "body"
+                   ""
+                   (xmlize* (cddr e)) ) ) )
+         'lambda )
+   (list (lambda (e)
          (tag "assignment"
               (attribute "name" (cadr e))
               (tag "value"
