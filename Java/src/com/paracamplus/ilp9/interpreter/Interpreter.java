@@ -63,7 +63,13 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
             String v = fd.getName();
             getGlobalVariableEnvironment().addGlobalVariableValue(v, f);
         }
-        return iast.getBody().accept(this, lexenv);
+        try {
+            return iast.getBody().accept(this, lexenv);
+        } catch (ThrownException exc) {
+            return exc.getThrownValue();
+        } catch (Exception exc) {
+            return exc;
+        }
     }
    
     // 
@@ -234,15 +240,38 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     public Object visit(IASTtry iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
         Object result = Boolean.FALSE;
+        IFunction fcatcher = null;
+        IASTlambda catcher = iast.getCatcher();
+        if ( null != catcher ) {
+            fcatcher = (IFunction) catcher.accept(this, lexenv);
+        }
         try {
             result = iast.getBody().accept(this, lexenv);
         } catch (ThrownException exc) {
-            Object value = exc.getThrownValue();
-            
+            if ( null != fcatcher ) {
+                Object value = exc.getThrownValue();
+                fcatcher.apply(this, new Object[]{ value });
+            } else {
+                throw exc;
+            }
         } catch (EvaluationException exc) {
-            
+            if ( null != fcatcher ) {
+                fcatcher.apply(this, new Object[]{ exc });
+            } else {
+                throw exc;
+            }
+        } catch (Exception exc) {
+            if ( null != fcatcher ) {
+                EvaluationException e = new EvaluationException(exc);
+                fcatcher.apply(this, new Object[]{ e });
+            } else {
+                throw exc;
+            }
         } finally {
-            
+            IASTexpression finallyer = iast.getFinallyer();
+            if ( null != finallyer ) {
+                finallyer.accept(this, lexenv);
+            }
         }
         return result;
     }

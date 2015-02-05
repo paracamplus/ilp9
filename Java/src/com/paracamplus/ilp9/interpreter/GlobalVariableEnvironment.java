@@ -18,6 +18,10 @@ public class GlobalVariableEnvironment implements IGlobalVariableEnvironment {
     public void addGlobalVariableValue(String variableName, Object value) {
         globalVariableEnvironment.put(variableName, value);
     }
+
+    public void addGlobalVariableValue(IPrimitive primitive) {
+        globalVariableEnvironment.put(primitive.getName(), primitive);
+    }
     
     public void updateGlobalVariableValue(String variableName, Object value) {
         globalVariableEnvironment.put(variableName, value);

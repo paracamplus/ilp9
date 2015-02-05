@@ -21,7 +21,7 @@ public class Function implements IFunction {
         return variables.length;
     }
 
-    public Object apply(Interpreter interpreter, Object... argument) 
+    public Object apply(Interpreter interpreter, Object[] argument) 
             throws EvaluationException {
         if ( argument.length != getArity() ) {
             String msg = "Wrong arity";

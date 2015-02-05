@@ -1,10 +1,16 @@
 package com.paracamplus.ilp9.interpreter.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -27,6 +33,7 @@ import com.paracamplus.ilp9.interpreter.OperatorEnvironment;
 import com.paracamplus.ilp9.interpreter.OperatorStuff;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
+import com.paracamplus.ilp9.tools.FileTool;
 import com.paracamplus.ilp9.tools.IProcess;
 import com.paracamplus.ilp9.tools.Input;
 import com.paracamplus.ilp9.tools.InputFromFile;
@@ -68,14 +75,57 @@ public class ProcessTest {
         IASTprogram program = process.getProgram();
         
         IGlobalVariableEnvironment gve = new GlobalVariableEnvironment();
-        GlobalVariableStuff.fillGlobalVariables(gve);
+        stdout = new StringWriter();
+        GlobalVariableStuff.fillGlobalVariables(gve, stdout);
         IOperatorEnvironment oe = new OperatorEnvironment();
         OperatorStuff.fillUnaryOperators(oe);
         OperatorStuff.fillBinaryOperators(oe);
         Interpreter interpreter = new Interpreter(gve, oe);
         ILexicalEnvironment lexenv = LexicalEnvironment.EMPTY;
         Object value = interpreter.visit(program, lexenv);
-        System.err.println(value);
+        String printing = stdout.toString();
+        System.out.println("  Value: " + value);
+        if ( ! "".equals(printing) ) {
+            System.out.println("  Printing: " + printing);
+        }
+        checkResult(value);
+        checkPrinting(printing);
+    }
+    private Writer stdout;
+    
+    protected static Object normalizeResult(Object value) {
+        if (value instanceof BigInteger) {
+            return ((BigInteger)value).intValue();
+        } else if ( value instanceof BigDecimal ) {
+            return ((BigDecimal)value).doubleValue();
+        } else {
+            return value;
+        }
+    }
+    
+    public void checkResult (Object value) throws IOException {
+        String expectedResult = readExpectedResult(file);
+        value = normalizeResult(value);
+        if ( value instanceof Double ) {
+            double expected = Double.parseDouble(expectedResult);
+            assertEquals("Comparing double results", 
+                    expected,
+                    (double)value, 
+                    0.01);
+        } else if ( value instanceof Integer ) {
+            assertEquals("Comparing integer results",
+                    expectedResult.toString(),
+                    value.toString());
+        } else {
+            assertEquals("Comparing results", 
+                    expectedResult, 
+                    value.toString());
+        }
+    }
+    
+    public void checkPrinting(String printing) throws IOException {
+        String expectedPrinting = readExpectedPrinting(file);
+        assertEquals("Comparing printings", printing, expectedPrinting);
     }
     
     @Parameters(name = "{0}")
@@ -116,6 +166,33 @@ public class ProcessTest {
         }
         return result;
     }
- 
+    
+    public static File changeSuffix(File file, String suffix) {
+        String parent = file.getParent();
+        String name = file.getName();
+        String basename;
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex >= 0) {
+            basename = name.substring(0, dotIndex);
+        } else {
+            basename = name;
+        }
+        String newName = parent + File.separator + basename + '.' + suffix;
+        return new File(newName);
+    }
+
+    public static String readExpectedPrinting (File file)
+      throws IOException {
+      File resultFile = changeSuffix(file, "print");
+      assertTrue(file.exists());
+      return FileTool.slurpFile(resultFile).trim();
+    }
+
+    public static String readExpectedResult (File file)
+      throws IOException {
+      File resultFile = changeSuffix(file, "result");
+      assertTrue(file.exists());
+      return FileTool.slurpFile(resultFile).trim();
+    }
 
 }

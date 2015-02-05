@@ -1,20 +1,29 @@
 package com.paracamplus.ilp9.interpreter.primitive;
 
+import java.io.IOException;
+import java.io.Writer;
+
 import com.paracamplus.ilp9.interpreter.EvaluationException;
 import com.paracamplus.ilp9.interpreter.Primitive;
 
 public class Newline extends Primitive {
     
-    public Newline() {
+    public Newline(Writer out) {
         super("newline");
+        this.out = out;
     }
+    private final Writer out;
     
     public int getArity () {
         return 0;
     }
     
-    public Object apply (Object value) {
-        System.out.println("");
+    public Object apply (Object value) throws EvaluationException {
+        try {
+            out.append("\n");
+        } catch (IOException e) {
+            throw new EvaluationException(e);
+        }
         return Boolean.FALSE;
     }
     
@@ -26,5 +35,4 @@ public class Newline extends Primitive {
             throw new EvaluationException(msg);
         }
     }
-
 }

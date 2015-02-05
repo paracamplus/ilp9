@@ -22,7 +22,7 @@ public class ASTtry extends ASTinstruction implements IASTtry {
         return body;
     }
 
-    public IASTexpression getCatcher() {
+    public IASTlambda getCatcher() {
         return catcher;
     }
 

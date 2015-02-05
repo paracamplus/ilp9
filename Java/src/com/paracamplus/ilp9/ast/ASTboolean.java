@@ -6,8 +6,9 @@ import com.paracamplus.ilp9.interfaces.IASTvisitor;
 public class ASTboolean extends ASTconstant implements IASTboolean {
 
     public ASTboolean (String description) {
-        super(description, Boolean.getBoolean(description));
+        super(description, "true".equals(description));
     }
+    
     public Boolean getValue() {
         return (Boolean) super.getValue();
     }
