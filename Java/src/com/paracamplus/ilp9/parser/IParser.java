@@ -1,6 +1,7 @@
 package com.paracamplus.ilp9.parser;
 
-import org.w3c.dom.Document;
+import java.io.File;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -8,10 +9,14 @@ import org.w3c.dom.NodeList;
 import com.paracamplus.ilp9.interfaces.IAST;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.tools.Input;
 
 public interface IParser {
 	IParserFactory getFactory();
-	IASTprogram parse(Document dom) throws ParseException;
+    IASTprogram getProgram() throws ParseException;
+    
+    void setInput(Input input);
+    void setGrammar(File rngFile);
 	
 	// Utilities
 	Element findChild (final Node n, final String childName)

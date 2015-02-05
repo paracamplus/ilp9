@@ -34,7 +34,6 @@ import com.paracamplus.ilp9.interpreter.OperatorStuff;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
 import com.paracamplus.ilp9.tools.FileTool;
-import com.paracamplus.ilp9.tools.IProcess;
 import com.paracamplus.ilp9.tools.Input;
 import com.paracamplus.ilp9.tools.InputFromFile;
 
@@ -47,16 +46,10 @@ public class ProcessTest {
     
     public ProcessTest(final File file) {
         this.file = file;
-        this.process = new com.paracamplus.ilp9.interpreter.Process();
         IParserFactory factory = new com.paracamplus.ilp9.ast.ASTfactory();
         this.parser = new com.paracamplus.ilp9.ast.Parser(factory);
     }
     protected File file;
-    
-    public void setProcess (IProcess process) {
-        this.process = process;
-    }
-    protected IProcess process;
     
     public void setParser (IParser parser) {
         this.parser = parser;
@@ -68,11 +61,10 @@ public class ProcessTest {
         System.err.println("Testing " + file.getAbsolutePath() + " ...");
         assertTrue(file.exists());
         Input input = new InputFromFile(file);
-        process.setInput(input);
+        parser.setInput(input);
         File rngFile = new File(rngFileName);
-        process.setGrammar(rngFile);
-        process.setParser(parser);
-        IASTprogram program = process.getProgram();
+        parser.setGrammar(rngFile);
+        IASTprogram program = parser.getProgram();
         
         IGlobalVariableEnvironment gve = new GlobalVariableEnvironment();
         stdout = new StringWriter();

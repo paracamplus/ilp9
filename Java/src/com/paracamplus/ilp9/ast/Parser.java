@@ -1,12 +1,18 @@
 package com.paracamplus.ilp9.ast;
 
+import java.io.File;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import com.paracamplus.ilp9.interfaces.IAST;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
@@ -34,6 +40,8 @@ import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.parser.AbstractExtensibleParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
 import com.paracamplus.ilp9.parser.ParseException;
+import com.paracamplus.ilp9.tools.Input;
+import com.thaiopensource.validate.ValidationDriver;
 
 public class Parser extends AbstractExtensibleParser {
 
@@ -58,7 +66,47 @@ public class Parser extends AbstractExtensibleParser {
         addMethod("lambda", Parser.class);
         addMethod("codefinitions", Parser.class);
 	}
+	  
+    public void setInput(Input input) {
+        this.input = input;
+    }
+    private Input input;
+    
+    public void setGrammar (File rngFile) {
+        this.rngFile = rngFile;
+    }
+    private File rngFile;
+    
+    public IASTprogram getProgram() throws ParseException {
+        try {
+            final String programText = input.getText();
+            final String rngFilePath = rngFile.getAbsolutePath();
+            final InputSource isg = ValidationDriver.fileInputSource(rngFilePath);
+            final ValidationDriver vd = new ValidationDriver();
+            vd.loadSchema(isg);
+            
+            InputSource is = new InputSource(new StringReader(programText));
+            if ( ! vd.validate(is) ) {
+                throw new ParseException("Invalid XML program!");
+            }
 
+            final DocumentBuilderFactory dbf =
+                DocumentBuilderFactory.newInstance();
+            final DocumentBuilder db = dbf.newDocumentBuilder();
+            // the previous value of is is totally drained!
+            is = new InputSource(new StringReader(programText));
+            final Document document = db.parse(is);
+            IASTprogram program = parse(document);
+            return program;
+        } catch (ParseException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ParseException(e);
+        }
+    }   
+
+    // 
+    
     public static IASTexpression narrowToIASTexpression (IAST iast) 
             throws ParseException {
         if ( iast != null && iast instanceof IASTexpression ) {
