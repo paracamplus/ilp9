@@ -43,7 +43,7 @@ public class ProcessTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
-    protected static String pattern = "u[0-7]\\d*-[12345]";
+    protected static String pattern = "ur?[0-7]\\d*-[12345]";
     
     public ProcessTest(final File file) {
         this.file = file;

@@ -16,6 +16,7 @@ import com.paracamplus.ilp9.interfaces.IASTblock;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
+import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
@@ -55,6 +56,7 @@ public class Parser extends AbstractExtensibleParser {
         addMethod("functionDefinition", Parser.class);
         addMethod("tryInstruction", Parser.class, "try");
         addMethod("lambda", Parser.class);
+        addMethod("codefinitions", Parser.class);
 	}
 
     public static IASTexpression narrowToIASTexpression (IAST iast) 
@@ -303,7 +305,20 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newLambda(variables, body);
     }
     
-    
+    public IASTcodefinitions codefinitions (Element e) throws ParseException {
+        List<IASTfunctionDefinition> fs = new Vector<>();
+        for ( IAST ifd : findThenParseChildAsArray(e, "functions")) {
+            // cast ensured by grammar9
+            IASTfunctionDefinition fd = (IASTfunctionDefinition) ifd;
+            fs.add(fd);
+        }
+        IASTexpression[] expressions =
+                findThenParseChildAsExpressions(e, "body");
+        IASTexpression body = getFactory().newSequence(expressions);
+        return getFactory().newCodefinitions(
+                fs.toArray(new IASTfunctionDefinition[0]),
+                body );
+    }
     
     
     

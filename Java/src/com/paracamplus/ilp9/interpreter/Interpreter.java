@@ -3,6 +3,7 @@ package com.paracamplus.ilp9.interpreter;
 import java.util.List;
 import java.util.Vector;
 
+import com.paracamplus.ilp9.ast.ASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -10,6 +11,7 @@ import com.paracamplus.ilp9.interfaces.IASTblock;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
+import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
@@ -216,10 +218,28 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     
     public Object visit(IASTlambda iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        Invocable fun = new Function(iast.getVariables(),
+        IFunction fun = new Function(iast.getVariables(),
                                      iast.getBody(),
                                      lexenv);
         return fun;
+    }
+    
+    public Object visit(IASTcodefinitions iast, ILexicalEnvironment lexenv)
+            throws EvaluationException {
+        IASTfunctionDefinition[] functions = iast.getFunctions();
+        ILexicalEnvironment lexenv2 = lexenv;
+        for ( IASTfunctionDefinition fun : functions ) {
+            IASTvariable variable = new ASTvariable(fun.getName());
+            lexenv2 = lexenv2.extend(variable, null);
+        }
+        for ( IASTfunctionDefinition fun : functions ) {
+            Object f = fun.accept(this, lexenv2);
+            IASTvariable variable = new ASTvariable(fun.getName());
+            lexenv2.update(variable, f);
+        }
+        IASTexpression body = iast.getBody();
+        Object result = body.accept(this, lexenv2);
+        return result;
     }
     
     public Object visit(IASTloop iast, ILexicalEnvironment lexenv) 

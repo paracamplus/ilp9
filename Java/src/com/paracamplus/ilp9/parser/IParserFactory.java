@@ -7,6 +7,7 @@ import com.paracamplus.ilp9.interfaces.IASTblock;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
+import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
@@ -92,7 +93,10 @@ public interface IParserFactory {
 
     IASTlambda newLambda (IASTvariable[] variables,
                           IASTexpression body );
-        
+
+    IASTcodefinitions newCodefinitions(IASTfunctionDefinition[] functions,
+                                       IASTexpression body);
+
     IASTclassDefinition newClassDefinition(
             String className,
             String superClassName,
