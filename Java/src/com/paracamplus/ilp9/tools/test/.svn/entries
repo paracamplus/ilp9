@@ -1,0 +1,63 @@
+10
+
+dir
+0
+https://depot-ens.ufr-info-p6.jussieu.fr/svn/ens/MI016/trunk/ILP2014janvier/EclipseWS/Compiler/Java/src/fr/upmc/ilp/tool/test
+https://depot-ens.ufr-info-p6.jussieu.fr/svn/ens/MI016
+add
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+957a4436-d0fc-0310-8757-e3261a4c1f52
+
+ToolTestSuite.java
+file
+
+
+
+add
+
+FinderTest.java
+file
+
+
+
+add
+
+ProgramCallerTest.java
+file
+
+
+
+add
+
+CStuffTest.java
+file
+
+
+
+add
+
+FileToolTest.java
+file
+
+
+
+add
+
