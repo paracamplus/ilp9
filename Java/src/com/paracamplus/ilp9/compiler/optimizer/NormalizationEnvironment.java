@@ -1,0 +1,46 @@
+package com.paracamplus.ilp9.compiler.optimizer;
+
+import com.paracamplus.ilp9.interfaces.IASTvariable;
+
+public class NormalizationEnvironment implements INormalizationEnvironment {
+
+    public NormalizationEnvironment (IASTvariable variable,
+                                     IASTvariable newvariable,
+                                     INormalizationEnvironment next ) {
+        this.variable = variable;
+        this.newvariable = newvariable;
+        this.next = next;
+    }
+    private final IASTvariable variable;
+    private final IASTvariable newvariable;
+    private final INormalizationEnvironment next;
+    
+    public INormalizationEnvironment extend (IASTvariable oldv,
+                                             IASTvariable newv) {
+        return new NormalizationEnvironment(oldv, newv, this);
+    }
+    
+    public IASTvariable renaming(IASTvariable otherVariable) 
+            throws NoSuchLocalVariableException {
+        if ( variable.getName().equals(otherVariable.getName()) ) {
+            return newvariable;
+        } else {
+            return next.renaming(otherVariable);
+        }
+    }
+
+    public static class EmptyNormalizationEnvironment
+    implements INormalizationEnvironment {
+        public INormalizationEnvironment extend (IASTvariable oldv,
+                                                 IASTvariable newv) {
+            return new NormalizationEnvironment(oldv, newv, this);
+        }
+
+        public IASTvariable renaming(IASTvariable otherVariable) 
+                throws NoSuchLocalVariableException {
+            throw new NoSuchLocalVariableException(otherVariable.getName());
+        }
+    }
+    public static final INormalizationEnvironment EMPTY = 
+            new EmptyNormalizationEnvironment();
+}

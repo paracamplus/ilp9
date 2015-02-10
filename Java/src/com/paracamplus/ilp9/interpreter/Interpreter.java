@@ -24,7 +24,6 @@ import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
-import com.paracamplus.ilp9.interfaces.IASTreference;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -61,7 +60,7 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     public Object visit(IASTprogram iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
         for ( IASTfunctionDefinition fd : iast.getFunctionDefinitions() ) {
-            Object f = fd.accept(this, lexenv);
+            Object f = this.visit(fd, lexenv);  // Attention!
             String v = fd.getName();
             getGlobalVariableEnvironment().addGlobalVariableValue(v, f);
         }
@@ -150,11 +149,6 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
         }
         return iast.getBody().accept(this, lexenv2);
     }
-    
-    public Object visit(IASTbinding iast, ILexicalEnvironment lexenv) 
-            throws EvaluationException {
-        throw new RuntimeException("Should never eval this!");
-    }
 
     // NOTA: may be condensed into a single method on IASTconstant 
     // alas, the interface requires all these four methods:
@@ -178,14 +172,13 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
         return iast.getValue();
     }
 
-    public Object visit(IASTreference iast, ILexicalEnvironment lexenv) 
+    public Object visit(IASTvariable iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        IASTvariable variable = iast.getVariable();
         try {
-            return lexenv.getValue(variable);
+            return lexenv.getValue(iast);
         } catch (EvaluationException exc) {
             return getGlobalVariableEnvironment()
-                    .getGlobalVariableValue(variable.getName());
+                    .getGlobalVariableValue(iast.getName());
         }
     }
     
@@ -233,7 +226,8 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
             lexenv2 = lexenv2.extend(variable, null);
         }
         for ( IASTfunctionDefinition fun : functions ) {
-            Object f = fun.accept(this, lexenv2);
+            //Object f = fun.accept(this, lexenv2);
+            Object f = this.visit(fun, lexenv2); // Attention
             IASTvariable variable = new ASTvariable(fun.getName());
             lexenv2.update(variable, f);
         }
@@ -294,11 +288,6 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
             }
         }
         return result;
-    }
-    
-    public Object visit(IASTvariable iast, ILexicalEnvironment lexenv) 
-            throws EvaluationException {
-        throw new RuntimeException("Useless: should not occur");
     }
 
     // Class-related methods 

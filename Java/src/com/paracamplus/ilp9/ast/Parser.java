@@ -2,7 +2,9 @@ package com.paracamplus.ilp9.ast;
 
 import java.io.File;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -148,8 +150,10 @@ public class Parser extends AbstractExtensibleParser {
         }
         IASTfunctionDefinition[] defs =
             functionDefinitions.toArray(new IASTfunctionDefinition[0]);
-        IASTclassDefinition[] clazzes =
-            classDefinitions.toArray(new IASTclassDefinition[0]);
+        Map<String, IASTclassDefinition> clazzes = new HashMap<>();
+        for ( IASTclassDefinition clazz : classDefinitions ) {
+            clazzes.put(clazz.getName(), clazz);
+        }
         IASTexpression[] exprs = 
             expressions.toArray(new IASTexpression[0]);
         IASTsequence body = getFactory().newSequence(exprs);
@@ -209,7 +213,7 @@ public class Parser extends AbstractExtensibleParser {
     public IASTexpression variable (Element e) throws ParseException {
         final String name = e.getAttribute("name");
         IASTvariable variable = getFactory().newVariable(name);
-        return getFactory().newReference(variable);
+        return variable;
     }
     
     public IASTunaryOperation unaryOperation (Element e) 

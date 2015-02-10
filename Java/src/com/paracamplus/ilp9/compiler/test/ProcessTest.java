@@ -24,6 +24,10 @@ import com.paracamplus.ilp9.compiler.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.compiler.IOperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorStuff;
+import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
+import com.paracamplus.ilp9.compiler.optimizer.INormalizationFactory;
+import com.paracamplus.ilp9.compiler.optimizer.NormalizationFactory;
+import com.paracamplus.ilp9.compiler.optimizer.Normalizer;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
@@ -60,8 +64,6 @@ public class ProcessTest {
         File rngFile = new File(rngFileName);
         parser.setGrammar(rngFile);
         IASTprogram program = parser.getProgram();
-
-        // TODO analysis
         
         IOperatorEnvironment ioe = new OperatorEnvironment();
         OperatorStuff.fillUnaryOperators(ioe);
@@ -69,7 +71,15 @@ public class ProcessTest {
         IGlobalVariableEnvironment gve = new GlobalVariableEnvironment();
         GlobalVariableStuff.fillGlobalVariables(gve);
         Compiler compiler = new Compiler(ioe, gve);
-        String compiled = compiler.compile(program);
+        //compiler.setOptimizer(new IdentityOptimizer());
+        INormalizationFactory nf = new NormalizationFactory();
+        IASTCprogram cprogram = nf.newProgram(
+                program.getFunctionDefinitions(),
+                program.getClassDefinitions(),
+                program.getBody());
+
+        compiler.setOptimizer(new Normalizer(nf));
+        String compiled = compiler.compile(cprogram);
         File cFile = changeSuffix(file, "c");
         FileTool.stuffFile(cFile, compiled);
         
@@ -83,7 +93,7 @@ public class ProcessTest {
         ProgramCaller pc = new ProgramCaller(compileProgram);
         pc.setVerbose();
         pc.run();
-        assertEquals(pc.getExitValue(), 0);
+        assertEquals("Comparing return code", 0, pc.getExitValue());
         String executionPrinting = pc.getStdout().trim();
         checkPrintingAndResult(executionPrinting);
     }
@@ -91,7 +101,8 @@ public class ProcessTest {
     public void checkPrintingAndResult(String actual) throws IOException {
         String expectedPrinting = readExpectedPrinting(file);
         String expectedResult = readExpectedResult(file);
-        assertEquals("Compare", actual, expectedPrinting + expectedResult);
+        String expected = expectedPrinting + expectedResult;
+        assertEquals("Compare", expected, actual);
     }
     
     @Parameters(name = "{0}")

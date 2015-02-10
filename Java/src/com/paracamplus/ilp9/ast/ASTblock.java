@@ -21,12 +21,6 @@ public class ASTblock extends ASTexpression implements IASTblock {
         public IASTexpression getInitialisation () {
             return initialisation;
         }
-
-        public <Result, Data, Anomaly extends Throwable> 
-        Result accept(IASTvisitor<Result, Data, Anomaly> visitor, Data data)
-                throws Anomaly {
-            return visitor.visit(this, data);
-        }
     }
     
     public ASTblock (IASTbinding[] binding,

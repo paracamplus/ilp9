@@ -1,8 +1,12 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.interfaces.IASTvariable;
+
 
 public interface IGlobalVariableEnvironment {
     void addGlobalVariableValue (String variableName, String cName);
-    void addGlobalVariableValue (IPrimitive primitive);
-
+    void addGlobalFunctionValue (IPrimitive primitive);
+    boolean isPrimitive(IASTvariable variable);
+    IPrimitive getPrimitiveDescription(IASTvariable variable);
+    String getCName (IASTvariable variable);
 }

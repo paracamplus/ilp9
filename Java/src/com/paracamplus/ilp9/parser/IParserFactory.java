@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.parser;
 
+import java.util.Map;
+
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -20,7 +22,6 @@ import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
-import com.paracamplus.ilp9.interfaces.IASTreference;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -34,7 +35,7 @@ import com.paracamplus.ilp9.interfaces.IASTwriteField;
 public interface IParserFactory {
     IASTprogram newProgram(
     		IASTfunctionDefinition[] functions,
-    		IASTclassDefinition[] clazzes,
+    		Map<String, IASTclassDefinition> clazzes,
             IASTexpression expression);
     
     IASTsequence newSequence(IASTexpression[] asts);
@@ -47,9 +48,7 @@ public interface IParserFactory {
     IASToperator newOperator(String name);
     
     IASTvariable newVariable(String name);
-
-    IASTreference newReference(IASTvariable variable);
-
+    
     IASTinvocation newInvocation(
             IASTexpression function,
             IASTexpression[] arguments);

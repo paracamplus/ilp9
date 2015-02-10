@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.ast;
 
+import java.util.Map;
+
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -20,7 +22,6 @@ import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
-import com.paracamplus.ilp9.interfaces.IASTreference;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -35,7 +36,7 @@ import com.paracamplus.ilp9.parser.IParserFactory;
 public class ASTfactory implements IParserFactory {
 
     public IASTprogram newProgram(IASTfunctionDefinition[] functions,
-                                  IASTclassDefinition[] clazzes, 
+                                  Map<String, IASTclassDefinition> clazzes, 
                                   IASTexpression expression) {
         return new ASTprogram(functions, clazzes, expression);
     }
@@ -56,10 +57,6 @@ public class ASTfactory implements IParserFactory {
 
     public IASTvariable newVariable(String name) {
         return new ASTvariable(name);
-    }
-
-    public IASTreference newReference(IASTvariable variable) {
-        return new ASTreference(variable);
     }
 
     public IASTinvocation newInvocation(IASTexpression function,
