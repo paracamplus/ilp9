@@ -77,6 +77,9 @@ typedef struct ILP_Object {
                short                arity;
                struct ILP_Object*   closed_variables[1];
           } asClosure;
+          struct asBox {
+               struct ILP_Object*   value;
+          } asBox;
      }                  _content;
 } *ILP_Object;
 
@@ -142,6 +145,15 @@ typedef struct ILP_Closure {
           } asClosure;
      }                 _content;
 } *ILP_Closure;
+
+typedef struct ILP_Box {
+     struct ILP_Class* _class;
+     union {
+          struct asBox_ {
+               struct ILP_Object*   value;
+          } asBox;
+     }                 _content;
+} *ILP_Box;
 
 /** Engendrer le type des classes à i méthodes. 
  *
@@ -244,7 +256,7 @@ extern ILP_Object ILP_dont_call_super_method(
        ILP_domain_error("Not an integer", o); \
   };
 
-/** Flottants */
+/** Floats */
 
 #define ILP_Float2ILP(f) \
   ILP_make_float(f)
@@ -262,6 +274,17 @@ extern ILP_Object ILP_dont_call_super_method(
 
 #define ILP_PI_VALUE 3.1415926535
 #define ILP_PI (ILP_pi())
+
+/** Box */
+
+#define ILP_AllocateBox() \
+     ILP_malloc(sizeof(struct ILP_Box), &ILP_object_Box_class)
+#define ILP_Box2Value(box) \
+     (((ILP_Box)(box))->_content.asBox.value)
+#define ILP_Value2Box(o) \
+     ILP_make_box(o)
+#define ILP_SetBoxedValue(box, o) \
+     (((ILP_Box)(box))->_content.asBox.value = (o))
 
 /** Closures */
 
@@ -344,6 +367,7 @@ extern struct ILP_Class ILP_object_String_class;
 extern struct ILP_Class ILP_object_Exception_class;
 extern struct ILP_Field ILP_object_super_field;
 extern struct ILP_Field ILP_object_defining_class_field;
+extern struct ILP_Field ILP_object_value_field;
 extern struct ILP_Method ILP_object_print_method;
 extern struct ILP_Method ILP_object_classOf_method;
 
@@ -384,6 +408,7 @@ extern ILP_general_function ILP_find_invokee (ILP_Object closure, int argc);
 extern ILP_Object ILP_make_closure(ILP_general_function f, 
                                    int arity, int argc, ...);
 extern ILP_Object ILP_invoke(ILP_Object f, int argc, ...);
+extern ILP_Object ILP_make_box(ILP_Object o);
 
 /** Mecanisme d'allocation */
 

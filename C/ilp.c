@@ -72,6 +72,17 @@ struct ILP_Class ILP_object_Closure_class = {
            ILP_classOf } } }
 };
 
+struct ILP_Class ILP_object_Box_class = {
+     &ILP_object_Class_class,
+     { { &ILP_object_Object_class,
+         "Box",
+         1,
+         &ILP_object_value_field,
+         2,
+         { ILP_print,
+           ILP_classOf } } }
+};
+
 struct ILP_Class ILP_object_Integer_class = {
      &ILP_object_Class_class,
      { { &ILP_object_Object_class,
@@ -163,6 +174,14 @@ struct ILP_Field ILP_object_class_defining_field = {
      { { &ILP_object_Method_class,
          NULL,
          "class_defining",
+         0 } }
+};
+
+struct ILP_Field ILP_object_value_field = {
+     &ILP_object_Field_class,
+     { { &ILP_object_Box_class,
+         NULL,
+         "value",
          0 } }
 };
 
@@ -555,6 +574,14 @@ ILP_invoke (ILP_Object closure, int argc, ... )
      }
      va_end(args);
      return result;
+}
+
+ILP_Object
+ILP_make_box (ILP_Object o)
+{
+     ILP_Object box = ILP_AllocateBox();
+     box->_content.asBox.value = o;
+     return box;
 }
 
 /** Allocateurs. ILP_malloc est paramétré par l'allocateur de bas

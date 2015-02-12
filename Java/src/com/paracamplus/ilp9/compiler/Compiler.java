@@ -16,6 +16,7 @@ import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
@@ -246,7 +247,13 @@ public class Compiler implements
     public Void visit(ASTCLocalVariable iast, Context context)
             throws CompilationException {
         emit(context.destination.compile());
-        emit(iast.getMangledName());
+        if ( iast.isClosed() ) {
+            emit("ILP_Box2Value(");
+            emit(iast.getMangledName());
+            emit(")");
+        } else {
+            emit(iast.getMangledName());
+        }
         emit("; \n");
         return null;
     }
@@ -388,9 +395,24 @@ public class Compiler implements
         iast.getExpression().accept(this, c1);
         emit(context.destination.compile());
         emit("(");
-        emit(iast.getVariable().getMangledName());
-        emit(" = ");
-        emit(tmp1.getMangledName());
+        try {
+            IASTCLocalVariable lv = (IASTCLocalVariable) iast.getVariable();
+            if ( lv.isClosed() ) {
+                emit("ILP_SetBoxedValue(");
+                emit(lv.getMangledName());
+                emit(", ");
+                emit(tmp1.getMangledName());
+                emit(")");
+            } else {
+                emit(lv.getMangledName());
+                emit(" = ");
+                emit(tmp1.getMangledName());
+            }
+        } catch (ClassCastException exc) {
+            emit(iast.getVariable().getMangledName());
+            emit(" = ");
+            emit(tmp1.getMangledName());
+        }
         emit("); \n} \n");
         return null;
     }
@@ -421,7 +443,18 @@ public class Compiler implements
             emit("    ILP_Object ");
             emit(variable.getMangledName());
             emit(" = ");
-            emit(tmp.getMangledName());
+            try {
+                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+                if ( lv.isClosed() ) {
+                    emit("ILP_Value2Box(");
+                    emit(tmp.getMangledName());
+                    emit(")");
+                } else {
+                    emit(tmp.getMangledName());
+                }
+            } catch (ClassCastException exc) {
+                emit(tmp.getMangledName());
+            }
             emit(";\n");
             context = context.extend(variable);
         }
@@ -576,6 +609,20 @@ public class Compiler implements
             }
         }
         emit(") {\n");
+        for ( IASTvariable variable : variables ) {
+            try {
+                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+                if ( lv.isClosed() ) {
+                    emit(lv.getMangledName());
+                    emit(" = ");
+                    emit("ILP_Value2Box(");
+                    emit(lv.getMangledName());
+                    emit("); \n");
+                }
+            } catch (ClassCastException exc) {
+                //nothing
+            }
+        }
         Context c = context.redirect(ReturnDestination.RETURN_DESTINATION);
         iast.getBody().accept(this, c);
         emit("}\n");
@@ -613,6 +660,20 @@ public class Compiler implements
             emit("ILP_Object ");
             emit(variable.getMangledName());
             emit(" = ilp_closure->_content.asClosure.closed_variables[" + i++ + "]; \n");
+        }
+        for ( IASTvariable variable : variables ) {
+            try {
+                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+                if ( lv.isClosed() ) {
+                    emit(lv.getMangledName());
+                    emit(" = ");
+                    emit("ILP_Value2Box(");
+                    emit(lv.getMangledName());
+                    emit("); \n");
+                }
+            } catch (ClassCastException exc) {
+                //nothing
+            }
         }
         Context c = context.redirect(ReturnDestination.RETURN_DESTINATION);
         iast.getBody().accept(this, c);
