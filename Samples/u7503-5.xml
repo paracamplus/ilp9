@@ -2,6 +2,7 @@
 <!-- 
 
 ;;; $Id$
+(comment "lambda closing one variable, applied out of scope, using one local variable")
 (let ((x 3))
   ((let ((f (lambda (y) (+ x y))))
      f )
@@ -11,7 +12,8 @@
 
  -->
 <program
-><block
+><!-- test:name description='lambda closing one variable, applied out of scope, using one local variable' 
+--><block
 ><bindings
 ><binding
 ><variable name='x'

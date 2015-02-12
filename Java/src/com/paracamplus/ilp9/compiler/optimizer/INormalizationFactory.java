@@ -3,11 +3,12 @@ package com.paracamplus.ilp9.compiler.optimizer;
 import java.util.Map;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
-import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
@@ -25,11 +26,11 @@ public interface INormalizationFactory {
 
     // Non uniform value types:
     
-    public IASTvariable newVariable(String name) throws CompilationException;
-    public IASTGlobalVariable newGlobalVariable(String name);
-    public IASTLocalVariable newLocalVariable(String name);
-    public IASTLocalFunctionVariable newLocalFunctionVariable(String name);
-    public IASTGlobalFunctionVariable newGlobalFunctionVariable(String name);
+    public IASTCvariable newVariable(String name) throws CompilationException;
+    public IASTCGlobalVariable newGlobalVariable(String name);
+    public IASTCLocalVariable newLocalVariable(String name);
+    public IASTCLocalFunctionVariable newLocalFunctionVariable(String name);
+    public IASTCGlobalFunctionVariable newGlobalFunctionVariable(String name);
 
     public IASToperator newOperator(String name);
 
@@ -59,10 +60,10 @@ public interface INormalizationFactory {
             IASTvariable function,
             IASTexpression[] arguments);
     public IASTexpression newGlobalInvocation(
-            IASTGlobalVariable funexpr,
+            IASTCGlobalVariable funexpr,
             IASTexpression[] arguments);
     public IASTexpression newLocalFunctionInvocation(
-            IASTLocalFunctionVariable function,
+            IASTCLocalFunctionVariable function,
             IASTexpression[] arguments);
 
     public IASTexpression newUnaryOperation(IASToperator operator,

@@ -1,5 +1,5 @@
 ;;; $Id$
-(comment "lambda enclosant une variable et appliquee")
+(comment "lambda closing one variable but immediately applied")
 (let ((x 1))
   ((lambda (y) (+ x y))
    7500 ) )

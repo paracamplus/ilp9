@@ -226,7 +226,6 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
             lexenv2 = lexenv2.extend(variable, null);
         }
         for ( IASTfunctionDefinition fun : functions ) {
-            //Object f = fun.accept(this, lexenv2);
             Object f = this.visit(fun, lexenv2); // Attention
             IASTvariable variable = new ASTvariable(fun.getName());
             lexenv2.update(variable, f);

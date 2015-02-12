@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <setjmp.h>
 
@@ -71,6 +72,11 @@ typedef struct ILP_Object {
           struct asInstance {
                struct ILP_Object*  field[1];
           } asInstance;
+          struct asClosure {
+               ILP_general_function function;
+               short                arity;
+               struct ILP_Object*   closed_variables[1];
+          } asClosure;
      }                  _content;
 } *ILP_Object;
 
@@ -125,6 +131,17 @@ typedef struct ILP_Field {
           } asField;
      }                  _content;
 } *ILP_Field;
+
+typedef struct ILP_Closure {
+     struct ILP_Class* _class;
+     union {
+          struct asClosure_ {
+               ILP_general_function function;
+               short                arity;
+               struct ILP_Object*   closed_variables[1];
+          } asClosure;
+     }                 _content;
+} *ILP_Closure;
 
 /** Engendrer le type des classes à i méthodes. 
  *
@@ -186,7 +203,7 @@ extern ILP_Object ILP_dont_call_super_method(
  */
 
 #define ILP_IsA(o,c) \
-  ILP_is_a(o, c)
+  ILP_is_a(o, &ILP_object_##c##_class)
 
 /** Booléens. */
 
@@ -246,7 +263,14 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_PI_VALUE 3.1415926535
 #define ILP_PI (ILP_pi())
 
-/** Chaînes de caractères */
+/** Closures */
+
+#define ILP_AllocateClosure(count) \
+     ILP_malloc(sizeof(struct ILP_Closure) \
+                + ((count) * sizeof(struct ILP_Object)), \
+                &ILP_object_Closure_class)
+
+/** Strings */
 
 #define ILP_String2ILP(s) \
   ILP_make_string(s)
@@ -312,6 +336,7 @@ extern struct ILP_Class ILP_object_Object_class;
 extern struct ILP_Class ILP_object_Class_class;
 extern struct ILP_Class ILP_object_Method_class;
 extern struct ILP_Class ILP_object_Field_class;
+extern struct ILP_Class ILP_object_Closure_class;
 extern struct ILP_Class ILP_object_Integer_class;
 extern struct ILP_Class ILP_object_Float_class;
 extern struct ILP_Class ILP_object_Boolean_class;
@@ -355,6 +380,10 @@ extern int /* boolean */ ILP_is_a (ILP_Object o, ILP_Class class);
 extern ILP_general_function ILP_find_method (ILP_Object receiver,
                                              ILP_Method method,
                                              int argc);
+extern ILP_general_function ILP_find_invokee (ILP_Object closure, int argc);
+extern ILP_Object ILP_make_closure(ILP_general_function f, 
+                                   int arity, int argc, ...);
+extern ILP_Object ILP_invoke(ILP_Object f, int argc, ...);
 
 /** Mecanisme d'allocation */
 

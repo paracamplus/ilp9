@@ -1,14 +1,16 @@
 package com.paracamplus.ilp9.compiler.optimizer;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.IOptimizer;
-import com.paracamplus.ilp9.compiler.ast.ASTLocalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -43,8 +45,10 @@ public class Normalizer implements IOptimizer,
 
     public Normalizer (INormalizationFactory factory) {
         this.factory = factory;
+        this.globalVariables = new HashSet<>();
     }
     private final INormalizationFactory factory;
+    private final Set<IASTvariable> globalVariables;
 
     public IASTCprogram transform(IASTCprogram program) 
             throws CompilationException {
@@ -57,7 +61,7 @@ public class Normalizer implements IOptimizer,
                 new IASTfunctionDefinition[functions.length];
         INormalizationEnvironment env = NormalizationEnvironment.EMPTY;
         for ( IASTfunctionDefinition function : functions ) {
-            IASTGlobalFunctionVariable gfv =
+            IASTCGlobalFunctionVariable gfv =
                     factory.newGlobalFunctionVariable(function.getName());
             env = env.extend(gfv, gfv);
         }
@@ -125,7 +129,13 @@ public class Normalizer implements IOptimizer,
             return env.renaming(iast);
         } catch (NoSuchLocalVariableException exc) {
             // TODO If we were to know the primitives, we might be more accurate:
+            for ( IASTvariable gv : globalVariables ) {
+                if ( iast.getName().equals(gv.getName()) ) {
+                    return gv;
+                }
+            }
             IASTvariable gv = factory.newGlobalVariable(iast.getName());
+            globalVariables.add(gv);
             return gv;
         }
     }
@@ -272,11 +282,11 @@ public class Normalizer implements IOptimizer,
             IASTexpression arg = argument.accept(this, env);
             args[i] = arg;
         }
-        if ( funexpr instanceof IASTGlobalVariable ) {
-            IASTGlobalVariable f = (IASTGlobalVariable) funexpr;
+        if ( funexpr instanceof IASTCGlobalVariable ) {
+            IASTCGlobalVariable f = (IASTCGlobalVariable) funexpr;
             return factory.newGlobalInvocation(f, args);
-        } else if ( funexpr instanceof IASTLocalFunctionVariable ) {
-            IASTLocalFunctionVariable f = (ASTLocalFunctionVariable) funexpr;
+        } else if ( funexpr instanceof IASTCLocalFunctionVariable ) {
+            IASTCLocalFunctionVariable f = (ASTCLocalFunctionVariable) funexpr;
             return factory.newLocalFunctionInvocation(f, args);
         } else {
             return factory.newComputedInvocation(funexpr, args);

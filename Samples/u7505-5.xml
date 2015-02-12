@@ -2,7 +2,7 @@
 <!-- 
 
 ;;; $Id$
-(comment "Lambda binaire")
+(comment "Binary lambda closing one variable, applied out of scope")
 ((let ((x 500))
    (let ((f (lambda (y z) (+ x (+ y z)))))
      f ) )
@@ -12,7 +12,7 @@
 
  -->
 <program
-><!-- test:name description='Lambda binaire' 
+><!-- test:name description='Binary lambda closing one variable, applied out of scope' 
 --><invocation
 ><function
 ><block

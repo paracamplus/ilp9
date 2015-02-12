@@ -24,7 +24,7 @@ import com.paracamplus.ilp9.compiler.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.compiler.IOperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorStuff;
-import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.optimizer.INormalizationFactory;
 import com.paracamplus.ilp9.compiler.optimizer.NormalizationFactory;
 import com.paracamplus.ilp9.compiler.optimizer.Normalizer;

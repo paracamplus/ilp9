@@ -61,6 +61,17 @@ struct ILP_Class ILP_object_Field_class = {
            ILP_classOf } } }
 };
 
+struct ILP_Class ILP_object_Closure_class = {
+     &ILP_object_Class_class,
+     { { &ILP_object_Object_class,
+         "Closure",
+         3,
+         NULL,
+         2,
+         { ILP_print,
+           ILP_classOf } } }
+};
+
 struct ILP_Class ILP_object_Integer_class = {
      &ILP_object_Class_class,
      { { &ILP_object_Object_class,
@@ -453,6 +464,97 @@ ILP_dont_call_super_method (
      ILP_throw((ILP_Object) &ILP_the_exception);
      /* UNREACHED */
      return NULL;
+}
+
+ILP_general_function
+ILP_find_invokee (ILP_Object closure, int argc)
+{
+     if ( ! ILP_IsA(closure, Closure) ) {
+          ILP_domain_error("Not a closure", (ILP_Object)closure);
+     }
+     if ( argc != closure->_content.asClosure.arity ) {
+          snprintf(ILP_the_exception._content.asException.message,
+                   ILP_EXCEPTION_BUFFER_LENGTH,
+                   "Closure arity error: %d instead of %d\nCulprit: 0x%p\n",
+                   argc,
+                   closure->_content.asClosure.arity,
+                   (void*) closure);
+          /*DEBUG*/
+          fprintf(stderr, "%s", ILP_the_exception._content.asException.message);
+          ILP_the_exception._content.asException.culprit[0] = 
+               (ILP_Object) closure;
+          ILP_the_exception._content.asException.culprit[1] = NULL;
+          ILP_throw((ILP_Object) &ILP_the_exception);
+          /* UNREACHED */
+          return NULL;
+     }
+
+     ILP_general_function f = closure->_content.asClosure.function;
+     return f;
+}
+
+ILP_Object
+ILP_make_closure(ILP_general_function f, int arity, int argc, ...)
+{
+     va_list args;
+     int i;
+     ILP_Object closure = ILP_AllocateClosure(arity);
+     closure->_content.asClosure.function = f;
+     closure->_content.asClosure.arity = arity;
+     va_start(args, argc);
+     for ( i=0 ; i<argc ; i++ ) {
+          closure->_content.asClosure.closed_variables[i] = 
+               va_arg(args, ILP_Object);
+     }
+     va_end(args);
+     return closure;
+}
+
+ILP_Object
+ILP_invoke (ILP_Object closure, int argc, ... )
+{
+     va_list args;
+     ILP_Object result;
+     ILP_general_function f = ILP_find_invokee(closure, argc);
+
+     va_start(args, argc);
+     // FIXME restriction on arity! Merge with supercaller!
+     switch ( argc ) {
+          case 0: {
+               result = f(closure);
+               break;
+          }
+          case 1: {
+               ILP_Object arg1 = va_arg(args, ILP_Object);
+               result = f(closure, arg1);
+               break;
+          }
+          case 2: {
+               ILP_Object arg1 = va_arg(args, ILP_Object);
+               ILP_Object arg2 = va_arg(args, ILP_Object);
+               result = f(closure, arg1, arg2);
+               break;
+          }
+          case 3: {
+               ILP_Object arg1 = va_arg(args, ILP_Object);
+               ILP_Object arg2 = va_arg(args, ILP_Object);
+               ILP_Object arg3 = va_arg(args, ILP_Object);
+               result = f(closure, arg1, arg2, arg3);
+               break;
+          }
+          case 4: {
+               ILP_Object arg1 = va_arg(args, ILP_Object);
+               ILP_Object arg2 = va_arg(args, ILP_Object);
+               ILP_Object arg3 = va_arg(args, ILP_Object);
+               ILP_Object arg4 = va_arg(args, ILP_Object);
+               result = f(closure, arg1, arg2, arg3, arg4);
+               break;
+          }
+          default: {
+          }
+     }
+     va_end(args);
+     return result;
 }
 
 /** Allocateurs. ILP_malloc est paramétré par l'allocateur de bas

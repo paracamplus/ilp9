@@ -1,5 +1,5 @@
 ;;; $Id$
-(comment "lambda enclosant une variable appliquee hors de portee")
+(comment "lambda closing one variable and applied out of scope")
 ((let ((x 2))
    (lambda (y) (+ x y)) )
  7500 )

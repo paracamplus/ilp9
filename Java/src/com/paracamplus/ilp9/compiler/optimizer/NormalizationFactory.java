@@ -10,9 +10,7 @@ import com.paracamplus.ilp9.ast.ASTblock;
 import com.paracamplus.ilp9.ast.ASTboolean;
 import com.paracamplus.ilp9.ast.ASTcodefinitions;
 import com.paracamplus.ilp9.ast.ASTfloat;
-import com.paracamplus.ilp9.ast.ASTfunctionDefinition;
 import com.paracamplus.ilp9.ast.ASTinteger;
-import com.paracamplus.ilp9.ast.ASTlambda;
 import com.paracamplus.ilp9.ast.ASTloop;
 import com.paracamplus.ilp9.ast.ASToperator;
 import com.paracamplus.ilp9.ast.ASTsequence;
@@ -20,24 +18,29 @@ import com.paracamplus.ilp9.ast.ASTstring;
 import com.paracamplus.ilp9.ast.ASTtry;
 import com.paracamplus.ilp9.ast.ASTunaryOperation;
 import com.paracamplus.ilp9.compiler.CompilationException;
-import com.paracamplus.ilp9.compiler.ast.ASTComputedInvocation;
-import com.paracamplus.ilp9.compiler.ast.ASTGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTGlobalInvocation;
-import com.paracamplus.ilp9.compiler.ast.ASTGlobalVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTLocalFunctionInvocation;
-import com.paracamplus.ilp9.compiler.ast.ASTLocalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTLocalVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTPrimitiveInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCComputedInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCGlobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCGlobalInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCLocalFunctionInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCLocalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCPrimitiveInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCfunctionDefinition;
+import com.paracamplus.ilp9.compiler.ast.ASTClambda;
 import com.paracamplus.ilp9.compiler.ast.ASTCprogram;
-import com.paracamplus.ilp9.compiler.ast.IASTComputedInvocation;
-import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalInvocation;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalFunctionInvocation;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTLocalVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTPrimitiveInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCComputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCPrimitiveInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
@@ -64,35 +67,39 @@ implements INormalizationFactory {
 
     // Various types of variables:
     
-    public IASTvariable newVariable(String name) throws CompilationException {
+    public IASTCvariable newVariable(String name) throws CompilationException {
         throw new CompilationException("Uncategorized variable " + name);
     }
-    public IASTLocalFunctionVariable newLocalFunctionVariable(String name) {
+    public IASTCLocalFunctionVariable newLocalFunctionVariable(String name) {
         String newName = name + count.incrementAndGet();
-        return new ASTLocalFunctionVariable(newName);
+        return new ASTCLocalFunctionVariable(newName);
     }
-    public IASTLocalVariable newLocalVariable(String name) {
+    public IASTCLocalVariable newLocalVariable(String name) {
         String newName = name + count.incrementAndGet();
-        return new ASTLocalVariable(newName);
+        return new ASTCLocalVariable(newName);
     }
-    public IASTGlobalVariable newGlobalVariable(String name) {
+    public IASTCGlobalVariable newGlobalVariable(String name) {
         String newName = name;
-        return new ASTGlobalVariable(newName);
+        return new ASTCGlobalVariable(newName);
     }
-    public IASTGlobalFunctionVariable newGlobalFunctionVariable(String name) {
+    public IASTCGlobalFunctionVariable newGlobalFunctionVariable(String name) {
         String newName = name;
-        return new ASTGlobalFunctionVariable(newName);
+        return new ASTCGlobalFunctionVariable(newName);
+    }
+    public String newGlobalClosureName() {
+        String newName = "ilpclosure" + count.incrementAndGet();
+        return newName;
     }
     
     public IASToperator newOperator(String name) {
         return new ASToperator(name);
     }
         
-    public IASTfunctionDefinition newFunctionDefinition(
+    public IASTCfunctionDefinition newFunctionDefinition(
             String functionName,
             IASTvariable[] variables, 
             IASTexpression body) {
-       return new ASTfunctionDefinition(functionName, variables, body);
+       return new ASTCfunctionDefinition(functionName, variables, body);
     }
     
     public IASTexpression newSequence(IASTexpression[] asts) {
@@ -113,25 +120,25 @@ implements INormalizationFactory {
             IASTexpression[] arguments) throws CompilationException {
         throw new CompilationException("Uncategorized invocation ");
     }
-    public IASTComputedInvocation newComputedInvocation(
+    public IASTCComputedInvocation newComputedInvocation(
             IASTexpression function,
             IASTexpression[] arguments) {
-        return new ASTComputedInvocation(function, arguments);
+        return new ASTCComputedInvocation(function, arguments);
     }
-    public IASTPrimitiveInvocation newPrimitiveInvocation(
+    public IASTCPrimitiveInvocation newPrimitiveInvocation(
             IASTvariable function,
             IASTexpression[] arguments) {
-        return new ASTPrimitiveInvocation(function, arguments);
+        return new ASTCPrimitiveInvocation(function, arguments);
     }
-    public IASTGlobalInvocation newGlobalInvocation(
-            IASTGlobalVariable function,
+    public IASTCGlobalInvocation newGlobalInvocation(
+            IASTCGlobalVariable function,
             IASTexpression[] arguments) {
-        return new ASTGlobalInvocation(function, arguments);
+        return new ASTCGlobalInvocation(function, arguments);
     }
-    public IASTLocalFunctionInvocation newLocalFunctionInvocation(
-            IASTLocalFunctionVariable function,
+    public IASTCLocalFunctionInvocation newLocalFunctionInvocation(
+            IASTCLocalFunctionVariable function,
             IASTexpression[] arguments) {
-        return new ASTLocalFunctionInvocation(function, arguments);
+        return new ASTCLocalFunctionInvocation(function, arguments);
     }
     
     public IASTexpression newUnaryOperation(
@@ -186,9 +193,10 @@ implements INormalizationFactory {
         return new ASTtry(body, catcher, finallyer);
     }
     
-    public IASTexpression newLambda(IASTvariable[] variables,
-                                    IASTexpression body) {
-        return new ASTlambda(variables, body);
+    public IASTClambda newLambda(IASTvariable[] variables,
+                                 IASTexpression body) {
+        String closureName = newGlobalClosureName();
+        return new ASTClambda(closureName, variables, body);
     }
     
     public IASTexpression newCodefinitions(

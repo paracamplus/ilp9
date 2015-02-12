@@ -1,5 +1,5 @@
 ;;; $Id$
-(comment "Lambda binaire")
+(comment "Binary lambda closing one variable, applied out of scope")
 ((let ((x 500))
    (let ((f (lambda (y z) (+ x (+ y z)))))
      f ) )

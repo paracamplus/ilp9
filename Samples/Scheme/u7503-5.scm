@@ -1,4 +1,5 @@
 ;;; $Id$
+(comment "lambda closing one variable, applied out of scope, using one local variable")
 (let ((x 3))
   ((let ((f (lambda (y) (+ x y))))
      f )

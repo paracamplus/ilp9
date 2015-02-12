@@ -1,15 +1,15 @@
 package com.paracamplus.ilp9.compiler;
 
-import java.util.List;
-import java.util.Vector;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.paracamplus.ilp9.compiler.ast.IASTCprogram;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.ast.IASTGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTblock;
+import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
@@ -21,6 +21,7 @@ import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASToperator;
+import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
@@ -32,43 +33,42 @@ import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
 import com.paracamplus.ilp9.interfaces.IASTwriteField;
-import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 
 public class GlobalVariableCollector 
-implements IASTvisitor<List<IASTGlobalVariable>, 
-                       List<IASTGlobalVariable>, 
-                       CompilationException>{
+implements IASTvisitor<Set<IASTCGlobalVariable>, 
+                       Set<IASTCGlobalVariable>, 
+                       CompilationException> {
 
     public GlobalVariableCollector () {
-        this.result = new Vector<>();
+        this.result = new HashSet<>();
     }
-    private List<IASTGlobalVariable> result;
+    private Set<IASTCGlobalVariable> result;
     
-    public void analyze(IASTCprogram program) 
+    public Set<IASTCGlobalVariable> analyze(IASTprogram program) 
             throws CompilationException {
         for ( IASTfunctionDefinition ifd : program.getFunctionDefinitions() ) {
             result = ifd.getBody().accept(this, result);
         }
         result = program.getBody().accept(this, result);
-        program.setGlobalVariables(result);
+        return result;
     }
 
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTvariable iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
-        if ( iast instanceof IASTGlobalVariable ) {
-            if ( ! (iast instanceof IASTGlobalFunctionVariable ) ) { 
-                IASTGlobalVariable gv = (IASTGlobalVariable) iast;
+        if ( iast instanceof IASTCGlobalVariable ) {
+            if ( ! (iast instanceof IASTCGlobalFunctionVariable ) ) { 
+                IASTCGlobalVariable gv = (IASTCGlobalVariable) iast;
                 result.add(gv);
             }
         }
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTalternative iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getCondition().accept(this, result);
         result = iast.getConsequence().accept(this, result);
@@ -76,59 +76,59 @@ implements IASTvisitor<List<IASTGlobalVariable>,
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTassignment iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getVariable().accept(this, result);
         result = iast.getExpression().accept(this, result);
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTbinaryOperation iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         iast.getLeftOperand().accept(this, result);
         iast.getRightOperand().accept(this, result);
         return result;
     }
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTunaryOperation iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         iast.getOperand().accept(this, result);
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTboolean iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         return result;
     }
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTfloat iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         return result;
     }
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTinteger iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         return result;
     }
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTstring iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         return result;
     }
 
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTblock iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         for ( IASTbinding binding : iast.getBindings() ) {
             result = binding.getInitialisation().accept(this, result);
@@ -137,9 +137,9 @@ implements IASTvisitor<List<IASTGlobalVariable>,
         return result;
     }
        
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTcodefinitions iast,
-            List<IASTGlobalVariable> result)
+            Set<IASTCGlobalVariable> result)
                     throws CompilationException {
         for ( IASTfunctionDefinition ifd : iast.getFunctions() ) {
             result = ifd.getBody().accept(this, result);
@@ -148,9 +148,9 @@ implements IASTvisitor<List<IASTGlobalVariable>,
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTinvocation iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getFunction().accept(this, result);
         for ( IASTexpression arg : iast.getArguments() ) {
@@ -159,33 +159,33 @@ implements IASTvisitor<List<IASTGlobalVariable>,
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTlambda iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getBody().accept(this, result);
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTloop iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getCondition().accept(this, result);
         result = iast.getBody().accept(this, result);
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASToperator iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTsequence iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         for ( IASTexpression expr : iast.getExpressions() ) {
             result = expr.accept(this, result);
@@ -193,9 +193,9 @@ implements IASTvisitor<List<IASTGlobalVariable>,
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(
+    public Set<IASTCGlobalVariable> visit(
             IASTtry iast,
-            List<IASTGlobalVariable> result) 
+            Set<IASTCGlobalVariable> result) 
                     throws CompilationException {
         result = iast.getBody().accept(this, result);
         IASTlambda catcher = iast.getCatcher();
@@ -211,35 +211,35 @@ implements IASTvisitor<List<IASTGlobalVariable>,
     
     // Class related
     
-    public List<IASTGlobalVariable> visit(IASTwriteField iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTwriteField iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }
-    public List<IASTGlobalVariable> visit(IASTsuper iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTsuper iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }
-    public List<IASTGlobalVariable> visit(IASTsend iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTsend iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }
-    public List<IASTGlobalVariable> visit(IASTreadField iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTreadField iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }
 
-    public List<IASTGlobalVariable> visit(IASTinstantiation iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTinstantiation iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }
     
-    public List<IASTGlobalVariable> visit(IASTself iast,
-            List<IASTGlobalVariable> result) throws CompilationException {
+    public Set<IASTCGlobalVariable> visit(IASTself iast,
+            Set<IASTCGlobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
     }

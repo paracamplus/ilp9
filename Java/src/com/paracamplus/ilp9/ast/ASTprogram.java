@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.ast;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
@@ -11,16 +13,16 @@ public class ASTprogram extends AST implements IASTprogram {
     public ASTprogram(IASTfunctionDefinition[] functions,
                       Map<String, IASTclassDefinition> clazzes, 
                       IASTexpression expression) {
-        this.functions = functions;
+        this.functions = Arrays.asList(functions);
         this.clazzes = clazzes;
         this.expression = expression;
     }
-    protected IASTfunctionDefinition[] functions;
+    protected List<IASTfunctionDefinition> functions;
     protected Map<String, IASTclassDefinition> clazzes;
     protected IASTexpression expression;
     
     public IASTfunctionDefinition[] getFunctionDefinitions() {
-        return functions;
+        return functions.toArray(new IASTfunctionDefinition[0]);
     }
     public Map<String, IASTclassDefinition> getClassDefinitions() {
         return clazzes;

@@ -2,14 +2,14 @@
 <!-- 
 
 ;;; $Id$
-(comment "lambda ne closant rien appliquee")
+(comment "lambda closing immediately applied in place (ako let)")
 ((lambda () 750))
 
 ;;; end of u750-5.scm
 
  -->
 <program
-><!-- test:name description='lambda ne closant rien appliquee' 
+><!-- test:name description='lambda closing immediately applied in place (ako let)' 
 --><invocation
 ><function
 ><lambda
