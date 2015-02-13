@@ -24,10 +24,7 @@ import com.paracamplus.ilp9.compiler.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.compiler.IOperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorStuff;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
-import com.paracamplus.ilp9.compiler.optimizer.INormalizationFactory;
-import com.paracamplus.ilp9.compiler.optimizer.NormalizationFactory;
-import com.paracamplus.ilp9.compiler.optimizer.Normalizer;
+import com.paracamplus.ilp9.compiler.optimizer.IdentityOptimizer;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
@@ -71,15 +68,8 @@ public class ProcessTest {
         IGlobalVariableEnvironment gve = new GlobalVariableEnvironment();
         GlobalVariableStuff.fillGlobalVariables(gve);
         Compiler compiler = new Compiler(ioe, gve);
-        //compiler.setOptimizer(new IdentityOptimizer());
-        INormalizationFactory nf = new NormalizationFactory();
-        IASTCprogram cprogram = nf.newProgram(
-                program.getFunctionDefinitions(),
-                program.getClassDefinitions(),
-                program.getBody());
-
-        compiler.setOptimizer(new Normalizer(nf));
-        String compiled = compiler.compile(cprogram);
+        compiler.setOptimizer(new IdentityOptimizer());
+        String compiled = compiler.compile(program);
         File cFile = changeSuffix(file, "c");
         FileTool.stuffFile(cFile, compiled);
         

@@ -72,9 +72,10 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         variable.accept(this, variables);
         iast.getExpression().accept(this, variables);
         try {
+            // Cast ensured by normalizer:
             ((IASTCvariable) variable).setMutable();
         } catch (ClassCastException exc) {
-            // should never occur!
+            throw new RuntimeException("should never occur!");
         }
         return null;
     }
@@ -142,7 +143,6 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         iast.getBody().accept(this, variables);
         IASTlambda catcher = iast.getCatcher();
         if ( catcher != null ) {
-            //catcher.accept(this, variables);
             Set<IASTvariable> newvars = new HashSet<>();
             catcher.getBody().accept(this, newvars);
             newvars.remove(catcher.getVariables()[0]);
@@ -163,13 +163,14 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         IASTvariable[] vars = fd.getVariables();
         newvars.removeAll(Arrays.asList(vars));
         try {
+            // Cast ensured by normalizer:
             IASTCfunctionDefinition fun = (IASTCfunctionDefinition) fd;
             fun.setClosedVariables(newvars);
             for ( IASTvariable v : newvars ) {
                 ((IASTCLocalVariable)v).setClosed();
             }
         } catch (ClassCastException exc) {
-            // should not occur
+            throw new RuntimeException("should not occur");
         }
         variables.addAll(newvars);
         return null;
@@ -195,10 +196,12 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         IASTvariable[] vars = iast.getVariables();
         newvars.removeAll(Arrays.asList(vars));
         try {
+            // Cast ensured by normalizer:
             IASTClambda f = (IASTClambda) iast;
             f.setClosedVariables(newvars);
             program.addClosureDefinition(f);
             for ( IASTvariable v : newvars ) {
+                // Cast ensured by normalizer:
                 ((IASTCLocalVariable)v).setClosed();
             }
         } catch (ClassCastException exc) {
@@ -222,9 +225,11 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
             IASTvariable[] vars = ifd.getVariables();
             newvars.removeAll(Arrays.asList(vars));
             try {
+                // Cast ensured by normalizer:
                 IASTClambda fun = (IASTClambda) ifd;
                 fun.setClosedVariables(newvars);
                 for ( IASTvariable v : newvars ) {
+                    // Cast ensured by normalizer:
                     ((IASTCLocalVariable)v).setClosed();
                 }
             } catch (ClassCastException exc) {
@@ -235,6 +240,7 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         }
         for ( IASTnamedLambda ifd : functions ) {
             try {
+                // Cast ensured by normalizer:
                 IASTCLocalFunctionVariable v = 
                     (IASTCLocalFunctionVariable) ifd.getFunctionVariable();
                 v.setClosed();

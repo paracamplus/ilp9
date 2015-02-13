@@ -60,7 +60,7 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     public Object visit(IASTprogram iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
         for ( IASTfunctionDefinition fd : iast.getFunctionDefinitions() ) {
-            Object f = this.visit(fd, lexenv);  // Attention!
+            Object f = this.visit(fd, lexenv);
             String v = fd.getName();
             getGlobalVariableEnvironment().addGlobalVariableValue(v, f);
         }
@@ -226,7 +226,7 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
             lexenv2 = lexenv2.extend(variable, null);
         }
         for ( IASTnamedLambda fun : functions ) {
-            Object f = this.visit(fun, lexenv2); // Attention
+            Object f = this.visit(fun, lexenv2);
             IASTvariable variable = fun.getFunctionVariable();
             lexenv2.update(variable, f);
         }

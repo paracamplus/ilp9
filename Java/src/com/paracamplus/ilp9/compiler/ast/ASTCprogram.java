@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;

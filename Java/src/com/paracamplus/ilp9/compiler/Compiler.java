@@ -19,6 +19,9 @@ import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.compiler.optimizer.INormalizationFactory;
+import com.paracamplus.ilp9.compiler.optimizer.NormalizationFactory;
+import com.paracamplus.ilp9.compiler.optimizer.Normalizer;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -38,6 +41,7 @@ import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
+import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
@@ -54,13 +58,10 @@ public class Compiler implements
         IASTvisitor<Void, Compiler.Context, CompilationException> {
     
     public static class Context {
-        public Context (IDestination destination,
-                        ILexicalEnvironment lexenv ) {
+        public Context (IDestination destination) {
             this.destination = destination;
-            this.lexenv = lexenv;
         }
         public IDestination destination;
-        public ILexicalEnvironment lexenv; // FIXME useless!
         public static AtomicInteger counter = new AtomicInteger(0);
         
         public IASTvariable newTemporaryVariable () {
@@ -68,15 +69,11 @@ public class Compiler implements
             return new ASTvariable("ILPtmp" + i);
         }
         
-        public Context extend (IASTvariable v) {
-            return new Context(destination, lexenv.extend(v, null));
-        }
-        
         public Context redirect (IDestination d) {
             if ( d == destination ) {
                 return this;
             } else {
-                return new Context(d, lexenv);
+                return new Context(d);
             }
         }
     }
@@ -119,10 +116,23 @@ public class Compiler implements
             throw new CompilationException(e);
         }
     }
+    
+    public IASTCprogram normalize(IASTprogram program) 
+            throws CompilationException {
+        INormalizationFactory nf = new NormalizationFactory();
+        IASTCprogram cprogram = nf.newProgram(
+                program.getFunctionDefinitions(),
+                program.getClassDefinitions(),
+                program.getBody());
+        IOptimizer normalizer = new Normalizer(nf);
+        IASTCprogram newprogram = normalizer.transform(cprogram);
+        return newprogram;
+    }
    
-    public String compile(IASTCprogram program) throws CompilationException {
+    public String compile(IASTprogram program) throws CompilationException {
         
-        IASTCprogram newprogram = optimizer.transform(program);
+        IASTCprogram newprogram = normalize(program);
+        newprogram = optimizer.transform(newprogram);
 
         GlobalVariableCollector gvc = new GlobalVariableCollector();
         Set<IASTCGlobalVariable> gvs = gvc.analyze(newprogram);
@@ -131,8 +141,7 @@ public class Compiler implements
         FreeVariableCollector fvc = new FreeVariableCollector(newprogram);
         newprogram = fvc.analyze();
       
-        Context context = new Context(NoDestination.NO_DESTINATION,
-                                      LexicalEnvironment.EMPTY);
+        Context context = new Context(NoDestination.NO_DESTINATION);
         StringWriter sw = new StringWriter();
         try {
             out = new BufferedWriter(sw);
@@ -222,7 +231,6 @@ public class Compiler implements
     public Void visit(IASTsequence iast, Context context)
             throws CompilationException {
         IASTvariable tmp = context.newTemporaryVariable();
-        context = context.extend(tmp);
         IASTexpression[] expressions = iast.getExpressions();
         Context c = context.redirect(new AssignDestination(tmp));
         emit("{ \n");
@@ -321,7 +329,6 @@ public class Compiler implements
     public Void visit(IASTunaryOperation iast, Context context)
             throws CompilationException {
         IASTvariable tmp1 = context.newTemporaryVariable();
-        context = context.extend(tmp1);
         emit("{ \n");
         emit("  ILP_Object " + tmp1.getMangledName() + "; \n");
         Context c1 = context.redirect(new AssignDestination(tmp1));
@@ -339,9 +346,7 @@ public class Compiler implements
     public Void visit(IASTbinaryOperation iast, Context context)
             throws CompilationException {
         IASTvariable tmp1 = context.newTemporaryVariable();
-        context = context.extend(tmp1);
         IASTvariable tmp2 = context.newTemporaryVariable();
-        context = context.extend(tmp2);
         emit("{ \n");
         emit("  ILP_Object " + tmp1.getMangledName() + "; \n");
         emit("  ILP_Object " + tmp2.getMangledName() + "; \n");
@@ -369,7 +374,6 @@ public class Compiler implements
     public Void visit(IASTalternative iast, Context context)
             throws CompilationException {
         IASTvariable tmp1 = context.newTemporaryVariable();
-        context = context.extend(tmp1);
         emit("{ \n");
         emit("  ILP_Object " + tmp1.getMangledName() + "; \n");
         Context c = context.redirect(new AssignDestination(tmp1));
@@ -388,32 +392,51 @@ public class Compiler implements
     
     public Void visit(IASTassignment iast, Context context)
             throws CompilationException {
+        if ( iast.getVariable() instanceof IASTCLocalVariable ) {
+            return visitLocalAssignment(iast, context);
+        } else {
+            return visitNonLocalAssignment(iast, context);
+        }
+    }
+    
+    private Void visitLocalAssignment(IASTassignment iast, Context context) 
+            throws CompilationException {
         IASTvariable tmp1 = context.newTemporaryVariable();
-        context = context.extend(tmp1);
+        emit("{ \n");
+        emit("  ILP_Object " + tmp1.getMangledName() + "; \n");
+        Context c1 = context.redirect(new AssignDestination(tmp1));
+        iast.getExpression().accept(this, c1);
+        // Cast ensured by visit(IASTassignment...)
+        IASTCLocalVariable lv = (IASTCLocalVariable) iast.getVariable();
+        emit(context.destination.compile());
+        emit("(");
+        if ( lv.isClosed() ) {
+            emit("ILP_SetBoxedValue(");
+            emit(lv.getMangledName());
+            emit(", ");
+            emit(tmp1.getMangledName());
+            emit(")");
+        } else {
+            emit(lv.getMangledName());
+            emit(" = ");
+            emit(tmp1.getMangledName());
+        }
+        emit("); \n} \n");
+        return null;
+    }
+    
+    public Void visitNonLocalAssignment(IASTassignment iast, Context context) 
+            throws CompilationException {
+        IASTvariable tmp1 = context.newTemporaryVariable();
         emit("{ \n");
         emit("  ILP_Object " + tmp1.getMangledName() + "; \n");
         Context c1 = context.redirect(new AssignDestination(tmp1));
         iast.getExpression().accept(this, c1);
         emit(context.destination.compile());
         emit("(");
-        try {
-            IASTCLocalVariable lv = (IASTCLocalVariable) iast.getVariable();
-            if ( lv.isClosed() ) {
-                emit("ILP_SetBoxedValue(");
-                emit(lv.getMangledName());
-                emit(", ");
-                emit(tmp1.getMangledName());
-                emit(")");
-            } else {
-                emit(lv.getMangledName());
-                emit(" = ");
-                emit(tmp1.getMangledName());
-            }
-        } catch (ClassCastException exc) {
-            emit(iast.getVariable().getMangledName());
-            emit(" = ");
-            emit(tmp1.getMangledName());
-        }
+        emit(iast.getVariable().getMangledName());
+        emit(" = ");
+        emit(tmp1.getMangledName());
         emit("); \n} \n");
         return null;
     }
@@ -427,7 +450,6 @@ public class Compiler implements
             IASTvariable tmp = context.newTemporaryVariable();
             emit("  ILP_Object " + tmp.getMangledName() + "; \n");
             tmps[i] = tmp;
-            context = context.extend(tmp);
         }
         for ( int i=0 ; i<bindings.length ; i++ ) {
             IASTbinding binding = bindings[i];
@@ -440,11 +462,10 @@ public class Compiler implements
             IASTbinding binding = bindings[i];
             IASTvariable tmp = tmps[i];
             IASTvariable variable = binding.getVariable();
-            context = context.extend(variable);
             emit("    ILP_Object ");
             emit(variable.getMangledName());
             emit(" = ");
-            try {
+            if ( variable instanceof IASTCLocalVariable ) {
                 IASTCLocalVariable lv = (IASTCLocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit("ILP_Value2Box(");
@@ -453,11 +474,10 @@ public class Compiler implements
                 } else {
                     emit(tmp.getMangledName());
                 }
-            } catch (ClassCastException exc) {
+            } else {
                 emit(tmp.getMangledName());
             }
             emit(";\n");
-            context = context.extend(variable);
         }
         iast.getBody().accept(this, context);
         emit("\n  }\n}\n");
@@ -477,12 +497,6 @@ public class Compiler implements
         }
     }
     
-    public Void visit(IASTCLocalFunctionInvocation iast, Context context)
-            throws CompilationException {
-     // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-    
     public Void visit(IASTCGlobalInvocation iast, Context context)
             throws CompilationException {
         emit("{ \n");
@@ -492,7 +506,6 @@ public class Compiler implements
             IASTvariable tmp = context.newTemporaryVariable();
             emit("  ILP_Object " + tmp.getMangledName() + "; \n");
             tmps[i] = tmp;
-            context = context.extend(tmp);
         }
         for ( int i=0 ; i<arguments.length ; i++ ) {
             IASTexpression expression = arguments[i];
@@ -548,7 +561,6 @@ public class Compiler implements
             IASTvariable tmp = context.newTemporaryVariable();
             emit("  ILP_Object " + tmp.getMangledName() + "; \n");
             tmps[i] = tmp;
-            context = context.extend(tmp);
         }
         Context cf = context.redirect(new AssignDestination(tmpf));
         fexpr.accept(this, cf);
@@ -596,7 +608,6 @@ public class Compiler implements
                 emit(variable.getMangledName());
             }
             emit("));\n");
-            context = context.extend(ifd.getFunctionVariable());
         }
         iast.getBody().accept(this, context);
         emit("\n} \n");
@@ -627,7 +638,6 @@ public class Compiler implements
         IASTvariable[] variables = iast.getVariables();
         for ( int i=0 ; i< variables.length ; i++ ) {
             IASTvariable variable = variables[i];
-            context = context.extend(variable);
             emit("    ILP_Object ");
             emit(variable.getMangledName());
             if ( i < variables.length-1 ) {
@@ -637,6 +647,7 @@ public class Compiler implements
         emit(") {\n");
         for ( IASTvariable variable : variables ) {
             try {
+                // Cast ensured by normalizer:
                 IASTCLocalVariable lv = (IASTCLocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit(lv.getMangledName());
@@ -646,7 +657,7 @@ public class Compiler implements
                     emit("); \n");
                 }
             } catch (ClassCastException exc) {
-                //nothing
+                throw new RuntimeException("Should not occur");
             }
         }
         Context c = context.redirect(ReturnDestination.RETURN_DESTINATION);
@@ -689,6 +700,7 @@ public class Compiler implements
         }
         for ( IASTvariable variable : variables ) {
             try {
+                // Cast ensured by normalizer:
                 IASTCLocalVariable lv = (IASTCLocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit(lv.getMangledName());
@@ -698,7 +710,7 @@ public class Compiler implements
                     emit("); \n");
                 }
             } catch (ClassCastException exc) {
-                //nothing
+                throw new RuntimeException("Should not occur");
             }
         }
         Context c = context.redirect(ReturnDestination.RETURN_DESTINATION);
@@ -728,7 +740,6 @@ public class Compiler implements
             throws CompilationException {
         emit("while ( 1 ) { \n");
         IASTvariable tmp = context.newTemporaryVariable();
-        context = context.extend(tmp);
         emit("  ILP_Object " + tmp.getMangledName() + "; \n");
         Context c = context.redirect(new AssignDestination(tmp));
         iast.getCondition().accept(this, c);
@@ -769,8 +780,7 @@ public class Compiler implements
             emit(caughtVariable.getMangledName());
             emit(" = ILP_current_exception; \n");
             emit("            ILP_current_exception = NULL; \n");
-            Context cc = context.extend(caughtVariable);
-            cc = cc.redirect(VoidDestination.VOID_DESTINATION);
+            Context cc = context.redirect(VoidDestination.VOID_DESTINATION);
             catcher.getBody().accept(this, cc);
             emit("          } \n");
             emit("      }; \n");
