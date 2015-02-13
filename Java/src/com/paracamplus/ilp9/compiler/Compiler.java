@@ -9,15 +9,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.paracamplus.ilp9.ast.ASTboolean;
 import com.paracamplus.ilp9.ast.ASTvariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.normalizer.INormalizationFactory;
 import com.paracamplus.ilp9.compiler.normalizer.NormalizationFactory;
@@ -66,7 +67,7 @@ public class Compiler implements
         
         public IASTvariable newTemporaryVariable () {
             int i = counter.incrementAndGet();
-            return new ASTvariable("ILPtmp" + i);
+            return new ASTvariable("ilptmp" + i);
         }
         
         public Context redirect (IDestination d) {
@@ -179,6 +180,7 @@ public class Compiler implements
         emit(cFunctionsPrefix);
         for ( IASTfunctionDefinition ifd : iast.getFunctionDefinitions() ) {
             this.visit(ifd, c);
+            emitClosure(ifd, c);
         }
         for ( IASTClambda closure : iast.getClosureDefinitions() ) {
             this.emitFunction(closure, c);
@@ -248,12 +250,14 @@ public class Compiler implements
             throws CompilationException {
         if ( iast instanceof ASTClocalVariable ) {
             return visit((ASTClocalVariable) iast, context);
+        } else if ( iast instanceof ASTCglobalFunctionVariable ) {
+            return visit((ASTCglobalFunctionVariable) iast, context);
         } else {
             return visit((ASTCglobalVariable) iast, context);
         }
     }
     
-    public Void visit(ASTClocalVariable iast, Context context)
+    private Void visit(ASTClocalVariable iast, Context context)
             throws CompilationException {
         emit(context.destination.compile());
         if ( iast.isClosed() ) {
@@ -266,11 +270,18 @@ public class Compiler implements
         emit("; \n");
         return null;
     }
-    public Void visit(ASTCglobalVariable iast, Context context)
+    private Void visit(ASTCglobalVariable iast, Context context)
             throws CompilationException {
         emit(context.destination.compile());
         emit(globalVariableEnvironment.getCName(iast));
         emit("; \n");
+        return null;
+    }
+    private Void visit(ASTCglobalFunctionVariable iast, Context context)
+            throws CompilationException {
+        emit(context.destination.compile());
+        emit("(ILP_Object)&" + globalVariableEnvironment.getCName(iast));
+        emit("_closure_object; \n");
         return null;
     }
 
@@ -425,7 +436,7 @@ public class Compiler implements
         return null;
     }
     
-    public Void visitNonLocalAssignment(IASTassignment iast, Context context) 
+    private Void visitNonLocalAssignment(IASTassignment iast, Context context) 
             throws CompilationException {
         IASTvariable tmp1 = context.newTemporaryVariable();
         emit("{ \n");
@@ -497,7 +508,7 @@ public class Compiler implements
         }
     }
     
-    public Void visit(IASTCglobalInvocation iast, Context context)
+    private Void visit(IASTCglobalInvocation iast, Context context)
             throws CompilationException {
         emit("{ \n");
         IASTexpression[] arguments = iast.getArguments();
@@ -522,8 +533,8 @@ public class Compiler implements
             emit("(");
         } else if (iast.getFunction() instanceof IASTCglobalFunctionVariable) {
             // check arity statically!
-            emit(iast.getFunction().getMangledName());
-            emit("(");
+            emit("ilp__" + iast.getFunction().getMangledName());
+            emit("(NULL, ");
         } else {
             emit("ILP_invoke(");
             emit(iast.getFunction().getMangledName());
@@ -544,12 +555,12 @@ public class Compiler implements
         return null;        
     }
      
-    public Void visit(IASTCcomputedInvocation iast, Context context)
+    private Void visit(IASTCcomputedInvocation iast, Context context)
         throws CompilationException {
         return visitGeneralInvocation(iast, context);
     }
     
-    public Void visitGeneralInvocation(IASTinvocation iast, Context context)
+    private Void visitGeneralInvocation(IASTinvocation iast, Context context)
             throws CompilationException {
         emit("{ \n");
         IASTexpression fexpr = iast.getFunction();
@@ -614,11 +625,11 @@ public class Compiler implements
         return null;
     }
 
-    public void emitPrototype(IASTfunctionDefinition iast, Context context)
+    private void emitPrototype(IASTfunctionDefinition iast, Context context)
             throws CompilationException {
-        emit("ILP_Object ");
+        emit("ILP_Object ilp__");
         emit(iast.getMangledName());
-        emit("(\n");
+        emit("(ILP_Closure ilp_not_a_closure,\n");
         IASTvariable[] variables = iast.getVariables();
         for ( int i=0 ; i< variables.length ; i++ ) {
             IASTvariable variable = variables[i];
@@ -632,9 +643,9 @@ public class Compiler implements
     }
     public Void visit(IASTfunctionDefinition iast, Context context)
             throws CompilationException {
-        emit("ILP_Object ");
+        emit("ILP_Object ilp__");
         emit(iast.getMangledName());
-        emit("(\n");
+        emit("(ILP_Closure ilp_not_a_closure,\n");
         IASTvariable[] variables = iast.getVariables();
         for ( int i=0 ; i< variables.length ; i++ ) {
             IASTvariable variable = variables[i];
@@ -665,8 +676,21 @@ public class Compiler implements
         emit("}\n");
         return null;
     }
+    private void emitClosure(IASTfunctionDefinition iast, Context context)
+            throws CompilationException {
+        emit("struct ILP_Closure ");
+        emit(iast.getMangledName());
+        emit("_closure_object = { \n");
+        emit("   &ILP_object_Closure_class, \n");
+        emit("   { { ilp__");
+        emit(iast.getMangledName());
+        emit(", \n");
+        emit("       " + iast.getVariables().length + ", \n");
+        emit("       { NULL } } } \n");
+        emit("}; \n");      
+    }
     
-    public void emitPrototype(IASTClambda iast, Context context)
+    private void emitPrototype(IASTClambda iast, Context context)
             throws CompilationException {
         emit("ILP_Object ");
         emit(iast.getMangledName());
@@ -680,7 +704,7 @@ public class Compiler implements
         emit(");\n");
     }
     
-    public void emitFunction(IASTClambda iast, Context context)
+    private void emitFunction(IASTClambda iast, Context context)
             throws CompilationException {
         emit("ILP_Object ");
         emit(iast.getMangledName());

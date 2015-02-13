@@ -2,3 +2,5 @@
 *~
 *.o
 *.a
+Samples/*.c
+C/HOSTTYPE
