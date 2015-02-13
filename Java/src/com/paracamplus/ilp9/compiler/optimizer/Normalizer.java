@@ -11,6 +11,7 @@ import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -207,31 +208,36 @@ public class Normalizer implements IOptimizer,
     public IASTexpression visit(IASTcodefinitions iast, 
                                 INormalizationEnvironment env)
             throws CompilationException {
-        IASTfunctionDefinition[] functions = iast.getFunctions();
-        IASTfunctionDefinition[] newfunctions = 
-                new IASTfunctionDefinition[functions.length];
+        IASTnamedLambda[] functions = iast.getFunctions();
+        IASTnamedLambda[] newfunctions = 
+                new IASTnamedLambda[functions.length];
+        IASTvariable[] newFunctionVariables = 
+                new IASTvariable[functions.length];
         INormalizationEnvironment bodyenv = env;
         for ( int i=0 ; i<functions.length ; i++ ) {
-            IASTfunctionDefinition function = functions[i];
-            String functionName = function.getName();
-            IASTvariable oldFunctionName = // HACK
-                    new com.paracamplus.ilp9.ast.ASTvariable(functionName);
-            IASTvariable newFunctionName = 
-                    factory.newLocalVariable(functionName);
-            INormalizationEnvironment newenv = env;
+            IASTnamedLambda function = functions[i];
+            IASTvariable oldFunctionVar = function.getFunctionVariable();
+            IASTvariable newFunctionVar = 
+                    factory.newLocalFunctionVariable(oldFunctionVar.getName());
+            newFunctionVariables[i] = newFunctionVar;
+            bodyenv = bodyenv.extend(oldFunctionVar, newFunctionVar);
+        }
+        for ( int i=0 ; i<functions.length ; i++ ) {
+            IASTnamedLambda function = functions[i];
+            IASTvariable newFunctionVar = newFunctionVariables[i]; 
+            INormalizationEnvironment newenv = bodyenv;
             IASTvariable[] variables = function.getVariables();
             IASTvariable[] newvariables = new IASTvariable[variables.length];
             for ( int iv=0 ; iv<variables.length ; iv++ ) {
-                IASTvariable variable = variables[i];
+                IASTvariable variable = variables[iv];
                 IASTvariable newvariable = 
                         factory.newLocalVariable(variable.getName());
-                newvariables[i] = newvariable;
+                newvariables[iv] = newvariable;
                 newenv = newenv.extend(variable, newvariable);
             }
             IASTexpression newbody = function.getBody().accept(this, newenv);
-            newfunctions[i] = factory.newFunctionDefinition(
-                    newFunctionName.getName(), newvariables, newbody);
-            bodyenv = bodyenv.extend(oldFunctionName, newFunctionName);
+            newfunctions[i] = factory.newNamedLambda(
+                    newFunctionVar, newvariables, newbody);
         }
         IASTexpression newbody = iast.getBody().accept(this, bodyenv);
         return factory.newCodefinitions(newfunctions, newbody);
@@ -252,7 +258,10 @@ public class Normalizer implements IOptimizer,
             newenv = newenv.extend(variable, newvariable);
         }
         IASTexpression newbody = iast.getBody().accept(this, newenv);
-        return factory.newFunctionDefinition(functionName, newvariables, newbody);
+        IASTvariable functionVariable = 
+                factory.newGlobalFunctionVariable(functionName);
+        return factory.newFunctionDefinition(
+                functionVariable, newvariables, newbody);
     }
 
     public IASTexpression visit(IASTlambda iast, INormalizationEnvironment env)

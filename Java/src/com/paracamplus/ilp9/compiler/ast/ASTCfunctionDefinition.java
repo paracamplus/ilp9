@@ -11,10 +11,10 @@ import com.paracamplus.ilp9.interfaces.IASTvariable;
 public class ASTCfunctionDefinition extends ASTfunctionDefinition 
 implements IASTCfunctionDefinition {
 
-    public ASTCfunctionDefinition (String functionName,
+    public ASTCfunctionDefinition (IASTvariable functionVariable,
                                    IASTvariable[] variables,
                                    IASTexpression body ) {
-        super(functionName, variables, body);
+        super(functionVariable, variables, body);
         this.closedVariables = new HashSet<>();
     }
     private final Set<IASTvariable> closedVariables;

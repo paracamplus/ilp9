@@ -28,6 +28,7 @@ import com.paracamplus.ilp9.compiler.ast.ASTCLocalVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTCPrimitiveInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.ast.ASTClambda;
+import com.paracamplus.ilp9.compiler.ast.ASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.ast.ASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCComputedInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
@@ -47,6 +48,7 @@ import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
@@ -96,10 +98,10 @@ implements INormalizationFactory {
     }
         
     public IASTCfunctionDefinition newFunctionDefinition(
-            String functionName,
+            IASTvariable functionVariable,
             IASTvariable[] variables, 
             IASTexpression body) {
-       return new ASTCfunctionDefinition(functionName, variables, body);
+       return new ASTCfunctionDefinition(functionVariable, variables, body);
     }
     
     public IASTexpression newSequence(IASTexpression[] asts) {
@@ -199,8 +201,15 @@ implements INormalizationFactory {
         return new ASTClambda(closureName, variables, body);
     }
     
+    public IASTnamedLambda newNamedLambda(
+            IASTvariable functionVariable,
+            IASTvariable[] variables, 
+            IASTexpression body) {
+        return new ASTCnamedLambda(functionVariable, variables, body);
+    }
+    
     public IASTexpression newCodefinitions(
-            IASTfunctionDefinition[] functions,
+            IASTnamedLambda[] functions,
             IASTexpression body) {
         return new ASTcodefinitions(functions, body);
     }

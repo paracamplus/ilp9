@@ -2,8 +2,11 @@ package com.paracamplus.ilp9.compiler;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
+import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
@@ -23,6 +26,7 @@ import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
@@ -198,7 +202,7 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
                 ((IASTCLocalVariable)v).setClosed();
             }
         } catch (ClassCastException exc) {
-            // should not occur
+            throw new RuntimeException("should not occur");
         }
         variables.addAll(newvars);
         return null;
@@ -206,8 +210,41 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
     
     public Void visit(IASTcodefinitions iast, Set<IASTvariable> variables)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        IASTnamedLambda[] functions = iast.getFunctions();
+        // Collect the names of the local functions:
+        List<IASTvariable> functionsVariables = new Vector<>(); 
+        for ( IASTnamedLambda ifd : functions ) {
+            functionsVariables.add(ifd.getFunctionVariable());
+        }
+        for ( IASTnamedLambda ifd : functions ) {
+            Set<IASTvariable> newvars = new HashSet<>();
+            visit(ifd, newvars);
+            IASTvariable[] vars = ifd.getVariables();
+            newvars.removeAll(Arrays.asList(vars));
+            try {
+                IASTClambda fun = (IASTClambda) ifd;
+                fun.setClosedVariables(newvars);
+                for ( IASTvariable v : newvars ) {
+                    ((IASTCLocalVariable)v).setClosed();
+                }
+            } catch (ClassCastException exc) {
+                throw new RuntimeException("should not occur");
+            }
+            newvars.removeAll(functionsVariables);
+            variables.addAll(newvars);
+        }
+        for ( IASTnamedLambda ifd : functions ) {
+            try {
+                IASTCLocalFunctionVariable v = 
+                    (IASTCLocalFunctionVariable) ifd.getFunctionVariable();
+                v.setClosed();
+            } catch (ClassCastException exc) {
+                throw new RuntimeException("should not occur");
+            }
+        }
+        iast.getBody().accept(this, variables);
+        variables.removeAll(functionsVariables);
+        return null;
     }
 
     // Class related 

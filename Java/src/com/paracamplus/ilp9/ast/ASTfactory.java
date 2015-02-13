@@ -2,6 +2,7 @@ package com.paracamplus.ilp9.ast;
 
 import java.util.Map;
 
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -108,10 +109,10 @@ public class ASTfactory implements IParserFactory {
     }
 
     public IASTfunctionDefinition newFunctionDefinition(
-            String functionName,
+            IASTvariable functionVariable,
             IASTvariable[] variables, 
             IASTexpression body) {
-        return new ASTfunctionDefinition(functionName, variables, body);
+        return new ASTfunctionDefinition(functionVariable, variables, body);
     }
 
     public IASTtry newTry (IASTexpression body,
@@ -125,8 +126,15 @@ public class ASTfactory implements IParserFactory {
         return new ASTlambda(variables, body);
     }
     
+    public IASTnamedLambda newNamedLambda (
+            IASTvariable functionVariable,
+            IASTvariable[] variables,
+            IASTexpression body ) {
+        return new ASTNamedLambda(functionVariable, variables, body);
+    }
+    
     public IASTcodefinitions newCodefinitions (
-            IASTfunctionDefinition[] functions,
+            IASTnamedLambda[] functions,
             IASTexpression body ) {
         return new ASTcodefinitions(functions, body);
     }

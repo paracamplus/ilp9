@@ -17,6 +17,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.paracamplus.ilp9.interfaces.IAST;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -292,6 +293,7 @@ public class Parser extends AbstractExtensibleParser {
     public IASTfunctionDefinition functionDefinition (Element e) 
             throws ParseException {
         String name = e.getAttribute("name");
+        IASTvariable functionVariable = getFactory().newVariable(name);
         List<IASTvariable> vs = new Vector<>();
         NodeList vars = findChild(e, "variables").getChildNodes();
         for ( int i=0 ; i<vars.getLength() ; i++ ) {
@@ -307,7 +309,8 @@ public class Parser extends AbstractExtensibleParser {
         IASTexpression[] expressions =
                 findThenParseChildAsExpressions(e, "body");
         IASTexpression body = getFactory().newSequence(expressions);
-        return getFactory().newFunctionDefinition(name, variables, body);
+        return getFactory().newFunctionDefinition(
+                functionVariable, variables, body);
     }
     
     public IASTtry tryInstruction (Element e) throws ParseException {
@@ -358,17 +361,21 @@ public class Parser extends AbstractExtensibleParser {
     }
     
     public IASTcodefinitions codefinitions (Element e) throws ParseException {
-        List<IASTfunctionDefinition> fs = new Vector<>();
+        List<IASTnamedLambda> fs = new Vector<>();
         for ( IAST ifd : findThenParseChildAsArray(e, "functions")) {
             // cast ensured by grammar9
             IASTfunctionDefinition fd = (IASTfunctionDefinition) ifd;
-            fs.add(fd);
+            IASTnamedLambda fun = getFactory().newNamedLambda(
+                    fd.getFunctionVariable(),
+                    fd.getVariables(),
+                    fd.getBody());
+            fs.add(fun);
         }
         IASTexpression[] expressions =
                 findThenParseChildAsExpressions(e, "body");
         IASTexpression body = getFactory().newSequence(expressions);
         return getFactory().newCodefinitions(
-                fs.toArray(new IASTfunctionDefinition[0]),
+                fs.toArray(new IASTnamedLambda[0]),
                 body );
     }
     

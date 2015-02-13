@@ -1,22 +1,22 @@
 package com.paracamplus.ilp9.ast;
 
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
-import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
 
 public class ASTcodefinitions extends ASTexpression 
 implements IASTcodefinitions {
 
-    public ASTcodefinitions (IASTfunctionDefinition[] functions, 
+    public ASTcodefinitions (IASTnamedLambda[] functions, 
                              IASTexpression body ) {
         this.functions = functions;
         this.body = body;
     }
-    private final IASTfunctionDefinition[] functions;
+    private final IASTnamedLambda[] functions;
     private final IASTexpression body;
     
-    public IASTfunctionDefinition[] getFunctions() {
+    public IASTnamedLambda[] getFunctions() {
         return functions;
     }
     

@@ -14,4 +14,16 @@ public class ASTvariable extends ASTnamed implements IASTvariable {
             throws Anomaly {
         return visitor.visit(this, data);
     }
+    
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("<");
+        sb.append(this.getClass().getName()
+                .replaceFirst("^com.paracamplus.ilp9.", ""));
+        sb.append(" name='");
+        sb.append(this.getName());
+        sb.append("'/>");
+        return sb.toString();
+    }
 }

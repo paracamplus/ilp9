@@ -36,6 +36,7 @@ import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
@@ -466,7 +467,7 @@ public class Compiler implements
     public Void visit(IASTinvocation iast, Context context)
             throws CompilationException {
         if ( iast instanceof IASTCLocalFunctionInvocation ) {
-            return visit((IASTCLocalFunctionInvocation) iast, context);
+            return visitGeneralInvocation(iast, context);
         } else if ( iast instanceof IASTCGlobalInvocation ) {
             return visit((IASTCGlobalInvocation) iast, context);
         } else if ( iast instanceof IASTCComputedInvocation ) {
@@ -573,8 +574,33 @@ public class Compiler implements
     
     public Void visit(IASTcodefinitions iast, Context context)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        emit("{ \n");
+        IASTnamedLambda[] functions = iast.getFunctions();
+        for ( IASTnamedLambda ifd : functions ) {
+            emit("  ILP_Object ");
+            emit(ifd.getFunctionVariable().getMangledName());
+            emit(" = ILP_Value2Box(NULL); \n");
+        }
+        for ( IASTnamedLambda ifd : functions ) {
+            IASTClambda fun = (IASTClambda) ifd;
+            emit("ILP_SetBoxedValue(");
+            emit(ifd.getFunctionVariable().getMangledName());
+            emit(", ILP_make_closure(");
+            emit(fun.getName());
+            emit(", ");
+            emit(fun.getVariables().length);
+            emit(", ");
+            emit(fun.getClosedVariables().size());
+            for ( IASTvariable variable : fun.getClosedVariables() ) {
+                emit(", ");
+                emit(variable.getMangledName());
+            }
+            emit("));\n");
+            context = context.extend(ifd.getFunctionVariable());
+        }
+        iast.getBody().accept(this, context);
+        emit("\n} \n");
+        return null;
     }
 
     public void emitPrototype(IASTfunctionDefinition iast, Context context)

@@ -3,18 +3,19 @@ package com.paracamplus.ilp9.compiler.optimizer;
 import java.util.Map;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
@@ -38,8 +39,8 @@ public interface INormalizationFactory {
                                   IASTexpression initialisation);
 
     public IASTfunctionDefinition newFunctionDefinition(
-            String functionName,
-            IASTvariable[] variables, 
+            IASTvariable functionVariable,
+            IASTvariable[] variables,
             IASTexpression body);
     
     // Expression related:
@@ -97,7 +98,7 @@ public interface INormalizationFactory {
                                      IASTexpression body );
     
     public IASTexpression newCodefinitions (
-            IASTfunctionDefinition[] functions,
+            IASTnamedLambda[] functions,
             IASTexpression body );
     
     // Class related
@@ -130,4 +131,7 @@ public interface INormalizationFactory {
                                   IASTexpression[] arguments);
     
     public IASTexpression newSuper();
+
+    IASTnamedLambda newNamedLambda(IASTvariable newFunctionVar,
+            IASTvariable[] newvariables, IASTexpression newbody);
 }

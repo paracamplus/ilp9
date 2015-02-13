@@ -20,6 +20,7 @@ import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
@@ -141,7 +142,7 @@ implements IASTvisitor<Set<IASTCGlobalVariable>,
             IASTcodefinitions iast,
             Set<IASTCGlobalVariable> result)
                     throws CompilationException {
-        for ( IASTfunctionDefinition ifd : iast.getFunctions() ) {
+        for ( IASTnamedLambda ifd : iast.getFunctions() ) {
             result = ifd.getBody().accept(this, result);
         }
         result = iast.getBody().accept(this, result);

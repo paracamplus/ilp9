@@ -3,7 +3,7 @@ package com.paracamplus.ilp9.interpreter;
 import java.util.List;
 import java.util.Vector;
 
-import com.paracamplus.ilp9.ast.ASTvariable;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -219,15 +219,15 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     
     public Object visit(IASTcodefinitions iast, ILexicalEnvironment lexenv)
             throws EvaluationException {
-        IASTfunctionDefinition[] functions = iast.getFunctions();
+        IASTnamedLambda[] functions = iast.getFunctions();
         ILexicalEnvironment lexenv2 = lexenv;
-        for ( IASTfunctionDefinition fun : functions ) {
-            IASTvariable variable = new ASTvariable(fun.getName());
+        for ( IASTnamedLambda fun : functions ) {
+            IASTvariable variable = fun.getFunctionVariable();
             lexenv2 = lexenv2.extend(variable, null);
         }
-        for ( IASTfunctionDefinition fun : functions ) {
+        for ( IASTnamedLambda fun : functions ) {
             Object f = this.visit(fun, lexenv2); // Attention
-            IASTvariable variable = new ASTvariable(fun.getName());
+            IASTvariable variable = fun.getFunctionVariable();
             lexenv2.update(variable, f);
         }
         IASTexpression body = iast.getBody();

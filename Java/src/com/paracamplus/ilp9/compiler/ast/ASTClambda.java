@@ -12,10 +12,9 @@ import com.paracamplus.ilp9.interfaces.Inamed;
 public class ASTClambda extends ASTlambda 
 implements IASTClambda, Inamed {
     
-    public ASTClambda (
-            String closureName,
-            IASTvariable[] variables, 
-            IASTexpression body) {
+    public ASTClambda (String closureName,
+                       IASTvariable[] variables, 
+                       IASTexpression body) {
         super(variables, body);
         this.closedVariables = new HashSet<>();
         this.closureName = closureName;
