@@ -1,4 +1,4 @@
-package com.paracamplus.ilp9.compiler.optimizer;
+package com.paracamplus.ilp9.compiler.normalizer;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -6,10 +6,10 @@ import java.util.Set;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.IOptimizer;
-import com.paracamplus.ilp9.compiler.ast.ASTCLocalFunctionVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
@@ -62,7 +62,7 @@ public class Normalizer implements IOptimizer,
                 new IASTfunctionDefinition[functions.length];
         INormalizationEnvironment env = NormalizationEnvironment.EMPTY;
         for ( IASTfunctionDefinition function : functions ) {
-            IASTCGlobalFunctionVariable gfv =
+            IASTCglobalFunctionVariable gfv =
                     factory.newGlobalFunctionVariable(function.getName());
             env = env.extend(gfv, gfv);
         }
@@ -291,11 +291,11 @@ public class Normalizer implements IOptimizer,
             IASTexpression arg = argument.accept(this, env);
             args[i] = arg;
         }
-        if ( funexpr instanceof IASTCGlobalVariable ) {
-            IASTCGlobalVariable f = (IASTCGlobalVariable) funexpr;
+        if ( funexpr instanceof IASTCglobalVariable ) {
+            IASTCglobalVariable f = (IASTCglobalVariable) funexpr;
             return factory.newGlobalInvocation(f, args);
-        } else if ( funexpr instanceof IASTCLocalFunctionVariable ) {
-            IASTCLocalFunctionVariable f = (ASTCLocalFunctionVariable) funexpr;
+        } else if ( funexpr instanceof IASTClocalFunctionVariable ) {
+            IASTClocalFunctionVariable f = (ASTClocalFunctionVariable) funexpr;
             return factory.newLocalFunctionInvocation(f, args);
         } else {
             return factory.newComputedInvocation(funexpr, args);

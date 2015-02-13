@@ -1,11 +1,11 @@
 package com.paracamplus.ilp9.compiler.ast;
 
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
 
-public class ASTCGlobalVariable extends ASTCvariable 
-implements IASTCGlobalVariable {
+public class ASTCglobalVariable extends ASTCvariable 
+implements IASTCglobalVariable {
 
-    public ASTCGlobalVariable (String name) {
+    public ASTCglobalVariable (String name) {
         super(name);
     }
     
@@ -22,8 +22,8 @@ implements IASTCGlobalVariable {
         if (obj == null ) {
             return false;
         }
-        if ( obj.getClass() == ASTCGlobalFunctionVariable.class ) {
-            return ((ASTCGlobalFunctionVariable) obj).getName()
+        if ( obj.getClass() == ASTCglobalFunctionVariable.class ) {
+            return ((ASTCglobalFunctionVariable) obj).getName()
                     .equals(getName());
         }
         return false;

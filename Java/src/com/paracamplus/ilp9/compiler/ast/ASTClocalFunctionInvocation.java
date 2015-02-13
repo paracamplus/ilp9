@@ -1,13 +1,13 @@
 package com.paracamplus.ilp9.compiler.ast;
 
 import com.paracamplus.ilp9.ast.ASTinvocation;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 
-public class ASTCLocalFunctionInvocation extends ASTinvocation
-implements IASTCLocalFunctionInvocation {
+public class ASTClocalFunctionInvocation extends ASTinvocation
+implements IASTClocalFunctionInvocation {
 
-    public ASTCLocalFunctionInvocation (IASTexpression function, 
+    public ASTClocalFunctionInvocation (IASTexpression function, 
                                        IASTexpression[] arguments) {
         super(function, arguments);
     }

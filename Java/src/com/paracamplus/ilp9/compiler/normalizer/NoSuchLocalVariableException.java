@@ -1,4 +1,4 @@
-package com.paracamplus.ilp9.compiler.optimizer;
+package com.paracamplus.ilp9.compiler.normalizer;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
 

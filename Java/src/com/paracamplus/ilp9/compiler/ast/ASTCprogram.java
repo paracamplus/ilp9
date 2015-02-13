@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
@@ -23,14 +23,14 @@ implements IASTCprogram {
         this.globalVariables = new HashSet<>();
         this.closureDefinitions = new Vector<>();
     }
-    private Set<IASTCGlobalVariable> globalVariables;
+    private Set<IASTCglobalVariable> globalVariables;
     private List<IASTClambda> closureDefinitions;
     
-    public Set<IASTCGlobalVariable> getGlobalVariables() {
+    public Set<IASTCglobalVariable> getGlobalVariables() {
         return globalVariables;
     }
 
-    public void setGlobalVariables(Set<IASTCGlobalVariable> gvs) {
+    public void setGlobalVariables(Set<IASTCglobalVariable> gvs) {
         globalVariables = gvs;        
     }
 

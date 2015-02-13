@@ -4,9 +4,9 @@ import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
-public class ASTNamedLambda extends ASTlambda implements IASTnamedLambda {
+public class ASTnamedLambda extends ASTlambda implements IASTnamedLambda {
 
-    public ASTNamedLambda (IASTvariable functionVariable,
+    public ASTnamedLambda (IASTvariable functionVariable,
             IASTvariable[] variables, 
             IASTexpression body) {
         super(variables, body);

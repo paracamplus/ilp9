@@ -130,7 +130,7 @@ public class ASTfactory implements IParserFactory {
             IASTvariable functionVariable,
             IASTvariable[] variables,
             IASTexpression body ) {
-        return new ASTNamedLambda(functionVariable, variables, body);
+        return new ASTnamedLambda(functionVariable, variables, body);
     }
     
     public IASTcodefinitions newCodefinitions (

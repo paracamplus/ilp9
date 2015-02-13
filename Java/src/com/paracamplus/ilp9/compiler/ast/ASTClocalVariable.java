@@ -1,11 +1,11 @@
 package com.paracamplus.ilp9.compiler.ast;
 
-import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
 
-public class ASTCLocalVariable extends ASTCvariable 
-implements IASTCLocalVariable {
+public class ASTClocalVariable extends ASTCvariable 
+implements IASTClocalVariable {
 
-    public ASTCLocalVariable (String name) {
+    public ASTClocalVariable (String name) {
         super(name);
         this.closed = false;
     }

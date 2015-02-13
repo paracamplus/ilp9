@@ -9,19 +9,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.paracamplus.ilp9.ast.ASTboolean;
 import com.paracamplus.ilp9.ast.ASTvariable;
-import com.paracamplus.ilp9.compiler.ast.ASTCGlobalVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTCLocalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCComputedInvocation;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalFunctionVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalInvocation;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCGlobalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalFunctionInvocation;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCLocalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
-import com.paracamplus.ilp9.compiler.optimizer.INormalizationFactory;
-import com.paracamplus.ilp9.compiler.optimizer.NormalizationFactory;
-import com.paracamplus.ilp9.compiler.optimizer.Normalizer;
+import com.paracamplus.ilp9.compiler.normalizer.INormalizationFactory;
+import com.paracamplus.ilp9.compiler.normalizer.NormalizationFactory;
+import com.paracamplus.ilp9.compiler.normalizer.Normalizer;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -135,7 +135,7 @@ public class Compiler implements
         newprogram = optimizer.transform(newprogram);
 
         GlobalVariableCollector gvc = new GlobalVariableCollector();
-        Set<IASTCGlobalVariable> gvs = gvc.analyze(newprogram);
+        Set<IASTCglobalVariable> gvs = gvc.analyze(newprogram);
         newprogram.setGlobalVariables(gvs);
         
         FreeVariableCollector fvc = new FreeVariableCollector(newprogram);
@@ -161,7 +161,7 @@ public class Compiler implements
         emit(cProgramPrefix);
         
         emit(cGlobalVariablesPrefix);
-        for ( IASTCGlobalVariable gv : iast.getGlobalVariables() ) {
+        for ( IASTCglobalVariable gv : iast.getGlobalVariables() ) {
             emit("ILP_Object ");
             emit(gv.getMangledName());
             emit(";\n");
@@ -246,14 +246,14 @@ public class Compiler implements
 
     public Void visit(IASTvariable iast, Context context)
             throws CompilationException {
-        if ( iast instanceof ASTCLocalVariable ) {
-            return visit((ASTCLocalVariable) iast, context);
+        if ( iast instanceof ASTClocalVariable ) {
+            return visit((ASTClocalVariable) iast, context);
         } else {
-            return visit((ASTCGlobalVariable) iast, context);
+            return visit((ASTCglobalVariable) iast, context);
         }
     }
     
-    public Void visit(ASTCLocalVariable iast, Context context)
+    public Void visit(ASTClocalVariable iast, Context context)
             throws CompilationException {
         emit(context.destination.compile());
         if ( iast.isClosed() ) {
@@ -266,7 +266,7 @@ public class Compiler implements
         emit("; \n");
         return null;
     }
-    public Void visit(ASTCGlobalVariable iast, Context context)
+    public Void visit(ASTCglobalVariable iast, Context context)
             throws CompilationException {
         emit(context.destination.compile());
         emit(globalVariableEnvironment.getCName(iast));
@@ -392,7 +392,7 @@ public class Compiler implements
     
     public Void visit(IASTassignment iast, Context context)
             throws CompilationException {
-        if ( iast.getVariable() instanceof IASTCLocalVariable ) {
+        if ( iast.getVariable() instanceof IASTClocalVariable ) {
             return visitLocalAssignment(iast, context);
         } else {
             return visitNonLocalAssignment(iast, context);
@@ -407,7 +407,7 @@ public class Compiler implements
         Context c1 = context.redirect(new AssignDestination(tmp1));
         iast.getExpression().accept(this, c1);
         // Cast ensured by visit(IASTassignment...)
-        IASTCLocalVariable lv = (IASTCLocalVariable) iast.getVariable();
+        IASTClocalVariable lv = (IASTClocalVariable) iast.getVariable();
         emit(context.destination.compile());
         emit("(");
         if ( lv.isClosed() ) {
@@ -465,8 +465,8 @@ public class Compiler implements
             emit("    ILP_Object ");
             emit(variable.getMangledName());
             emit(" = ");
-            if ( variable instanceof IASTCLocalVariable ) {
-                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+            if ( variable instanceof IASTClocalVariable ) {
+                IASTClocalVariable lv = (IASTClocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit("ILP_Value2Box(");
                     emit(tmp.getMangledName());
@@ -486,18 +486,18 @@ public class Compiler implements
     
     public Void visit(IASTinvocation iast, Context context)
             throws CompilationException {
-        if ( iast instanceof IASTCLocalFunctionInvocation ) {
+        if ( iast instanceof IASTClocalFunctionInvocation ) {
             return visitGeneralInvocation(iast, context);
-        } else if ( iast instanceof IASTCGlobalInvocation ) {
-            return visit((IASTCGlobalInvocation) iast, context);
-        } else if ( iast instanceof IASTCComputedInvocation ) {
-            return visit((IASTCComputedInvocation) iast, context);
+        } else if ( iast instanceof IASTCglobalInvocation ) {
+            return visit((IASTCglobalInvocation) iast, context);
+        } else if ( iast instanceof IASTCcomputedInvocation ) {
+            return visit((IASTCcomputedInvocation) iast, context);
         } else {
             return visitGeneralInvocation(iast, context);
         }
     }
     
-    public Void visit(IASTCGlobalInvocation iast, Context context)
+    public Void visit(IASTCglobalInvocation iast, Context context)
             throws CompilationException {
         emit("{ \n");
         IASTexpression[] arguments = iast.getArguments();
@@ -520,7 +520,7 @@ public class Compiler implements
                     .getPrimitiveDescription(iast.getFunction());
             emit(fun.getCName());
             emit("(");
-        } else if (iast.getFunction() instanceof IASTCGlobalFunctionVariable) {
+        } else if (iast.getFunction() instanceof IASTCglobalFunctionVariable) {
             // check arity statically!
             emit(iast.getFunction().getMangledName());
             emit("(");
@@ -544,7 +544,7 @@ public class Compiler implements
         return null;        
     }
      
-    public Void visit(IASTCComputedInvocation iast, Context context)
+    public Void visit(IASTCcomputedInvocation iast, Context context)
         throws CompilationException {
         return visitGeneralInvocation(iast, context);
     }
@@ -648,7 +648,7 @@ public class Compiler implements
         for ( IASTvariable variable : variables ) {
             try {
                 // Cast ensured by normalizer:
-                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+                IASTClocalVariable lv = (IASTClocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit(lv.getMangledName());
                     emit(" = ");
@@ -701,7 +701,7 @@ public class Compiler implements
         for ( IASTvariable variable : variables ) {
             try {
                 // Cast ensured by normalizer:
-                IASTCLocalVariable lv = (IASTCLocalVariable) variable;
+                IASTClocalVariable lv = (IASTClocalVariable) variable;
                 if ( lv.isClosed() ) {
                     emit(lv.getMangledName());
                     emit(" = ");
