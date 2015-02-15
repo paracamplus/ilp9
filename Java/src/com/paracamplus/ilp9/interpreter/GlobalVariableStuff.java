@@ -3,6 +3,7 @@ package com.paracamplus.ilp9.interpreter;
 import java.io.Writer;
 import java.math.BigDecimal;
 
+import com.paracamplus.ilp9.interpreter.interfaces.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.interpreter.primitive.Newline;
 import com.paracamplus.ilp9.interpreter.primitive.Print;
 import com.paracamplus.ilp9.interpreter.primitive.Throw;

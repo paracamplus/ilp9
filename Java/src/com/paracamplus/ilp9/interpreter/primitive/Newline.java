@@ -3,8 +3,7 @@ package com.paracamplus.ilp9.interpreter.primitive;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.paracamplus.ilp9.interpreter.EvaluationException;
-import com.paracamplus.ilp9.interpreter.Primitive;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 
 public class Newline extends Primitive {
     

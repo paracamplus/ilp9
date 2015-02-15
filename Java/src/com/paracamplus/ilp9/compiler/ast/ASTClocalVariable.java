@@ -1,6 +1,7 @@
 package com.paracamplus.ilp9.compiler.ast;
 
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvisitor;
 
 public class ASTClocalVariable extends ASTCvariable 
 implements IASTClocalVariable {
@@ -18,4 +19,10 @@ implements IASTClocalVariable {
     public void setClosed() {
         closed = true;        
     }
+    
+    public <Result, Data, Anomaly extends Throwable> Result 
+    accept(IASTCvisitor<Result, Data, Anomaly> visitor, Data data)
+        throws Anomaly {
+    return visitor.visit(this, data);
+}
 }

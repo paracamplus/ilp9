@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.paracamplus.ilp9.ast.ASTfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
@@ -23,7 +24,7 @@ implements IASTCfunctionDefinition {
         return closedVariables;
     }
 
-    public void setClosedVariables(Set<IASTvariable> closedVariables) {
+    public void setClosedVariables(Set<IASTClocalVariable> closedVariables) {
         this.closedVariables.addAll(closedVariables);
     }
 }

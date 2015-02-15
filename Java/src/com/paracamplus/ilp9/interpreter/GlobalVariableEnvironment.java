@@ -3,6 +3,9 @@ package com.paracamplus.ilp9.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.paracamplus.ilp9.interpreter.interfaces.IGlobalVariableEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.IPrimitive;
+
 public class GlobalVariableEnvironment implements IGlobalVariableEnvironment {
 
     public GlobalVariableEnvironment () {

@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.paracamplus.ilp9.ast.ASTlambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvisitor;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.Inamed;
@@ -26,11 +28,17 @@ implements IASTClambda, Inamed {
         return closedVariables;
     }
 
-    public void setClosedVariables(Set<IASTvariable> closedVariables) {
+    public void setClosedVariables(Set<IASTClocalVariable> closedVariables) {
         this.closedVariables.addAll(closedVariables);
     }
 
     public String getName() {
         return closureName;
     }
+    
+    public <Result, Data, Anomaly extends Throwable> Result 
+    accept(IASTCvisitor<Result, Data, Anomaly> visitor, Data data)
+        throws Anomaly {
+    return visitor.visit(this, data);
+}
 }

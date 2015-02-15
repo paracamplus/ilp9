@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.paracamplus.ilp9.interfaces.IASToperator;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.IOperator;
+import com.paracamplus.ilp9.interpreter.interfaces.IOperatorEnvironment;
 
 public class OperatorEnvironment implements IOperatorEnvironment {
 

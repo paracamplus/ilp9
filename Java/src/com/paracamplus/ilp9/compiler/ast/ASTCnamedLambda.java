@@ -2,12 +2,12 @@ package com.paracamplus.ilp9.compiler.ast;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
 public class ASTCnamedLambda extends ASTClambda 
-implements IASTnamedLambda {
+implements IASTCnamedLambda {
 
     public ASTCnamedLambda (IASTvariable functionVariable,
                             IASTvariable[] variables, 

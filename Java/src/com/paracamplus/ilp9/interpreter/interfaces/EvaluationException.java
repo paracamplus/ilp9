@@ -1,4 +1,4 @@
-package com.paracamplus.ilp9.interpreter;
+package com.paracamplus.ilp9.interpreter.interfaces;
 
 @SuppressWarnings("serial")
 public class EvaluationException extends Exception {

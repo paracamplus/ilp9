@@ -19,8 +19,7 @@ public class ASTvariable extends ASTnamed implements IASTvariable {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("<");
-        sb.append(this.getClass().getName()
-                .replaceFirst("^com.paracamplus.ilp9.", ""));
+        sb.append(this.getClassShortName());
         sb.append(" name='");
         sb.append(this.getName());
         sb.append("'/>");

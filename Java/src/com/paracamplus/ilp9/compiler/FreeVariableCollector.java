@@ -6,12 +6,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
-import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCprimitiveInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvisitor;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -37,11 +46,10 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTvisitor;
 import com.paracamplus.ilp9.interfaces.IASTwriteField;
 
 public class FreeVariableCollector 
-implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
+implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
 
     public FreeVariableCollector(IASTCprogram program) {
         this.program = program;
@@ -51,22 +59,44 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
     public IASTCprogram analyze () 
             throws CompilationException {
         for ( IASTfunctionDefinition ifd : program.getFunctionDefinitions() ) {
-            Set<IASTvariable> newvars = new HashSet<>();
+            Set<IASTClocalVariable> newvars = new HashSet<>();
             visit(ifd, newvars);
         }
-        Set<IASTvariable> newvars = new HashSet<>();
+        Set<IASTClocalVariable> newvars = new HashSet<>();
         program.getBody().accept(this, newvars);
         return program;
     }
     
-    public Void visit(IASTvariable iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTvariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
         if ( iast instanceof IASTClocalVariable ) {
-            variables.add(iast);
+            variables.add((IASTClocalVariable)iast);
         }
         return null;
     }
+    public Void visit(IASTCglobalFunctionVariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        return null;
+    }
+    public Void visit(IASTCglobalVariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        return null;
+    }
+    public Void visit(IASTClocalFunctionVariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        return null;
+    }
+    public Void visit(IASTClocalVariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        variables.add(iast);
+        return null;
+    }
+    public Void visit(IASTCvariable iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        return null;
+    }
     
-    public Void visit(IASTassignment iast, Set<IASTvariable> variables)
+    public Void visit(IASTassignment iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         IASTvariable variable = iast.getVariable();
         variable.accept(this, variables);
@@ -80,7 +110,7 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         return null;
     }
     
-    public Void visit(IASTalternative iast, Set<IASTvariable> variables)
+    public Void visit(IASTalternative iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         iast.getCondition().accept(this, variables);
         iast.getConsequence().accept(this, variables);
@@ -88,35 +118,35 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         return null;
     }
     
-    public Void visit(IASTbinaryOperation iast, Set<IASTvariable> variables)
+    public Void visit(IASTbinaryOperation iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         iast.getLeftOperand().accept(this, variables);
         iast.getRightOperand().accept(this, variables);
         return null;
     }
-    public Void visit(IASTunaryOperation iast, Set<IASTvariable> variables)
+    public Void visit(IASTunaryOperation iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         iast.getOperand().accept(this, variables);
         return null;
     }
-    public Void visit(IASToperator iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASToperator iast, Set<IASTClocalVariable> variables) throws CompilationException {
         throw new RuntimeException("Should not occur");
     }
     
-    public Void visit(IASTboolean iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTboolean iast, Set<IASTClocalVariable> variables) throws CompilationException {
         return null;
     }
-    public Void visit(IASTfloat iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTfloat iast, Set<IASTClocalVariable> variables) throws CompilationException {
         return null;
     }
-    public Void visit(IASTinteger iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTinteger iast, Set<IASTClocalVariable> variables) throws CompilationException {
         return null;
     }
-    public Void visit(IASTstring iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTstring iast, Set<IASTClocalVariable> variables) throws CompilationException {
         return null;
     }
     
-    public Void visit(IASTinvocation iast, Set<IASTvariable> variables)
+    public Void visit(IASTinvocation iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         iast.getFunction().accept(this, variables);
         for ( IASTexpression expression : iast.getArguments() ) {
@@ -124,14 +154,30 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         }
         return null;
     }
+    public Void visit(IASTCcomputedInvocation iast, Set<IASTClocalVariable> variables)
+            throws CompilationException {
+        return visit((IASTinvocation) iast, variables);
+    }
+    public Void visit(IASTCprimitiveInvocation iast, Set<IASTClocalVariable> variables)
+            throws CompilationException {
+        return visit((IASTinvocation) iast, variables);
+    }
+    public Void visit(IASTCglobalInvocation iast, Set<IASTClocalVariable> variables)
+            throws CompilationException {
+        return visit((IASTinvocation) iast, variables);
+    }
+    public Void visit(IASTClocalFunctionInvocation iast, Set<IASTClocalVariable> variables)
+            throws CompilationException {
+        return visit((IASTinvocation) iast, variables);
+    }
     
-    public Void visit(IASTloop iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTloop iast, Set<IASTClocalVariable> variables) throws CompilationException {
         iast.getCondition().accept(this, variables);
         iast.getBody().accept(this, variables);
         return null;
     }
     
-    public Void visit(IASTsequence iast, Set<IASTvariable> variables) 
+    public Void visit(IASTsequence iast, Set<IASTClocalVariable> variables) 
             throws CompilationException {
         for ( IASTexpression expression : iast.getExpressions() ) {
             expression.accept(this, variables);
@@ -139,11 +185,11 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         return null;
     }
     
-    public Void visit(IASTtry iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTtry iast, Set<IASTClocalVariable> variables) throws CompilationException {
         iast.getBody().accept(this, variables);
         IASTlambda catcher = iast.getCatcher();
         if ( catcher != null ) {
-            Set<IASTvariable> newvars = new HashSet<>();
+            Set<IASTClocalVariable> newvars = new HashSet<>();
             catcher.getBody().accept(this, newvars);
             newvars.remove(catcher.getVariables()[0]);
             variables.addAll(newvars);
@@ -156,9 +202,9 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
     }
     
     public Void visit(IASTfunctionDefinition fd, 
-            Set<IASTvariable> variables) 
+            Set<IASTClocalVariable> variables) 
             throws CompilationException {
-        Set<IASTvariable> newvars = new HashSet<>();
+        Set<IASTClocalVariable> newvars = new HashSet<>();
         fd.getBody().accept(this, newvars);
         IASTvariable[] vars = fd.getVariables();
         newvars.removeAll(Arrays.asList(vars));
@@ -176,22 +222,31 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         return null;
     }
     
-    public Void visit(IASTblock iast, Set<IASTvariable> variables) 
+    public Void visit(IASTblock iast, Set<IASTClocalVariable> variables) 
             throws CompilationException {
-        Set<IASTvariable> currentVars = new HashSet<>();
-        for ( IASTblock.IASTbinding binding : iast.getBindings() ) {
+        if ( iast instanceof IASTCblock ) {
+            return visit((IASTCblock) iast, variables);
+        } else {
+            throw new RuntimeException("should not occur");
+        }
+    }
+    public Void visit(IASTCblock iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        Set<IASTClocalVariable> currentVars = new HashSet<>();
+        for ( IASTCblock.IASTCbinding binding : iast.getBindings() ) {
             binding.getInitialisation().accept(this, variables);
             currentVars.add(binding.getVariable());
         }
-        Set<IASTvariable> newvars = new HashSet<>();
+        Set<IASTClocalVariable> newvars = new HashSet<>();
         iast.getBody().accept(this, newvars);
         newvars.removeAll(currentVars);
         variables.addAll(newvars);
         return null;
     }
     
-    public Void visit(IASTlambda iast, Set<IASTvariable> variables) throws CompilationException {
-        Set<IASTvariable> newvars = new HashSet<>();
+    public Void visit(IASTlambda iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        Set<IASTClocalVariable> newvars = new HashSet<>();
         iast.getBody().accept(this, newvars);
         IASTvariable[] vars = iast.getVariables();
         newvars.removeAll(Arrays.asList(vars));
@@ -210,8 +265,27 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         variables.addAll(newvars);
         return null;
     }
+    public Void visit(IASTClambda iast, Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        Set<IASTClocalVariable> newvars = new HashSet<>();
+        iast.getBody().accept(this, newvars);
+        IASTvariable[] vars = iast.getVariables();
+        newvars.removeAll(Arrays.asList(vars));
+        try {
+            iast.setClosedVariables(newvars);
+            program.addClosureDefinition(iast);
+            for ( IASTvariable v : newvars ) {
+                // Cast ensured by normalizer:
+                ((IASTClocalVariable)v).setClosed();
+            }
+        } catch (ClassCastException exc) {
+            throw new RuntimeException("should not occur");
+        }
+        variables.addAll(newvars);
+        return null;
+    }
     
-    public Void visit(IASTcodefinitions iast, Set<IASTvariable> variables)
+    public Void visit(IASTcodefinitions iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         IASTnamedLambda[] functions = iast.getFunctions();
         // Collect the names of the local functions:
@@ -220,7 +294,7 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
             functionsVariables.add(ifd.getFunctionVariable());
         }
         for ( IASTnamedLambda ifd : functions ) {
-            Set<IASTvariable> newvars = new HashSet<>();
+            Set<IASTClocalVariable> newvars = new HashSet<>();
             visit(ifd, newvars);
             IASTvariable[] vars = ifd.getVariables();
             newvars.removeAll(Arrays.asList(vars));
@@ -252,38 +326,42 @@ implements IASTvisitor<Void, Set<IASTvariable>, CompilationException> {
         variables.removeAll(functionsVariables);
         return null;
     }
+    public Void visit(IASTCcodefinitions iast, Set<IASTClocalVariable> variables)
+            throws CompilationException {
+        return visit((IASTcodefinitions) iast, variables); 
+    }
 
     // Class related 
     
-    public Void visit(IASTwriteField iast, Set<IASTvariable> variables)
+    public Void visit(IASTwriteField iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTinstantiation iast, Set<IASTvariable> variables)
+    public Void visit(IASTinstantiation iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTreadField iast, Set<IASTvariable> variables)
+    public Void visit(IASTreadField iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTself iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTself iast, Set<IASTClocalVariable> variables) throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTsend iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTsend iast, Set<IASTClocalVariable> variables) throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTsuper iast, Set<IASTvariable> variables) throws CompilationException {
+    public Void visit(IASTsuper iast, Set<IASTClocalVariable> variables) throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
     }

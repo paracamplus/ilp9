@@ -1,4 +1,7 @@
-package com.paracamplus.ilp9.interpreter;
+package com.paracamplus.ilp9.interpreter.interfaces;
+
+
+
 
 public interface IGlobalVariableEnvironment {
     Object getGlobalVariableValue (String variableName);

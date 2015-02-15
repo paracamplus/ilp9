@@ -1,4 +1,4 @@
-package com.paracamplus.ilp9.compiler;
+package com.paracamplus.ilp9.compiler.interfaces;
 
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 

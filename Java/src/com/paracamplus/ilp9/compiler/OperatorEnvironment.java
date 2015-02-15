@@ -3,6 +3,7 @@ package com.paracamplus.ilp9.compiler;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.paracamplus.ilp9.compiler.interfaces.IOperatorEnvironment;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 
 public class OperatorEnvironment implements IOperatorEnvironment {

@@ -1,4 +1,6 @@
-package com.paracamplus.ilp9.interpreter;
+package com.paracamplus.ilp9.interpreter.operator;
+
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 
 public abstract class UnaryOperator extends Operator {
     

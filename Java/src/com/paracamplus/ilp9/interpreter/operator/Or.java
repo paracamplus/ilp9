@@ -1,7 +1,6 @@
 package com.paracamplus.ilp9.interpreter.operator;
 
-import com.paracamplus.ilp9.interpreter.BinaryOperator;
-import com.paracamplus.ilp9.interpreter.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 
 public class Or extends BinaryOperator {
     

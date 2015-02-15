@@ -2,6 +2,9 @@ package com.paracamplus.ilp9.interpreter;
 
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.IFunction;
+import com.paracamplus.ilp9.interpreter.interfaces.ILexicalEnvironment;
 
 public class Function implements IFunction {
     

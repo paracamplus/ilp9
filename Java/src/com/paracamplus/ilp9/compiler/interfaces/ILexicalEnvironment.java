@@ -1,7 +1,8 @@
-package com.paracamplus.ilp9.compiler;
+package com.paracamplus.ilp9.compiler.interfaces;
 
+import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.tools.IEnvironment;
+import com.paracamplus.ilp9.interfaces.IEnvironment;
 
 public interface ILexicalEnvironment 
 extends IEnvironment<IASTvariable, Object, CompilationException> {  

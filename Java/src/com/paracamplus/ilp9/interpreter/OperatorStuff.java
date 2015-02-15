@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.interpreter;
 
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.IOperatorEnvironment;
 import com.paracamplus.ilp9.interpreter.operator.Add;
 import com.paracamplus.ilp9.interpreter.operator.And;
 import com.paracamplus.ilp9.interpreter.operator.Equal;

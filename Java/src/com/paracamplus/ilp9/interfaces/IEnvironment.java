@@ -1,4 +1,4 @@
-package com.paracamplus.ilp9.tools;
+package com.paracamplus.ilp9.interfaces;
 
 public interface IEnvironment<K,V,T extends Throwable> {
 	/** is the key present in the environment ? */

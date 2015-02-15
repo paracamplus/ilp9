@@ -1,4 +1,6 @@
-package com.paracamplus.ilp9.interpreter;
+package com.paracamplus.ilp9.interpreter.interfaces;
+
+import com.paracamplus.ilp9.interpreter.Interpreter;
 
 public interface Invocable {
     int getArity();

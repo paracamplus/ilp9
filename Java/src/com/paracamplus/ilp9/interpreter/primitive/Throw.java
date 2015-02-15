@@ -1,6 +1,6 @@
 package com.paracamplus.ilp9.interpreter.primitive;
 
-import com.paracamplus.ilp9.interpreter.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 
 public class Throw extends UnaryPrimitive {
 

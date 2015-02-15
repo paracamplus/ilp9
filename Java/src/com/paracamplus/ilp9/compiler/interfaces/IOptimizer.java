@@ -1,8 +1,8 @@
-package com.paracamplus.ilp9.compiler;
+package com.paracamplus.ilp9.compiler.interfaces;
 
-import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
+import com.paracamplus.ilp9.compiler.CompilationException;
 
-public interface IOptimizer {
+public abstract interface IOptimizer {
         IASTCprogram transform (IASTCprogram program) 
                 throws CompilationException;
 }

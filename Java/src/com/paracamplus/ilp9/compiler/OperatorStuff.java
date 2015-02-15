@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.compiler.interfaces.IOperatorEnvironment;
+
 public class OperatorStuff {
 
     public static void fillUnaryOperators (IOperatorEnvironment env)

@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.compiler.interfaces.IGlobalVariableEnvironment;
+
 public class GlobalVariableStuff {
     public static void fillGlobalVariables (IGlobalVariableEnvironment env) {
         env.addGlobalVariableValue("pi", "ILP_PI");

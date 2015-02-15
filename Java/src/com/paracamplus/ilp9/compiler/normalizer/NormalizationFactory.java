@@ -6,9 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.paracamplus.ilp9.ast.ASTalternative;
 import com.paracamplus.ilp9.ast.ASTassignment;
 import com.paracamplus.ilp9.ast.ASTbinaryOperation;
-import com.paracamplus.ilp9.ast.ASTblock;
 import com.paracamplus.ilp9.ast.ASTboolean;
-import com.paracamplus.ilp9.ast.ASTcodefinitions;
 import com.paracamplus.ilp9.ast.ASTfloat;
 import com.paracamplus.ilp9.ast.ASTinteger;
 import com.paracamplus.ilp9.ast.ASTloop;
@@ -18,37 +16,40 @@ import com.paracamplus.ilp9.ast.ASTstring;
 import com.paracamplus.ilp9.ast.ASTtry;
 import com.paracamplus.ilp9.ast.ASTunaryOperation;
 import com.paracamplus.ilp9.compiler.CompilationException;
+import com.paracamplus.ilp9.compiler.ast.ASTCblock;
+import com.paracamplus.ilp9.compiler.ast.ASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.ast.ASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTClambda;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalVariable;
-import com.paracamplus.ilp9.compiler.ast.ASTCprimitiveInvocation;
-import com.paracamplus.ilp9.compiler.ast.ASTCfunctionDefinition;
-import com.paracamplus.ilp9.compiler.ast.ASTClambda;
 import com.paracamplus.ilp9.compiler.ast.ASTCnamedLambda;
+import com.paracamplus.ilp9.compiler.ast.ASTCprimitiveInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTCprogram;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprimitiveInvocation;
-import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
-import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
-import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
@@ -177,11 +178,11 @@ implements INormalizationFactory {
         return new ASTassignment(variable, value);
     }
     
-    public IASTexpression newBlock(IASTbinding[] binding, IASTexpression body) {
-        return new ASTblock(binding, body);
+    public IASTCblock newBlock(IASTCblock.IASTCbinding[] binding, IASTexpression body) {
+        return new ASTCblock(binding, body);
     }
-    public IASTbinding newBinding(IASTvariable variable, IASTexpression initialisation) {
-        return new ASTblock.ASTbinding(variable, initialisation);
+    public IASTCblock.IASTCbinding newBinding(IASTvariable variable, IASTexpression initialisation) {
+        return new ASTCblock.ASTCbinding(variable, initialisation);
     }
     
     public IASTexpression newLoop(IASTexpression condition, IASTexpression body) {
@@ -201,17 +202,17 @@ implements INormalizationFactory {
         return new ASTClambda(closureName, variables, body);
     }
     
-    public IASTnamedLambda newNamedLambda(
+    public IASTCnamedLambda newNamedLambda(
             IASTvariable functionVariable,
             IASTvariable[] variables, 
             IASTexpression body) {
         return new ASTCnamedLambda(functionVariable, variables, body);
     }
     
-    public IASTexpression newCodefinitions(
-            IASTnamedLambda[] functions,
+    public IASTCcodefinitions newCodefinitions(
+            IASTCnamedLambda[] functions,
             IASTexpression body) {
-        return new ASTcodefinitions(functions, body);
+        return new ASTCcodefinitions(functions, body);
     }
 
     // Class related

@@ -3,23 +3,25 @@ package com.paracamplus.ilp9.compiler.normalizer;
 import java.util.Map;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
-import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
-public interface INormalizationFactory {
+ public interface INormalizationFactory {
 
     IASTCprogram newProgram(IASTfunctionDefinition[] functions,
                             Map<String, IASTclassDefinition> clazzes, 
@@ -27,111 +29,113 @@ public interface INormalizationFactory {
 
     // Non uniform value types:
     
-    public IASTCvariable newVariable(String name) throws CompilationException;
-    public IASTCglobalVariable newGlobalVariable(String name);
-    public IASTClocalVariable newLocalVariable(String name);
-    public IASTClocalFunctionVariable newLocalFunctionVariable(String name);
-    public IASTCglobalFunctionVariable newGlobalFunctionVariable(String name);
+     IASTCvariable newVariable(String name) throws CompilationException;
+     IASTCglobalVariable newGlobalVariable(String name);
+     IASTClocalVariable newLocalVariable(String name);
+     IASTClocalFunctionVariable newLocalFunctionVariable(String name);
+     IASTCglobalFunctionVariable newGlobalFunctionVariable(String name);
 
-    public IASToperator newOperator(String name);
+     IASToperator newOperator(String name);
 
-    public IASTbinding newBinding(IASTvariable variable, 
-                                  IASTexpression initialisation);
-
-    public IASTfunctionDefinition newFunctionDefinition(
+     IASTfunctionDefinition newFunctionDefinition(
             IASTvariable functionVariable,
             IASTvariable[] variables,
             IASTexpression body);
     
     // Expression related:
 
-    public IASTexpression newSequence(IASTexpression[] asts);
+     IASTexpression newSequence(IASTexpression[] asts);
 
-    public IASTexpression newAlternative(IASTexpression condition,
-                                         IASTexpression consequence, 
-                                         IASTexpression alternant);
+     IASTexpression newAlternative(IASTexpression condition,
+                                   IASTexpression consequence, 
+                                   IASTexpression alternant);
 
-    public IASTexpression newInvocation(
+     IASTexpression newInvocation(
             IASTexpression function,
             IASTexpression[] arguments) throws CompilationException;
-    public IASTexpression newComputedInvocation(
+     IASTexpression newComputedInvocation(
             IASTexpression function,
             IASTexpression[] arguments);
-    public IASTexpression newPrimitiveInvocation(
+     IASTexpression newPrimitiveInvocation(
             IASTvariable function,
             IASTexpression[] arguments);
-    public IASTexpression newGlobalInvocation(
+     IASTexpression newGlobalInvocation(
             IASTCglobalVariable funexpr,
             IASTexpression[] arguments);
-    public IASTexpression newLocalFunctionInvocation(
+     IASTexpression newLocalFunctionInvocation(
             IASTClocalFunctionVariable function,
             IASTexpression[] arguments);
 
-    public IASTexpression newUnaryOperation(IASToperator operator,
-                                            IASTexpression operand);
+     IASTexpression newUnaryOperation(IASToperator operator,
+                                      IASTexpression operand);
 
-    public IASTexpression newBinaryOperation(IASToperator operator,
-            IASTexpression leftOperand, IASTexpression rightOperand);
+     IASTexpression newBinaryOperation(IASToperator operator,
+                                       IASTexpression leftOperand, 
+                                       IASTexpression rightOperand);
 
-    public IASTexpression newIntegerConstant(String value);
+     IASTexpression newIntegerConstant(String value);
 
-    public IASTexpression newFloatConstant(String value);
+     IASTexpression newFloatConstant(String value);
 
-    public IASTexpression newStringConstant(String value);
+     IASTexpression newStringConstant(String value);
 
-    public IASTexpression newBooleanConstant(String value);
+     IASTexpression newBooleanConstant(String value);
 
-    public IASTexpression newAssignment(IASTvariable variable,
-                                        IASTexpression value);
+     IASTexpression newAssignment(IASTvariable variable,
+                                  IASTexpression value);
 
-    public IASTexpression newBlock(IASTbinding[] binding,
-                                   IASTexpression body);
-    
-    public IASTexpression newLoop(IASTexpression condition, 
+     IASTCblock newBlock(IASTCblock.IASTCbinding[] binding,
+                         IASTexpression body);
+
+     IASTCblock.IASTCbinding newBinding(IASTvariable variable, 
+                                        IASTexpression initialisation);
+
+     IASTexpression newLoop(IASTexpression condition, 
                                   IASTexpression body);
 
-    public IASTexpression newTry (IASTexpression body,
-                                  IASTlambda catcher,
-                                  IASTexpression finallyer );
+     IASTexpression newTry (IASTexpression body,
+                            IASTlambda catcher,
+                            IASTexpression finallyer );
     
-    public IASTexpression newLambda (IASTvariable[] variables,
-                                     IASTexpression body );
+     IASTClambda newLambda (IASTvariable[] variables,
+                            IASTexpression body );
+
+    IASTCnamedLambda newNamedLambda(IASTvariable newFunctionVar,
+                                    IASTvariable[] newvariables,
+                                    IASTexpression newbody);
     
-    public IASTexpression newCodefinitions (
-            IASTnamedLambda[] functions,
+     IASTCcodefinitions newCodefinitions (
+            IASTCnamedLambda[] functions,
             IASTexpression body );
     
     // Class related
     
-    public IASTclassDefinition newClassDefinition(
+     IASTclassDefinition newClassDefinition(
             String className,
             String superClassName, 
             String[] fieldNames,
             IASTmethodDefinition[] methodDefinitions);
 
-    public IASTmethodDefinition newMethodDefinition(
+     IASTmethodDefinition newMethodDefinition(
             String methodName,
             IASTvariable[] variables, 
             IASTexpression body);
 
-    public IASTexpression newInstantiation(String className,
+     IASTexpression newInstantiation(String className,
                                            IASTexpression[] arguments);
 
-    public IASTexpression newReadField(String fieldName, 
+     IASTexpression newReadField(String fieldName, 
                                        IASTexpression object);
 
-    public IASTexpression newWriteField(String fieldName,
+     IASTexpression newWriteField(String fieldName,
                                         IASTexpression object, 
                                         IASTexpression value);
 
-    public IASTexpression newSelf(IASTvariable variable);
+     IASTexpression newSelf(IASTvariable variable);
 
-    public IASTexpression newSend(String message, 
+     IASTexpression newSend(String message, 
                                   IASTexpression receiver,
                                   IASTexpression[] arguments);
     
-    public IASTexpression newSuper();
-
-    IASTnamedLambda newNamedLambda(IASTvariable newFunctionVar,
-            IASTvariable[] newvariables, IASTexpression newbody);
+     IASTexpression newSuper();
 }

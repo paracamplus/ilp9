@@ -1,5 +1,6 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.compiler.interfaces.IDestination;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
 public class AssignDestination implements IDestination {

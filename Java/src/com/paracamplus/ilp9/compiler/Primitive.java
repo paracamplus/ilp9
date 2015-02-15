@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.compiler.interfaces.IPrimitive;
+
 
 public class Primitive implements IPrimitive {
 

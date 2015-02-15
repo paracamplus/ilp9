@@ -1,5 +1,7 @@
 package com.paracamplus.ilp9.compiler;
 
+import com.paracamplus.ilp9.compiler.interfaces.IDestination;
+
 public class VoidDestination implements IDestination {
 
     private VoidDestination () {}

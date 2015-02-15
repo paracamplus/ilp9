@@ -5,13 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
-import com.paracamplus.ilp9.compiler.IOptimizer;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
+import com.paracamplus.ilp9.compiler.interfaces.IOptimizer;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -28,6 +29,7 @@ import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
@@ -174,7 +176,8 @@ public class Normalizer implements IOptimizer,
             throws CompilationException {
         INormalizationEnvironment newenv = env;
         IASTbinding[] bindings = iast.getBindings();
-        IASTbinding[] newbindings = new IASTbinding[bindings.length];
+        IASTCblock.IASTCbinding[] newbindings = 
+                new IASTCblock.IASTCbinding[bindings.length];
         for ( int i=0 ; i<bindings.length ; i++ ) {
             IASTbinding binding = bindings[i];
             IASTexpression expr = binding.getInitialisation();
@@ -209,8 +212,8 @@ public class Normalizer implements IOptimizer,
                                 INormalizationEnvironment env)
             throws CompilationException {
         IASTnamedLambda[] functions = iast.getFunctions();
-        IASTnamedLambda[] newfunctions = 
-                new IASTnamedLambda[functions.length];
+        IASTCnamedLambda[] newfunctions = 
+                new IASTCnamedLambda[functions.length];
         IASTvariable[] newFunctionVariables = 
                 new IASTvariable[functions.length];
         INormalizationEnvironment bodyenv = env;

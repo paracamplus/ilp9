@@ -34,6 +34,13 @@ import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
 import com.paracamplus.ilp9.interfaces.IASTwriteField;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.IFunction;
+import com.paracamplus.ilp9.interpreter.interfaces.IGlobalVariableEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.ILexicalEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.IOperator;
+import com.paracamplus.ilp9.interpreter.interfaces.IOperatorEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.Invocable;
 import com.paracamplus.ilp9.interpreter.primitive.Throw.ThrownException;
 
 public class Interpreter

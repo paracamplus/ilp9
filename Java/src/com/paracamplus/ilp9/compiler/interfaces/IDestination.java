@@ -1,5 +1,5 @@
-package com.paracamplus.ilp9.compiler;
+package com.paracamplus.ilp9.compiler.interfaces;
 
-public interface IDestination {
+public abstract interface IDestination {
     String compile ();
 }

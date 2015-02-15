@@ -3,8 +3,7 @@ package com.paracamplus.ilp9.interpreter.operator;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.paracamplus.ilp9.interpreter.EvaluationException;
-import com.paracamplus.ilp9.interpreter.UnaryOperator;
+import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 
 public class Minus extends UnaryOperator {
     

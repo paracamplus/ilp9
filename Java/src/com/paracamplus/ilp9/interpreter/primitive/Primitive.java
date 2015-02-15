@@ -1,4 +1,7 @@
-package com.paracamplus.ilp9.interpreter;
+package com.paracamplus.ilp9.interpreter.primitive;
+
+import com.paracamplus.ilp9.interpreter.interfaces.IPrimitive;
+
 
 public abstract class Primitive implements IPrimitive {
 

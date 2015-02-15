@@ -1,6 +1,7 @@
 package com.paracamplus.ilp9.compiler.ast;
 
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCvisitor;
 
 public class ASTCglobalVariable extends ASTCvariable 
 implements IASTCglobalVariable {
@@ -28,4 +29,10 @@ implements IASTCglobalVariable {
         }
         return false;
     }
+    
+    public <Result, Data, Anomaly extends Throwable> Result 
+    accept(IASTCvisitor<Result, Data, Anomaly> visitor, Data data)
+        throws Anomaly {
+    return visitor.visit(this, data);
+}
 }
