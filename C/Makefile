@@ -59,11 +59,9 @@ compile.gc : gc-7.2/gc.a
 	mv gc-7.2/gc.a . 
 	mv gc-7.2/include .
 	rm -rf gc-7.2
-gc-7.2/gc.a : gc-7.2d.tgz
-	[ -d gc-7.2 ] || tar xzf gc-7.2d.tgz
-	cd gc-7.2/ && make -f Makefile.direct test
-# QNC 2010oct: OK sur amd64 (ubuntu 9.10)
-# QNC 2010oct: 6.8 ne compile pas sur MacOSX 10.6.4
-# QNC 2012aug: 7.2d OK sur amd64 (Debian 6) et sur MacOSX 10.6.8
+gc-7.2/gc.a : gc-7.2f.tgz
+	[ -d gc-7.2 ] || tar xzf gc-7.2f.tgz
+	cd gc-7.2/ && ./configure && make && make check
+	cd gc-7.2/ && make -f Makefile.direct
 
 # end of Imakefile
