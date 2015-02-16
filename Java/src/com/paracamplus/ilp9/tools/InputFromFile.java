@@ -20,5 +20,4 @@ public class InputFromFile implements Input {
         final String content = FileTool.slurpFile(file);
         return content;
     }
-
 }

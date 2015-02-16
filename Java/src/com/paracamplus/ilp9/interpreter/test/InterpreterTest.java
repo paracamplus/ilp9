@@ -38,13 +38,13 @@ import com.paracamplus.ilp9.tools.Input;
 import com.paracamplus.ilp9.tools.InputFromFile;
 
 @RunWith(Parameterized.class)
-public class ProcessTest {
+public class InterpreterTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
     protected static String pattern = "ur?[0-7]\\d*-[12345]";
     
-    public ProcessTest(final File file) {
+    public InterpreterTest(final File file) {
         this.file = file;
         IParserFactory factory = new com.paracamplus.ilp9.ast.ASTfactory();
         this.parser = new com.paracamplus.ilp9.ast.Parser(factory);
@@ -186,5 +186,4 @@ public class ProcessTest {
       assertTrue(file.exists());
       return FileTool.slurpFile(resultFile).trim();
     }
-
 }

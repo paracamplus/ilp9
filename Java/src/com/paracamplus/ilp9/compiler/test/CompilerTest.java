@@ -34,13 +34,13 @@ import com.paracamplus.ilp9.tools.InputFromFile;
 import com.paracamplus.ilp9.tools.ProgramCaller;
 
 @RunWith(Parameterized.class)
-public class ProcessTest {
+public class CompilerTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
     protected static String pattern = "ur?[0-7]\\d*-[12345](gfv)?";
     
-    public ProcessTest(final File file) {
+    public CompilerTest(final File file) {
         this.file = file;
         IParserFactory factory = new com.paracamplus.ilp9.ast.ASTfactory();
         this.parser = new com.paracamplus.ilp9.ast.Parser(factory);
@@ -78,7 +78,7 @@ public class ProcessTest {
         pcindent.run();
         System.out.println(FileTool.slurpFile(cFile));
 
-        String compileProgram = "bash C/compileThenRun.sh "
+        String compileProgram = "bash C/compileThenRun.sh +gc "
             + cFile.getAbsolutePath();
         ProgramCaller pc = new ProgramCaller(compileProgram);
         pc.setVerbose();

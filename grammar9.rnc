@@ -51,7 +51,7 @@ block = element block {
 
 codefinitions = element codefinitions {
    element functions {
-      functionDefinition +
+      functionDefinition *
    },
    element body { expression + }
 }

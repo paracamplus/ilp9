@@ -231,6 +231,7 @@ public class Compiler implements
             + "}\n\n"
             + "int main (int argc, char *argv[]) \n"
             + "{ \n"
+            + "  ILP_START_GC; \n"
             + "  ILP_print(ilp_caught_program()); \n"
             + "  ILP_newline(); \n"
             + "  return EXIT_SUCCESS; \n"
