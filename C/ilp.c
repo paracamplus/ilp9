@@ -842,6 +842,47 @@ DefineComparator(greater_than, >)
 DefineComparator(greater_than_or_equal, >=)
 DefineComparator(not_equal, !=)
 
+ILP_Object
+ILP_and (ILP_Object o1, ILP_Object o2)
+{
+     if ( ILP_isEquivalentToTrue(o1) ) {
+          if ( ILP_isEquivalentToTrue(o2) ) {
+               return o2;
+          }
+     }
+     return ILP_FALSE;
+}
+
+ILP_Object
+ILP_or (ILP_Object o1, ILP_Object o2)
+{
+     if ( ILP_isEquivalentToTrue(o1) ) {
+          return o1;
+     }
+     if ( ILP_isEquivalentToTrue(o2) ) {
+          return o2;
+     }
+     return ILP_FALSE;
+}
+
+ILP_Object
+ILP_xor (ILP_Object o1, ILP_Object o2)
+{
+     if ( ILP_isEquivalentToTrue(o1) ) {
+          if ( ILP_isEquivalentToTrue(o2) ) {
+               return ILP_FALSE;
+          } else {
+               return o1;
+          }
+     } else {
+          if ( ILP_isEquivalentToTrue(o2) ) {
+               return o2;
+          } else {
+               return ILP_FALSE;
+          }
+     }
+}
+
 /** Primitives */
 
 ILP_Object

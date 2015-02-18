@@ -12,30 +12,54 @@ public class Xor extends BinaryOperator {
             throws EvaluationException {
         if ( arg1 instanceof Boolean ) {
             Boolean b1 = (Boolean) arg1;
-            if ( ! b1.booleanValue() ) {
-              // Here arg1 is false!
+            if ( b1.booleanValue() ) {
+                // Here arg1 is the true boolean:
+                if ( arg2 instanceof Boolean ) {
+                    Boolean b2 = (Boolean) arg2;
+                    if ( b2.booleanValue() ) {
+                        // Here arg2 is the true boolean:
+                        return Boolean.FALSE;
+                    } else {
+                        // Here arg2 is also the false boolean:
+                        return Boolean.TRUE;
+                    }
+                } else {
+                    // Here arg2 is not a boolean hence true
+                        return Boolean.FALSE;
+                }
+            } else {
+              // Here arg1 is the boolean false:
               if ( arg2 instanceof Boolean ) {
                 Boolean b2 = (Boolean) arg2;
-                if ( ! b2.booleanValue() ) {
-                  // Here arg2 is also false!
+                if ( b2.booleanValue() ) {
+                    // Here arg2 is the true boolean:
+                    return b2; // True!
+                } else {
+                    // Here arg2 is also the boolean false:
                   return Boolean.FALSE;
                 }
+              } else {
+                  // here arg2 is not a boolean hence true:
+                  return arg2;
               }
             }
-            return Boolean.TRUE;
         } else {
-          // Here, arg1 cannot be false!
-          if ( arg2 instanceof Boolean ) {
-            Boolean b2 = (Boolean) arg2;
-            if ( ! b2.booleanValue() ) {
-              // Here arg2 is false!
-              return Boolean.TRUE;
+            // Here arg1 is not a boolean hence true:
+            if ( arg2 instanceof Boolean ) {
+                Boolean b2 = (Boolean) arg2;
+                if ( b2.booleanValue() ) {
+                    // Here arg2 is the true boolean:
+                    return Boolean.FALSE;
+                } else {
+                    // Here arg2 is the false boolean:
+                    return arg1;
+                }
+            } else {
+                // Here arg2 is not a boolean hence true:
+                return Boolean.FALSE;
             }
-          }
-          // here arg2 cannot be false
-          return Boolean.FALSE;
         }
     }
 }
 
-// end of And.java
+// end of Xor.java

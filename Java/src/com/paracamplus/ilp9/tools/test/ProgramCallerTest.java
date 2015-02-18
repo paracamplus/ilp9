@@ -118,7 +118,8 @@ public class ProgramCallerTest extends TestCase {
     // testing multiple concurrent tasks
 
     public void testMultipleProgramCallers () {
-        final int max = 5;
+        System.err.println("\nATTENTION: this test lasts for 10 seconds...");
+        final int max = 2;
         final ProgramCaller[] pcs = new ProgramCaller[max];
         for ( int i = max ; i>0 ; i-- ) {
             pcs[i-1] = new ProgramCaller("sleep " + i);

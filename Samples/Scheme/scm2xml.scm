@@ -105,6 +105,9 @@
                        (> "&gt;")
                        (>= "&gt;=")
                        (string-append "+")
+                       (or "|")
+                       (and "&")
+                       (xor "^")
                        ))
 (define (translate-op2 op)
   (translate op *operators2*) )
@@ -121,6 +124,14 @@
  ))
 (define sinus sin)
 (define pi 3.1415926535)
+(define (xor a b)
+  (if a 
+      (if b 
+          #f
+          b )
+      (if b 
+          b
+          #f ) ) )
 
 (define (translate-primitive op)
   (translate op *primitives*) )
@@ -387,6 +398,9 @@
          'divide
          '%
          'modulo
+         'and
+         'or
+         'xor
          '<
          '<=
          '=

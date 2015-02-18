@@ -353,6 +353,15 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_NotEqual(o1,o2) \
   ILP_compare_not_equal(o1,o2)
 
+#define ILP_And(o1,o2) \
+  ILP_and(o1,o2)
+
+#define ILP_Or(o1,o2) \
+  ILP_or(o1,o2)
+
+#define ILP_Xor(o1,o2) \
+  ILP_xor(o1,o2)
+
 /** Constantes de classes. */
 
 extern struct ILP_Class ILP_object_Object_class;
@@ -394,6 +403,9 @@ extern ILP_Object ILP_compare_equal (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_compare_greater_than (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_compare_greater_than_or_equal (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_compare_not_equal (ILP_Object o1, ILP_Object o2);
+extern ILP_Object ILP_and (ILP_Object o1, ILP_Object o2);
+extern ILP_Object ILP_or (ILP_Object o1, ILP_Object o2);
+extern ILP_Object ILP_xor (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_newline ();
 extern ILP_Object ILP_print (ILP_Object self);
 extern ILP_Object ILP_classOf (ILP_Object self);

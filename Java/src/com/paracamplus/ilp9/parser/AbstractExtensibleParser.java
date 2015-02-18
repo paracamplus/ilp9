@@ -99,6 +99,5 @@ public abstract class AbstractExtensibleParser extends AbstractParser {
         throw new ParseException(msg);
       }
       }
-
     }
 }
