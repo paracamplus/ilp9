@@ -157,8 +157,6 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
         return iast.getBody().accept(this, lexenv2);
     }
 
-    // NOTA: may be condensed into a single method on IASTconstant 
-    // alas, the interface requires all these four methods:
     public Object visit(IASTboolean iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
         return iast.getValue();
