@@ -38,7 +38,7 @@ public class CompilerTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
-    protected static String pattern = "ur?[0-7]\\d*-[12345](gfv)?";
+    protected static String pattern = "ur?[0-78]\\d*-[123456](gfv)?";
     
     public CompilerTest(final File file) {
         this.file = file;

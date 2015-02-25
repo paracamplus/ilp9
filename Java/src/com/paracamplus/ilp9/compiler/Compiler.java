@@ -50,7 +50,7 @@ import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -59,7 +59,7 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class Compiler implements
         IASTCvisitor<Void, Compiler.Context, CompilationException> {
@@ -875,7 +875,7 @@ public class Compiler implements
         throw new RuntimeException("NYI");
     }
 
-    public Void visit(IASTreadField iast, Context context)
+    public Void visit(IASTfieldRead iast, Context context)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
@@ -905,7 +905,7 @@ public class Compiler implements
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTwriteField iast, Context context)
+    public Void visit(IASTfieldWrite iast, Context context)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");

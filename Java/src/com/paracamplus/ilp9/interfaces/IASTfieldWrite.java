@@ -1,7 +1,7 @@
 package com.paracamplus.ilp9.interfaces;
 
-public interface IASTwriteField extends IASTexpression {
-	 IASTexpression getObject();
+public interface IASTfieldWrite extends IASTexpression {
+	 IASTexpression getTarget();
 	 String getFieldName();
 	 IASTexpression getValue();
 }

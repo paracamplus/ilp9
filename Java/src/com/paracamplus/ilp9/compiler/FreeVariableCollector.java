@@ -37,7 +37,7 @@ import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -46,7 +46,7 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class FreeVariableCollector 
 implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
@@ -333,7 +333,7 @@ implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
 
     // Class related 
     
-    public Void visit(IASTwriteField iast, Set<IASTClocalVariable> variables)
+    public Void visit(IASTfieldWrite iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
@@ -345,7 +345,7 @@ implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
         throw new RuntimeException("NYI");
     }
     
-    public Void visit(IASTreadField iast, Set<IASTClocalVariable> variables)
+    public Void visit(IASTfieldRead iast, Set<IASTClocalVariable> variables)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");

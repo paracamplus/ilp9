@@ -1,8 +1,5 @@
 package com.paracamplus.ilp9.parser;
 
-import java.util.Map;
-
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -12,6 +9,8 @@ import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -20,9 +19,9 @@ import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -31,12 +30,11 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
 
 public interface IParserFactory {
     IASTprogram newProgram(
     		IASTfunctionDefinition[] functions,
-    		Map<String, IASTclassDefinition> clazzes,
+    		IASTclassDefinition[] clazzes,
             IASTexpression expression);
     
     IASTsequence newSequence(IASTexpression[] asts);
@@ -109,24 +107,25 @@ public interface IParserFactory {
             IASTmethodDefinition[] methodDefinitions );
     
     IASTmethodDefinition newMethodDefinition(
-            String methodName,
+            IASTvariable methodVariable,
             IASTvariable[] variables,
-            IASTexpression body  );
+            IASTexpression body, 
+            String definingClassName  );
     
     IASTinstantiation newInstantiation(
             String className,
             IASTexpression[] arguments );
     
-    IASTreadField newReadField(
+    IASTfieldRead newReadField(
             String fieldName,
             IASTexpression object );
     
-    IASTwriteField newWriteField(
+    IASTfieldWrite newWriteField(
             String fieldName,
             IASTexpression object,
             IASTexpression value );
     
-    IASTself newSelf(IASTvariable variable);
+    IASTself newSelf();
     
     IASTsend newSend(
             String message,

@@ -14,7 +14,7 @@ public interface IASTvisitor<Result, Data, Anomaly extends Throwable> {
     Result visit(IASTlambda iast, Data data) throws Anomaly;
     Result visit(IASTloop iast, Data data) throws Anomaly;
     Result visit(IASToperator iast, Data data) throws Anomaly;
-    Result visit(IASTreadField iast, Data data) throws Anomaly;
+    Result visit(IASTfieldRead iast, Data data) throws Anomaly;
     Result visit(IASTself iast, Data data) throws Anomaly;
     Result visit(IASTsend iast, Data data) throws Anomaly;
     Result visit(IASTsequence iast, Data data) throws Anomaly;
@@ -23,5 +23,5 @@ public interface IASTvisitor<Result, Data, Anomaly extends Throwable> {
     Result visit(IASTtry iast, Data data) throws Anomaly;
     Result visit(IASTunaryOperation iast, Data data) throws Anomaly;
     Result visit(IASTvariable iast, Data data) throws Anomaly;
-    Result visit(IASTwriteField iast, Data data) throws Anomaly;
+    Result visit(IASTfieldWrite iast, Data data) throws Anomaly;
 }

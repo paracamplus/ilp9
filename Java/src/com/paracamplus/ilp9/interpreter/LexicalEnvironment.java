@@ -3,6 +3,7 @@ package com.paracamplus.ilp9.interpreter;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
 import com.paracamplus.ilp9.interpreter.interfaces.ILexicalEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.ISuperCallInformation;
 
 public class LexicalEnvironment implements ILexicalEnvironment {
 
@@ -27,6 +28,11 @@ public class LexicalEnvironment implements ILexicalEnvironment {
         this.value = value;
     }
     
+    public ISuperCallInformation getSuperCallInformation() 
+            throws EvaluationException {
+        return getNext().getSuperCallInformation();
+    }
+    
     public boolean isPresent(IASTvariable key) {
         if ( key.getName().equals(getKey().getName()) ) {
             return true;
@@ -37,6 +43,10 @@ public class LexicalEnvironment implements ILexicalEnvironment {
 
     public ILexicalEnvironment extend(IASTvariable variable, Object value) {
         return new LexicalEnvironment(variable, value, this);
+    }
+    
+    public ILexicalEnvironment extend(ISuperCallInformation isci) {
+        return new SuperCallInformationLexicalEnvironment(isci, this);
     }
 
     public void update(IASTvariable key, Object value) throws EvaluationException {
@@ -62,41 +72,4 @@ public class LexicalEnvironment implements ILexicalEnvironment {
     public ILexicalEnvironment getNext() {
         return next;
     }
-       
-    // The empty lexical environment:
-    
-    public static class EmptyLexicalEnvironment 
-    implements ILexicalEnvironment {
-
-        public boolean isPresent(IASTvariable key) {
-            return false;
-        }
-
-        public IASTvariable getKey() throws EvaluationException {
-            throw new EvaluationException("Really empty environment");
-        }
-
-        public Object getValue(IASTvariable key) throws EvaluationException {
-            throw new EvaluationException("No such variable " + key.getName());
-        }
-
-        public void update(IASTvariable key, Object value) throws EvaluationException {
-            throw new EvaluationException("Empty environment");
-        }
-
-        public boolean isEmpty() {
-            return true;
-        }
-
-        public ILexicalEnvironment extend(IASTvariable variable, Object value) {
-            return new LexicalEnvironment(variable, value, this);
-        }
-
-        public ILexicalEnvironment getNext() throws EvaluationException {
-            throw new EvaluationException("Completely empty environment");
-        }
-    }
-    public static final ILexicalEnvironment EMPTY = 
-            new EmptyLexicalEnvironment();
-    
 }

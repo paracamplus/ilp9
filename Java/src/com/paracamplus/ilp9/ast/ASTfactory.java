@@ -1,8 +1,5 @@
 package com.paracamplus.ilp9.ast;
 
-import java.util.Map;
-
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -12,6 +9,8 @@ import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -20,9 +19,9 @@ import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -31,13 +30,12 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
 import com.paracamplus.ilp9.parser.IParserFactory;
 
 public class ASTfactory implements IParserFactory {
 
     public IASTprogram newProgram(IASTfunctionDefinition[] functions,
-                                  Map<String, IASTclassDefinition> clazzes, 
+                                  IASTclassDefinition[] clazzes, 
                                   IASTexpression expression) {
         return new ASTprogram(functions, clazzes, expression);
     }
@@ -139,50 +137,57 @@ public class ASTfactory implements IParserFactory {
         return new ASTcodefinitions(functions, body);
     }
     
-    public IASTclassDefinition newClassDefinition(String className,
-            String superClassName, String[] fieldNames,
+    public IASTclassDefinition newClassDefinition(
+            String className,
+            String superClassName, 
+            String[] fieldNames,
             IASTmethodDefinition[] methodDefinitions) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTclassDefinition(
+                className,
+                superClassName,
+                fieldNames,
+                methodDefinitions );
     }
 
-    public IASTmethodDefinition newMethodDefinition(String methodName,
-            IASTvariable[] variables, IASTexpression body) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public IASTmethodDefinition newMethodDefinition(
+            IASTvariable methodVariable,
+            IASTvariable[] variables, 
+            IASTexpression body,
+            String definingClassName ) {
+        return new ASTmethodDefinition(
+                methodVariable, variables, body, definingClassName);
     }
 
-    public IASTinstantiation newInstantiation(String className,
+    public IASTinstantiation newInstantiation(
+            String className,
             IASTexpression[] arguments) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTinstantiation(className, arguments);
     }
 
-    public IASTreadField newReadField(String fieldName, IASTexpression object) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public IASTfieldRead newReadField(String fieldName, IASTexpression target) {
+        return new ASTfieldRead(fieldName, target);
     }
 
-    public IASTwriteField newWriteField(String fieldName,
-            IASTexpression object, IASTexpression value) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public IASTfieldWrite newWriteField(
+            String fieldName,
+            IASTexpression target, 
+            IASTexpression value) {
+        return new ASTfieldWrite(fieldName, target, value);
     }
 
-    public IASTself newSelf(IASTvariable variable) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-
-    public IASTsend newSend(String message, IASTexpression receiver,
+    public IASTsend newSend(
+            String message, 
+            IASTexpression receiver,
             IASTexpression[] arguments) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTsend(message, receiver, arguments);
+    }
+
+    public IASTself newSelf() {
+        return new ASTself();
     }
 
     public IASTsuper newSuper() {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTsuper();
     }
 
 }

@@ -33,7 +33,7 @@ import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -42,7 +42,7 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class GlobalVariableCollector 
 implements IASTCvisitor<Set<IASTCglobalVariable>, 
@@ -288,7 +288,7 @@ implements IASTCvisitor<Set<IASTCglobalVariable>,
     
     // Class related
     
-    public Set<IASTCglobalVariable> visit(IASTwriteField iast,
+    public Set<IASTCglobalVariable> visit(IASTfieldWrite iast,
             Set<IASTCglobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;
@@ -303,7 +303,7 @@ implements IASTCvisitor<Set<IASTCglobalVariable>,
         // TODO Auto-generated method stub
         return result;
     }
-    public Set<IASTCglobalVariable> visit(IASTreadField iast,
+    public Set<IASTCglobalVariable> visit(IASTfieldRead iast,
             Set<IASTCglobalVariable> result) throws CompilationException {
         // TODO Auto-generated method stub
         return result;

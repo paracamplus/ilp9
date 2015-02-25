@@ -31,7 +31,7 @@ import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -41,7 +41,7 @@ import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class Normalizer implements IOptimizer,
  IASTvisitor<IASTexpression, INormalizationEnvironment, CompilationException> {
@@ -314,7 +314,7 @@ public class Normalizer implements IOptimizer,
     
     // class related 
 
-    public IASTexpression visit(IASTreadField iast, INormalizationEnvironment env)
+    public IASTexpression visit(IASTfieldRead iast, INormalizationEnvironment env)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");
@@ -344,7 +344,7 @@ public class Normalizer implements IOptimizer,
         throw new RuntimeException("NYI");
     }
 
-    public IASTexpression visit(IASTwriteField iast, INormalizationEnvironment env)
+    public IASTexpression visit(IASTfieldWrite iast, INormalizationEnvironment env)
             throws CompilationException {
         // TODO Auto-generated method stub
         throw new RuntimeException("NYI");

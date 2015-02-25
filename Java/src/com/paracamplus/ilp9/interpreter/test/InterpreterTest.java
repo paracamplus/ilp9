@@ -22,12 +22,14 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.interpreter.ClassEnvironment;
+import com.paracamplus.ilp9.interpreter.EmptyLexicalEnvironment;
 import com.paracamplus.ilp9.interpreter.GlobalVariableEnvironment;
 import com.paracamplus.ilp9.interpreter.GlobalVariableStuff;
 import com.paracamplus.ilp9.interpreter.Interpreter;
-import com.paracamplus.ilp9.interpreter.LexicalEnvironment;
 import com.paracamplus.ilp9.interpreter.OperatorEnvironment;
 import com.paracamplus.ilp9.interpreter.OperatorStuff;
+import com.paracamplus.ilp9.interpreter.interfaces.IClassEnvironment;
 import com.paracamplus.ilp9.interpreter.interfaces.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.interpreter.interfaces.ILexicalEnvironment;
 import com.paracamplus.ilp9.interpreter.interfaces.IOperatorEnvironment;
@@ -42,7 +44,7 @@ public class InterpreterTest {
     
     protected static String rngFileName = "grammar9.rng";
     protected static String samplesDirName = "Samples";
-    protected static String pattern = "ur?[0-7]\\d*-[12345]";
+    protected static String pattern = "ur?[0-8]\\d*-[123456]";
     
     public InterpreterTest(final File file) {
         this.file = file;
@@ -72,8 +74,9 @@ public class InterpreterTest {
         IOperatorEnvironment oe = new OperatorEnvironment();
         OperatorStuff.fillUnaryOperators(oe);
         OperatorStuff.fillBinaryOperators(oe);
-        Interpreter interpreter = new Interpreter(gve, oe);
-        ILexicalEnvironment lexenv = LexicalEnvironment.EMPTY;
+        IClassEnvironment ice = new ClassEnvironment(stdout);
+        Interpreter interpreter = new Interpreter(gve, oe, ice);
+        ILexicalEnvironment lexenv = new EmptyLexicalEnvironment();
         Object value = interpreter.visit(program, lexenv);
         String printing = stdout.toString();
         System.out.println("  Value: " + value);
@@ -106,12 +109,12 @@ public class InterpreterTest {
                     0.01);
         } else if ( value instanceof Integer ) {
             assertEquals("Comparing integer results",
-                    expectedResult.toString(),
-                    value.toString());
+                    value.toString(),
+                    expectedResult.toString());
         } else {
             assertEquals("Comparing results", 
-                    expectedResult, 
-                    value.toString());
+                    value.toString(),
+                    expectedResult);
         }
     }
     

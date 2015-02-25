@@ -2,13 +2,16 @@ package com.paracamplus.ilp9.ast;
 
 import java.io.File;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -17,7 +20,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.paracamplus.ilp9.interfaces.IAST;
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -27,16 +29,24 @@ import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
+import com.paracamplus.ilp9.interfaces.IASTinstantiation;
 import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.interfaces.IASTself;
+import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
 import com.paracamplus.ilp9.interfaces.IASTstring;
+import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
@@ -68,6 +78,13 @@ public class Parser extends AbstractExtensibleParser {
         addMethod("tryInstruction", Parser.class, "try");
         addMethod("lambda", Parser.class);
         addMethod("codefinitions", Parser.class);
+        addMethod("classDefinition", Parser.class);
+        addMethod("instantiation", Parser.class);
+        addMethod("fieldRead", Parser.class);
+        addMethod("fieldWrite", Parser.class);
+        addMethod("send", Parser.class);
+        addMethod("self", Parser.class);
+        addMethod("superInvocation", Parser.class, "super");
 	}
 	  
     public void setInput(Input input) {
@@ -151,10 +168,8 @@ public class Parser extends AbstractExtensibleParser {
         }
         IASTfunctionDefinition[] defs =
             functionDefinitions.toArray(new IASTfunctionDefinition[0]);
-        Map<String, IASTclassDefinition> clazzes = new HashMap<>();
-        for ( IASTclassDefinition clazz : classDefinitions ) {
-            clazzes.put(clazz.getName(), clazz);
-        }
+        IASTclassDefinition[] clazzes =
+                classDefinitions.toArray(new IASTclassDefinition[0]);
         IASTexpression[] exprs = 
             expressions.toArray(new IASTexpression[0]);
         IASTsequence body = getFactory().newSequence(exprs);
@@ -379,17 +394,119 @@ public class Parser extends AbstractExtensibleParser {
                 body );
     }
     
+    public IASTclassDefinition classDefinition (Element e) 
+            throws ParseException {
+        String className = e.getAttribute("name");
+        String superClassName = e.getAttribute("parent");
+
+        try {
+            final XPathExpression fieldPath =
+                xPath.compile("./fields/field");
+            final NodeList nlFields = (NodeList)
+                fieldPath.evaluate(e, XPathConstants.NODESET);
+            final List<String> fieldNames = new Vector<>();
+            for ( int i=0 ; i<nlFields.getLength() ; i++ ) {
+                final Element n = (Element) nlFields.item(i);
+                fieldNames.add(n.getAttribute("name"));
+            }
+
+            final XPathExpression methodPath =
+                xPath.compile("./methods/method");
+            final NodeList nlMethods = (NodeList)
+                methodPath.evaluate(e, XPathConstants.NODESET);
+            final List<IASTmethodDefinition> methodDefinitions = new Vector<>();
+            for ( int i=0 ; i<nlMethods.getLength() ; i++ ) {
+                final Element method = (Element) nlMethods.item(i);
+                final IASTmethodDefinition m = 
+                        methodDefinition(method, className);
+                methodDefinitions.add(m);
+            }
+            return getFactory().newClassDefinition(
+                    className, 
+                    superClassName, 
+                    fieldNames.toArray(new String[0]), 
+                    methodDefinitions.toArray(new IASTmethodDefinition[0]));
+        } catch (XPathExpressionException e1) {
+            throw new ParseException(e1);
+        }
+    }
+    private static final XPath xPath = XPathFactory.newInstance().newXPath();
     
+    public IASTmethodDefinition methodDefinition (
+            Element e, 
+            String definingClassName)
+            throws ParseException {
+        String name = e.getAttribute("name");
+        IASTvariable methodVariable = getFactory().newVariable(name);
+        List<IASTvariable> vs = new Vector<>();
+        vs.add(getFactory().newSelf());
+        NodeList vars = findChild(e, "variables").getChildNodes();
+        for ( int i=0 ; i<vars.getLength() ; i++ ) {
+            Node nd = vars.item(i);
+            if ( nd.getNodeType() == Node.ELEMENT_NODE ) {
+                Element v = (Element) nd;
+                String variableName = v.getAttribute("name");
+                IASTvariable variable = getFactory().newVariable(variableName);
+                vs.add(variable);
+            }
+        }
+        IASTvariable[] variables = vs.toArray(new IASTvariable[0]);
+        IASTexpression[] expressions =
+                findThenParseChildAsExpressions(e, "body");
+        IASTexpression body = getFactory().newSequence(expressions);
+        return getFactory().newMethodDefinition(
+                methodVariable, variables, body, definingClassName);
+    }
     
+    public IASTinstantiation instantiation (Element e)
+            throws ParseException {
+        String className = e.getAttribute("class");
+        final IAST[] iasts = parseAll(e.getChildNodes());
+        List<IASTexpression> exprs = new Vector<>();
+        for ( IAST iast : iasts ) {
+            if ( iast != null && iast instanceof IASTexpression ) {
+                exprs.add((IASTexpression) iast);
+            }
+        }
+        IASTexpression[] arguments = exprs.toArray(new IASTexpression[0]);
+        return getFactory().newInstantiation(className, arguments);
+    }
     
+    public IASTfieldRead fieldRead (Element e)
+            throws ParseException {
+        String fieldName = e.getAttribute("field");
+        IASTexpression target = narrowToIASTexpression(
+                findThenParseChildContent(e, "target"));
+        return getFactory().newReadField(fieldName, target);
+    }
     
+    public IASTfieldWrite fieldWrite (Element e)
+            throws ParseException {
+        String fieldName = e.getAttribute("field");
+        IASTexpression target = narrowToIASTexpression(
+                findThenParseChildContent(e, "target"));
+        IASTexpression value = narrowToIASTexpression(
+                findThenParseChildContent(e, "value"));
+        return getFactory().newWriteField(fieldName, target, value);
     
+    }
     
+    public IASTsend send (Element e)
+            throws ParseException {
+        String messageName = e.getAttribute("message");
+        IASTexpression receiver = narrowToIASTexpression(
+                findThenParseChildContent(e, "receiver"));
+        final IASTexpression[] arguments = findThenParseChildAsExpressions(e, "arguments");
+        return getFactory().newSend(messageName, receiver, arguments);
+    }
     
+    public IASTself self (Element e)
+            throws ParseException {
+        return getFactory().newSelf();
+    }
     
-    
-    
-    
-    
-    
+    public IASTsuper superInvocation (Element e)
+            throws ParseException {
+        return getFactory().newSuper();
+    }
 }

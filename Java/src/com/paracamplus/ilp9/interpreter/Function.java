@@ -23,6 +23,16 @@ public class Function implements IFunction {
     public int getArity() {
         return variables.length;
     }
+    public IASTvariable[] getVariables() {
+        return variables;
+    }
+    public IASTexpression getBody() {
+        return body;
+    }
+    
+    protected ILexicalEnvironment getClosedEnvironment() {
+        return lexenv;
+    }
 
     public Object apply(Interpreter interpreter, Object[] argument) 
             throws EvaluationException {
@@ -31,10 +41,11 @@ public class Function implements IFunction {
             throw new EvaluationException(msg);
         }
         
-        ILexicalEnvironment lexenv2 = lexenv;
+        ILexicalEnvironment lexenv2 = getClosedEnvironment();
+        IASTvariable[] variables = getVariables();
         for ( int i=0 ; i<argument.length ; i++ ) {
             lexenv2 = lexenv2.extend(variables[i], argument[i]);
         }
-        return body.accept(interpreter, lexenv2);
+        return getBody().accept(interpreter, lexenv2);
     }
 }

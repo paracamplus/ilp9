@@ -3,7 +3,6 @@ package com.paracamplus.ilp9.interpreter;
 import java.util.List;
 import java.util.Vector;
 
-import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -13,6 +12,8 @@ import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -21,9 +22,9 @@ import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
+import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTreadField;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -33,13 +34,16 @@ import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
-import com.paracamplus.ilp9.interfaces.IASTwriteField;
 import com.paracamplus.ilp9.interpreter.interfaces.EvaluationException;
+import com.paracamplus.ilp9.interpreter.interfaces.IClass;
+import com.paracamplus.ilp9.interpreter.interfaces.IClassEnvironment;
 import com.paracamplus.ilp9.interpreter.interfaces.IFunction;
 import com.paracamplus.ilp9.interpreter.interfaces.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.interpreter.interfaces.ILexicalEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.IMethod;
 import com.paracamplus.ilp9.interpreter.interfaces.IOperator;
 import com.paracamplus.ilp9.interpreter.interfaces.IOperatorEnvironment;
+import com.paracamplus.ilp9.interpreter.interfaces.ISuperCallInformation;
 import com.paracamplus.ilp9.interpreter.interfaces.Invocable;
 import com.paracamplus.ilp9.interpreter.primitive.Throw.ThrownException;
 
@@ -47,12 +51,15 @@ public class Interpreter
 implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     
     public Interpreter (IGlobalVariableEnvironment globalVariableEnvironment,
-                        IOperatorEnvironment operatorEnvironment) {
+                        IOperatorEnvironment operatorEnvironment,
+                        IClassEnvironment classEnvironment ) {
         this.globalVariableEnvironment = globalVariableEnvironment;
         this.operatorEnvironment = operatorEnvironment;
+        this.classEnvironment = classEnvironment;
     }
     protected IGlobalVariableEnvironment globalVariableEnvironment;
     protected IOperatorEnvironment operatorEnvironment;
+    protected IClassEnvironment classEnvironment;
 
     public IOperatorEnvironment getOperatorEnvironment() {
         return operatorEnvironment;
@@ -61,11 +68,18 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
     public IGlobalVariableEnvironment getGlobalVariableEnvironment() {
         return globalVariableEnvironment;
     }
+    
+    public IClassEnvironment getClassEnvironment () {
+        return classEnvironment;
+    }
 
     // 
     
     public Object visit(IASTprogram iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
+        for ( IASTclassDefinition cd : iast.getClassDefinitions() ) {
+            this.visit(cd, lexenv);
+        }
         for ( IASTfunctionDefinition fd : iast.getFunctionDefinitions() ) {
             Object f = this.visit(fd, lexenv);
             String v = fd.getName();
@@ -187,11 +201,11 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
         }
     }
     
-    public Object visit(IASTfunctionDefinition iast, ILexicalEnvironment lexenv) 
+    public Invocable visit(IASTfunctionDefinition iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
         Invocable fun = new Function(iast.getVariables(),
                                      iast.getBody(),
-                                     LexicalEnvironment.EMPTY);
+                                     new EmptyLexicalEnvironment());
         getGlobalVariableEnvironment()
             .addGlobalVariableValue(iast.getName(), fun);
         return fun;
@@ -296,51 +310,95 @@ implements IASTvisitor<Object, ILexicalEnvironment, EvaluationException> {
 
     // Class-related methods 
     
-    public Object visit(IASTclassDefinition iast, ILexicalEnvironment lexenv) 
+    public IClass visit(IASTclassDefinition iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        List<IMethod> methods = new Vector<>();
+        for ( IASTmethodDefinition md : iast.getProperMethodDefinitions() ) {
+            IMethod m = visit(md, lexenv);
+            methods.add(m);
+        }
+        IClass clazz = new ILP9Class(
+                getClassEnvironment(),
+                iast.getName(),
+                iast.getSuperClassName(),
+                iast.getProperFieldNames(),
+                methods.toArray(new IMethod[0]) );
+        return clazz;
     }
     
-    public Object visit(IASTmethodDefinition iast, ILexicalEnvironment lexenv) 
+    public IMethod visit(IASTmethodDefinition iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        IMethod method = new ILP9Method(
+                iast.getMethodName(),
+                iast.getDefiningClassName(),
+                iast.getVariables(),
+                iast.getBody() );
+        return method;
     }
 
     public Object visit(IASTinstantiation iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        IClass clazz = getClassEnvironment().getILP9Class(iast.getClassName());
+        List<Object> args = new Vector<Object>();
+        for ( IASTexpression arg : iast.getArguments() ) {
+            Object value = arg.accept(this, lexenv);
+            args.add(value);
+        }
+        return new ILP9Instance(clazz, args.toArray());
     }    
      
-    public Object visit(IASTreadField iast, ILexicalEnvironment lexenv) 
+    public Object visit(IASTfieldRead iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        String fieldName = iast.getFieldName();
+        Object target = iast.getTarget().accept(this, lexenv);
+        if ( target instanceof ILP9Instance ) {
+            return ((ILP9Instance) target).read(fieldName);
+        } else {
+            String msg = "Not an ILP9 instance " + target;
+            throw new EvaluationException(msg);
+        }
     }
     
-    public Object visit(IASTself iast, ILexicalEnvironment lexenv) 
+    public Object visit(IASTfieldWrite iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        String fieldName = iast.getFieldName();
+        Object target = iast.getTarget().accept(this, lexenv);
+        Object value = iast.getValue().accept(this, lexenv);
+        if ( target instanceof ILP9Instance ) {
+            return ((ILP9Instance) target).write(fieldName, value);
+        } else {
+            String msg = "Not an ILP9 instance " + target;
+            throw new EvaluationException(msg);
+        }
     }
     
     public Object visit(IASTsend iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        String message = iast.getMethodName();
+        Object receiver = iast.getReceiver().accept(this, lexenv);
+        List<Object> arguments = new Vector<Object>();
+        for ( IASTexpression arg : iast.getArguments() ) {
+            Object value = arg.accept(this, lexenv);
+            arguments.add(value);
+        }
+        if ( receiver instanceof ILP9Instance ) {
+            return ((ILP9Instance)receiver).send(
+                    this, message, arguments.toArray());
+        } else {
+            String msg = "Not an ILP9 instance " + receiver;
+            throw new EvaluationException(msg);
+        }
+    }
+    
+    public Object visit(IASTself iast, ILexicalEnvironment lexenv) 
+            throws EvaluationException {
+        return lexenv.getValue(iast);
     }
     
      public Object visit(IASTsuper iast, ILexicalEnvironment lexenv) 
             throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-            
-    public Object visit(IASTwriteField iast, ILexicalEnvironment lexenv) 
-            throws EvaluationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+         ISuperCallInformation isci = lexenv.getSuperCallInformation();
+         IMethod supermethod = isci.getSuperMethod();
+         return supermethod.apply(this, isci.getArguments());
     }
 }
