@@ -131,6 +131,8 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
         }
     }
     
+    //
+    
     public IASTCprogram normalize(IASTprogram program, 
                                   IASTCclassDefinition objectClass) 
             throws CompilationException {
@@ -571,29 +573,36 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
         }
         emit(context.destination.compile());
         if ( globalVariableEnvironment.isPrimitive(iast.getFunction()) ) {
-            // check arity statically!
+            // Should check arity statically!
             IPrimitive fun = globalVariableEnvironment
                     .getPrimitiveDescription(iast.getFunction());
             emit(fun.getCName());
             emit("(");
+            for ( int i=0 ; i<arguments.length ; i++ ) {
+                IASTvariable tmp = tmps[i];
+                emit(tmp.getMangledName());
+                if ( i < arguments.length-1 ) {
+                    emit(", ");
+                }
+            }
         } else if (iast.getFunction() instanceof IASTCglobalFunctionVariable) {
-            // check arity statically!
+            // Should check arity statically!
             emit("ilp__" + iast.getFunction().getMangledName());
-            emit("(NULL, ");
+            emit("(NULL ");
+            for ( int i=0 ; i<arguments.length ; i++ ) {
+                IASTvariable tmp = tmps[i];
+                emit(", ");
+                emit(tmp.getMangledName());
+            }
         } else {
             emit("ILP_invoke(");
             emit(iast.getFunction().getMangledName());
             emit(", ");
             emit(arguments.length);
-            if ( 0 < arguments.length ) {
+            for ( int i=0 ; i<arguments.length ; i++ ) {
+                IASTvariable tmp = tmps[i];
                 emit(", ");
-            }
-        }
-        for ( int i=0 ; i<arguments.length ; i++ ) {
-            IASTvariable tmp = tmps[i];
-            emit(tmp.getMangledName());
-            if ( i < arguments.length-1 ) {
-                emit(", ");
+                emit(tmp.getMangledName());
             }
         }
         emit(");\n}\n");
@@ -688,15 +697,12 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
             throws CompilationException {
         emit("ILP_Object ");
         emit(iast.getCName());
-        emit("(ILP_Closure ilp_useless,\n");
+        emit("(ILP_Closure ilp_useless\n");
         IASTvariable[] variables = iast.getVariables();
         for ( int i=0 ; i< variables.length ; i++ ) {
             IASTvariable variable = variables[i];
-            emit("    ILP_Object ");
+            emit(",\n    ILP_Object ");
             emit(variable.getMangledName());
-            if ( i < variables.length-1 ) {
-                emit(",\n");
-            }
         }
         emit(");\n");
     }
@@ -712,15 +718,12 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
             throws CompilationException {
         emit("\nILP_Object ");
         emit(iast.getCName());
-        emit("(ILP_Closure ilp_useless,\n");
+        emit("(ILP_Closure ilp_useless\n");
         IASTvariable[] variables = iast.getVariables();
         for ( int i=0 ; i< variables.length ; i++ ) {
             IASTvariable variable = variables[i];
-            emit("    ILP_Object ");
+            emit(",\n    ILP_Object ");
             emit(variable.getMangledName());
-            if ( i < variables.length-1 ) {
-                emit(",\n");
-            }
         }
         emit(") {\n");
         for ( IASTvariable variable : variables ) {
@@ -787,7 +790,9 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
         for ( IASTvariable variable : iast.getClosedVariables() ) {
             emit("ILP_Object ");
             emit(variable.getMangledName());
-            emit(" = ilp_closure->_content.asClosure.closed_variables[" + i++ + "]; \n");
+            emit(" = ilp_closure->_content.asClosure.closed_variables[");
+            emit(i++);
+            emit("]; \n");
         }
         for ( IASTvariable variable : variables ) {
             try {
@@ -1106,7 +1111,7 @@ implements IASTCvisitor<Void, Compiler.Context, CompilationException> {
         
         emit(tmpInstance.getMangledName());
         emit(" = ILP_MakeInstance(");
-        emit(iast.getClassName());
+        emit(Inamed.computeMangledName(iast.getClassName()));
         emit("); \n");
         
         for ( int i=0 ; i<arguments.length ; i++ ) {

@@ -678,6 +678,8 @@
 (define g 'void)
 ;;; necessaire pour u92-4js.scm
 (define globalcount 'void)
+;;; necessaire pour u5492-2.scm
+(define mang:le 'void)
 
 ;;; }}}
 
