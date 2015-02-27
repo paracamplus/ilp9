@@ -1,18 +1,23 @@
 package com.paracamplus.ilp9.compiler.normalizer;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCclassDefinition;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCmethodDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
-import com.paracamplus.ilp9.compiler.interfaces.IOptimizer;
 import com.paracamplus.ilp9.interfaces.IASTalternative;
 import com.paracamplus.ilp9.interfaces.IASTassignment;
 import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
@@ -22,6 +27,8 @@ import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -29,9 +36,10 @@ import com.paracamplus.ilp9.interfaces.IASTinteger;
 import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
+import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
-import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTprogram;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -41,28 +49,59 @@ import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.interfaces.IASTvisitor;
-import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
-public class Normalizer implements IOptimizer,
+public class Normalizer implements 
  IASTvisitor<IASTexpression, INormalizationEnvironment, CompilationException> {
 
-    public Normalizer (INormalizationFactory factory) {
+    public Normalizer (INormalizationFactory factory,
+                       IASTCclassDefinition objectClass ) {
         this.factory = factory;
         this.globalVariables = new HashSet<>();
+        this.field2classes = new HashMap<>();
+        this.classes = new HashMap<>();
+        classes.put("Object", objectClass);
     }
     private final INormalizationFactory factory;
     private final Set<IASTvariable> globalVariables;
-
-    public IASTCprogram transform(IASTCprogram program) 
+    private final Map<String, IASTCclassDefinition> classes;
+    private final Map<String, IASTCclassDefinition> field2classes;
+    
+    protected IASTCclassDefinition getClassByName (String className)
             throws CompilationException {
-        
-        Map<String, IASTclassDefinition> clazzes = 
-                program.getClassDefinitions();
+        IASTCclassDefinition cd = classes.get(className);
+        if ( cd == null ) {
+            String msg = "No class with that name " + className;
+            throw new CompilationException(msg);
+        }
+        return cd;
+    }
+    
+    protected IASTCclassDefinition getClassByFieldName (String fieldName) 
+            throws CompilationException {
+        IASTCclassDefinition cd = field2classes.get(fieldName);
+        if ( cd == null ) {
+            String msg = "No class with that field " + fieldName;
+            throw new CompilationException(msg);
+        }
+        return cd;
+    }
+
+    public IASTCprogram transform(IASTprogram program) 
+            throws CompilationException {
+        INormalizationEnvironment env = NormalizationEnvironment.EMPTY;
+        IASTclassDefinition[] clazzes = program.getClassDefinitions();
+        IASTCclassDefinition[] newclasses = 
+                new IASTCclassDefinition[clazzes.length];
+        for ( int i=0 ; i<clazzes.length ; i++ ) {
+            IASTclassDefinition cd = clazzes[i];
+            IASTCclassDefinition newclass = visit(cd, env); 
+            newclasses[i] = newclass;
+            classes.put(newclass.getName(), newclass);
+        }
 
         IASTfunctionDefinition[] functions = program.getFunctionDefinitions();
-        IASTfunctionDefinition[] funs = 
-                new IASTfunctionDefinition[functions.length];
-        INormalizationEnvironment env = NormalizationEnvironment.EMPTY;
+        IASTCfunctionDefinition[] funs = 
+                new IASTCfunctionDefinition[functions.length];
         for ( IASTfunctionDefinition function : functions ) {
             IASTCglobalFunctionVariable gfv =
                     factory.newGlobalFunctionVariable(function.getName());
@@ -70,13 +109,13 @@ public class Normalizer implements IOptimizer,
         }
         for ( int i=0 ; i<functions.length ; i++ ) {
             IASTfunctionDefinition function = functions[i];
-            IASTfunctionDefinition newfunction = visit(function, env);
+            IASTCfunctionDefinition newfunction = visit(function, env);
             funs[i] = newfunction;
         }
         
         IASTexpression body = program.getBody();
         IASTexpression newbody = body.accept(this, env);
-        return factory.newProgram(funs, clazzes, newbody);
+        return factory.newProgram(funs, newclasses, newbody);
     }
 
     public IASTexpression visit(IASTalternative iast, INormalizationEnvironment env)
@@ -246,7 +285,7 @@ public class Normalizer implements IOptimizer,
         return factory.newCodefinitions(newfunctions, newbody);
     }
 
-    public IASTfunctionDefinition visit(
+    public IASTCfunctionDefinition visit(
             IASTfunctionDefinition iast,
             INormalizationEnvironment env) throws CompilationException {
         String functionName = iast.getName();
@@ -314,40 +353,100 @@ public class Normalizer implements IOptimizer,
     
     // class related 
 
-    public IASTexpression visit(IASTfieldRead iast, INormalizationEnvironment env)
+    public IASTCclassDefinition visit(IASTclassDefinition iast, 
+                                      INormalizationEnvironment env)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        IASTmethodDefinition[] methods = iast.getProperMethodDefinitions();
+        IASTCmethodDefinition[] newmethods =
+                new IASTCmethodDefinition[methods.length]; 
+        IASTCclassDefinition cd = factory.newClassDefinition(
+                iast.getName(),
+                getClassByName(iast.getSuperClassName()),
+                iast.getProperFieldNames(),
+                newmethods );
+        for ( String fieldName : iast.getProperFieldNames() ) {
+            field2classes.put(fieldName, cd);
+        }
+        for ( int i=0 ; i<methods.length ; i++ ) {
+            IASTmethodDefinition method = methods[i];
+            newmethods[i] = visit(method, env, cd);
+        }
+        return cd;
+    }
+
+    public IASTCmethodDefinition visit(
+            IASTmethodDefinition iast, 
+            INormalizationEnvironment env,
+            IASTCclassDefinition definingClass )
+            throws CompilationException {
+        String methodName = iast.getName();
+        IASTvariable[] variables = iast.getVariables();
+        IASTvariable[] newvariables = new IASTvariable[variables.length];
+        INormalizationEnvironment newenv = env;
+        for ( int i=0 ; i<variables.length ; i++ ) {
+            IASTvariable variable = variables[i];
+            IASTvariable newvariable = 
+                    factory.newLocalVariable(variable.getName());
+            newvariables[i] = newvariable;
+            newenv = newenv.extend(variable, newvariable);
+        }
+        IASTexpression newbody = iast.getBody().accept(this, newenv);
+        IASTvariable methodVariable = 
+                factory.newMethodVariable(methodName);
+        return factory.newMethodDefinition(
+                methodVariable, newvariables, newbody, 
+                methodName, definingClass );
     }
 
     public IASTexpression visit(IASTinstantiation iast, INormalizationEnvironment env)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        IASTCclassDefinition cd = getClassByName(iast.getClassName());
+        List<Object> args = new Vector<Object>();
+        for ( IASTexpression arg : iast.getArguments() ) {
+            Object value = arg.accept(this, env);
+            args.add(value);
+        }
+        return factory.newInstantiation(
+                cd, args.toArray(new IASTexpression[0]));
     }
-
-    public IASTexpression visit(IASTself iast, INormalizationEnvironment env)
+    
+    public IASTexpression visit(IASTfieldRead iast, INormalizationEnvironment env)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-
-    public IASTexpression visit(IASTsend iast, INormalizationEnvironment env)
-            throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-
-    public IASTexpression visit(IASTsuper iast, INormalizationEnvironment env)
-            throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        String fieldName = iast.getFieldName();
+        IASTCclassDefinition cd = getClassByFieldName(fieldName);
+        IASTexpression target = iast.getTarget().accept(this, env);
+        return factory.newReadField(cd, fieldName, target);
     }
 
     public IASTexpression visit(IASTfieldWrite iast, INormalizationEnvironment env)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        String fieldName = iast.getFieldName();
+        IASTCclassDefinition cd = getClassByFieldName(fieldName);
+        IASTexpression target = iast.getTarget().accept(this, env);
+        IASTexpression value = iast.getValue().accept(this, env);
+        return factory.newWriteField(cd, fieldName, target, value);
     }
 
+    public IASTexpression visit(IASTsend iast, INormalizationEnvironment env)
+            throws CompilationException {
+        String message = iast.getMethodName();
+        IASTexpression receiver = iast.getReceiver().accept(this, env);
+        IASTexpression[] arguments = iast.getArguments();
+        IASTexpression[] args = new IASTexpression[arguments.length];
+        for ( int i=0 ; i<arguments.length ; i++ ){
+            IASTexpression argument = arguments[i];
+            args[i] = argument.accept(this, env);
+        }
+        return factory.newSend(message, receiver, args);
+    }
+
+    public IASTexpression visit(IASTself iast, INormalizationEnvironment env)
+            throws CompilationException {
+        return env.renaming(iast);
+    }
+
+    public IASTexpression visit(IASTsuper iast, INormalizationEnvironment env)
+            throws CompilationException {
+        return factory.newSuper();
+    }
 }

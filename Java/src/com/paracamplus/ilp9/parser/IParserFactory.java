@@ -110,6 +110,7 @@ public interface IParserFactory {
             IASTvariable methodVariable,
             IASTvariable[] variables,
             IASTexpression body, 
+            String methodName,
             String definingClassName  );
     
     IASTinstantiation newInstantiation(

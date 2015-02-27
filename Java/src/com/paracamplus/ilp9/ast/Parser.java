@@ -455,7 +455,8 @@ public class Parser extends AbstractExtensibleParser {
                 findThenParseChildAsExpressions(e, "body");
         IASTexpression body = getFactory().newSequence(expressions);
         return getFactory().newMethodDefinition(
-                methodVariable, variables, body, definingClassName);
+                methodVariable, variables, body, 
+                name, definingClassName);
     }
     
     public IASTinstantiation instantiation (Element e)

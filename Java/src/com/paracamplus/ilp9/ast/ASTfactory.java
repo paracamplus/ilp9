@@ -153,9 +153,11 @@ public class ASTfactory implements IParserFactory {
             IASTvariable methodVariable,
             IASTvariable[] variables, 
             IASTexpression body,
+            String methodName,
             String definingClassName ) {
         return new ASTmethodDefinition(
-                methodVariable, variables, body, definingClassName);
+                methodVariable, variables, body, 
+                methodName, definingClassName);
     }
 
     public IASTinstantiation newInstantiation(
@@ -189,5 +191,4 @@ public class ASTfactory implements IParserFactory {
     public IASTsuper newSuper() {
         return new ASTsuper();
     }
-
 }

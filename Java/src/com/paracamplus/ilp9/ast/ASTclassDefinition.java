@@ -15,15 +15,11 @@ implements IASTclassDefinition {
         this.fieldNames = fieldNames;
         this.methods = methods;
         this.methodNames = new String[methods.length];
-        for ( int i=0 ; i<methods.length ; i++ ) {
-            this.methodNames[i] = 
-                    this.methods[i].getFunctionVariable().getName();
-        }
     }
     private final String superClassName;
     private final String[] fieldNames;
     private final IASTmethodDefinition[] methods;
-    private final String[] methodNames;
+    private String[] methodNames = null;
 
     public String getSuperClassName() {
         return superClassName;
@@ -38,11 +34,18 @@ implements IASTclassDefinition {
     }
 
     public String[] getProperMethodNames() {
+        // Defer initialization (see IASTCclassDefinition.visit)
+        if ( methodNames == null ) {
+            for ( int i=0 ; i<methods.length ; i++ ) {
+                IASTmethodDefinition method = this.methods[i];
+                this.methodNames[i] = method.getFunctionVariable().getName();
+            }
+        }
         return methodNames;
     }
 
     public int getProperMethodCount() {
-        return methodNames.length;
+        return getProperMethodNames().length;
     }
 
     public IASTmethodDefinition[] getProperMethodDefinitions() {

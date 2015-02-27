@@ -413,61 +413,56 @@ ILP_find_method (ILP_Object receiver,
      }
 }
 
-#define DefineSuperMethodCaller(i) \
-ILP_Object \
-ILP_find_and_call_super_method##i ( \
-     ILP_Object self, \
-     ILP_Method current_method, \
-     ILP_general_function super_method, \
-     ILP_Object arguments[1] ) \
-{ \
-     /* assert( super_method != NULL ); */ \
-     switch ( i ) { \
-          case 0: { \
-               return (*super_method)(self); \
-          } \
-          case 1: { \
-               return (*super_method)(self, arguments[1]); \
-          } \
-          case 2: { \
-               return (*super_method)(self, arguments[1], arguments[2]); \
-          } \
-          case 3: { \
-               return (*super_method)(self, arguments[1],  \
-                                            arguments[2],  \
-                                            arguments[3]); \
-          } \
-          default: { \
-               snprintf(ILP_the_exception._content.asException.message, \
-                        ILP_EXCEPTION_BUFFER_LENGTH, \
-                        "Cannot invoke supermethod %s\nCulprit: 0x%p\n", \
-                        current_method->_content.asMethod.name,  \
-                        (void*) self ); \
-               /*DEBUG*/ \
-               fprintf(stderr, "%s", ILP_the_exception._content.asException.message); \
-               ILP_the_exception._content.asException.culprit[0] = self; \
-               ILP_the_exception._content.asException.culprit[1] =  \
-                    (ILP_Object) current_method; \
-               ILP_the_exception._content.asException.culprit[2] = NULL; \
-               ILP_throw((ILP_Object) &ILP_the_exception); \
-               /* UNREACHED */ \
-               return NULL; \
-          } \
-     } \
+ILP_Object 
+ILP_find_and_call_super_method ( 
+     ILP_Method current_method, 
+     ILP_general_function super_method, 
+     ILP_Object arguments[1] ) 
+{ 
+     /* assert( super_method != NULL ); */ 
+     ILP_Object self = arguments[0];
+     int arity = current_method->_content.asMethod.arity;
+     switch ( arity ) { 
+          case 0: { 
+               return (*super_method)(NULL, self); 
+          } 
+          case 1: { 
+               return (*super_method)(NULL, self, arguments[1]); 
+          } 
+          case 2: { 
+               return (*super_method)(NULL, self, arguments[1], arguments[2]); 
+          } 
+          case 3: { 
+               return (*super_method)(NULL, self, arguments[1],  
+                                            arguments[2],  
+                                            arguments[3]); 
+          } 
+          default: { 
+               snprintf(ILP_the_exception._content.asException.message, 
+                        ILP_EXCEPTION_BUFFER_LENGTH, 
+                        "Cannot invoke supermethod %snCulprit: 0x%pn", 
+                        current_method->_content.asMethod.name,  
+                        (void*) self ); 
+               /*DEBUG*/ 
+               fprintf(stderr, "%s", ILP_the_exception._content.asException.message); 
+               ILP_the_exception._content.asException.culprit[0] = self; 
+               ILP_the_exception._content.asException.culprit[1] =  
+                    (ILP_Object) current_method; 
+               ILP_the_exception._content.asException.culprit[2] = NULL; 
+               ILP_throw((ILP_Object) &ILP_the_exception); 
+               /* UNREACHED */ 
+               return NULL; 
+          } 
+     } 
 }
-
-DefineSuperMethodCaller(0)
-DefineSuperMethodCaller(1)
-DefineSuperMethodCaller(2)
-DefineSuperMethodCaller(3)
 
 ILP_Object 
 ILP_dont_call_super_method (
-     ILP_Object self,
      ILP_Method current_method,
      ILP_general_function super_method,
      ILP_Object arguments[1] )
 {
+     ILP_Object self = arguments[0];
      /* assert ( super_method == NULL ); */
      snprintf(ILP_the_exception._content.asException.message,
               ILP_EXCEPTION_BUFFER_LENGTH,
@@ -934,11 +929,23 @@ ILP_print (ILP_Object self)
      return ILP_FALSE;
 }
 
+ILP_Object
+ILPm_print (ILP_Closure useless, ILP_Object self)
+{
+     return ILP_print(self);
+}
+
 /** Cette fonction renvoie la classe du receveur. La classe est
  * également un objet obéissant au modèle ObjVlisp. */
 
 ILP_Object
 ILP_classOf (ILP_Object self) 
+{
+     return (ILP_Object) (self->_class);
+}
+
+ILP_Object
+ILPm_classOf (ILP_Closure useless, ILP_Object self)
 {
      return (ILP_Object) (self->_class);
 }

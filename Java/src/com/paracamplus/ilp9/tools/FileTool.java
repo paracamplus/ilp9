@@ -11,16 +11,8 @@ public class FileTool {
     
     public static String slurpFile (final File file)
             throws IOException {
-        final int length = (int) file.length();
-        final char[] buffer = new char[length];
-        try (final FileReader fr = new FileReader(file)) {
-            int offset = 0;
-            while ( offset < length ) {
-                int read = fr.read(buffer, offset, length-offset);
-                offset += read;
-            }
-        }
-        return new String(buffer);
+        final FileReader fr = new FileReader(file);
+        return slurpFile(fr);
     }
     
     public static String slurpFile (final Reader fr)

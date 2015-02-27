@@ -15,4 +15,7 @@ extends IASTvisitor<Result, Data, Anomaly> {
     Result visit(IASTClocalVariable iast, Data data) throws Anomaly;
     Result visit(IASTCprimitiveInvocation iast, Data data) throws Anomaly;
     Result visit(IASTCvariable iast, Data data) throws Anomaly;
+    Result visit(IASTCinstantiation iast, Data data) throws Anomaly;
+    Result visit(IASTCfieldRead iast, Data data) throws Anomaly;
+    Result visit(IASTCfieldWrite iast, Data data) throws Anomaly;
 }

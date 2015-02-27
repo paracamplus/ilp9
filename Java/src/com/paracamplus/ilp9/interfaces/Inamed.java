@@ -4,7 +4,10 @@ public interface Inamed extends IAST {
 	String getName();
 	
 	default String getMangledName() {
-	    final String s = getName();
+	    return computeMangledName(getName());
+	}
+	
+	static String computeMangledName(String s) {
         final StringBuffer sb = new StringBuffer(s.length());
         for ( int i=0 ; i<s.length() ; i++ ) {
           final char c = s.charAt(i);

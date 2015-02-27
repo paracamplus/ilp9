@@ -9,10 +9,13 @@ import java.util.Vector;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldRead;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldWrite;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCinstantiation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
@@ -28,6 +31,8 @@ import com.paracamplus.ilp9.interfaces.IASTblock;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -37,7 +42,6 @@ import com.paracamplus.ilp9.interfaces.IASTlambda;
 import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
-import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -46,7 +50,6 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class FreeVariableCollector 
 implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
@@ -333,36 +336,64 @@ implements IASTCvisitor<Void, Set<IASTClocalVariable>, CompilationException> {
 
     // Class related 
     
-    public Void visit(IASTfieldWrite iast, Set<IASTClocalVariable> variables)
+    public Void visit(IASTinstantiation iast, 
+                      Set<IASTClocalVariable> variables)
+                    throws CompilationException {
+        for ( IASTexpression expression : iast.getArguments() ) {
+            expression.accept(this, variables);
+        }
+        return null;
+    }
+    public Void visit(IASTCinstantiation iast, 
+                      Set<IASTClocalVariable> variables)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+       return visit((IASTinstantiation)iast, variables);
     }
-    
-    public Void visit(IASTinstantiation iast, Set<IASTClocalVariable> variables)
+
+    public Void visit(IASTfieldRead iast, 
+            Set<IASTClocalVariable> variables)
+                    throws CompilationException {
+        iast.getTarget().accept(this, variables);
+        return null;
+    }
+    public Void visit(IASTCfieldRead iast, 
+                      Set<IASTClocalVariable> variables)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return visit((IASTfieldRead)iast, variables);
     }
-    
-    public Void visit(IASTfieldRead iast, Set<IASTClocalVariable> variables)
+
+    public Void visit(IASTfieldWrite iast, 
+            Set<IASTClocalVariable> variables)
+                    throws CompilationException {
+        iast.getTarget().accept(this, variables);
+        iast.getValue().accept(this, variables);
+        return null;
+    }
+    public Void visit(IASTCfieldWrite iast, 
+                      Set<IASTClocalVariable> variables)
             throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return visit((IASTfieldWrite)iast, variables);
     }
     
-    public Void visit(IASTself iast, Set<IASTClocalVariable> variables) throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public Void visit(IASTsend iast, 
+                      Set<IASTClocalVariable> variables) 
+            throws CompilationException {
+        iast.getReceiver().accept(this, variables);
+        for ( IASTexpression expression : iast.getArguments() ) {
+            expression.accept(this, variables);
+        }
+        return null;
     }
     
-    public Void visit(IASTsend iast, Set<IASTClocalVariable> variables) throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public Void visit(IASTself iast, 
+                      Set<IASTClocalVariable> variables) 
+        throws CompilationException {
+        return null;
     }
     
-    public Void visit(IASTsuper iast, Set<IASTClocalVariable> variables) throws CompilationException {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+    public Void visit(IASTsuper iast, 
+                      Set<IASTClocalVariable> variables) 
+        throws CompilationException {
+        return null;
     }
 }

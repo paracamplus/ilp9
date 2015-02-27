@@ -10,4 +10,7 @@ public interface IASTCprogram extends IASTprogram {
     void setGlobalVariables(Set<IASTCglobalVariable> gvs);
     void addClosureDefinition(IASTClambda f);
     List<IASTClambda> getClosureDefinitions ();
+    // Covariance
+    IASTCfunctionDefinition[] getFunctionDefinitions();
+    IASTCclassDefinition[] getClassDefinitions();
 }

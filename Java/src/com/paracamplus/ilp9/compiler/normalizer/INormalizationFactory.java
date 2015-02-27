@@ -1,30 +1,28 @@
 package com.paracamplus.ilp9.compiler.normalizer;
 
-import java.util.Map;
-
 import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCclassDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCmethodDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
-import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
-import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
-import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
  public interface INormalizationFactory {
 
-    IASTCprogram newProgram(IASTfunctionDefinition[] functions,
-                            Map<String, IASTclassDefinition> clazzes, 
+    IASTCprogram newProgram(IASTCfunctionDefinition[] functions,
+                            IASTCclassDefinition[] clazzes, 
                             IASTexpression expression);
 
     // Non uniform value types:
@@ -34,10 +32,11 @@ import com.paracamplus.ilp9.interfaces.IASTvariable;
      IASTClocalVariable newLocalVariable(String name);
      IASTClocalFunctionVariable newLocalFunctionVariable(String name);
      IASTCglobalFunctionVariable newGlobalFunctionVariable(String name);
-
+     IASTCglobalFunctionVariable newMethodVariable(String name);
+     
      IASToperator newOperator(String name);
 
-     IASTfunctionDefinition newFunctionDefinition(
+     IASTCfunctionDefinition newFunctionDefinition(
             IASTvariable functionVariable,
             IASTvariable[] variables,
             IASTexpression body);
@@ -110,32 +109,36 @@ import com.paracamplus.ilp9.interfaces.IASTvariable;
     
     // Class related
     
-     IASTclassDefinition newClassDefinition(
+     IASTCclassDefinition newClassDefinition(
             String className,
-            String superClassName, 
+            IASTCclassDefinition superClass, 
             String[] fieldNames,
-            IASTmethodDefinition[] methodDefinitions);
+            IASTCmethodDefinition[] methodDefinitions);
 
-     IASTmethodDefinition newMethodDefinition(
-            String methodName,
-            IASTvariable[] variables, 
-            IASTexpression body);
+     IASTCmethodDefinition newMethodDefinition(
+             IASTvariable methodVariable,
+             IASTvariable[] variables, 
+             IASTexpression body,
+             String methodName,
+             IASTCclassDefinition definingClass );
+     
+     IASTexpression newInstantiation(IASTCclassDefinition clazz,
+                                     IASTexpression[] arguments);
 
-     IASTexpression newInstantiation(String className,
-                                           IASTexpression[] arguments);
+     IASTexpression newReadField(IASTCclassDefinition clazz,
+                                 String fieldName, 
+                                 IASTexpression target);
 
-     IASTexpression newReadField(String fieldName, 
-                                       IASTexpression object);
+     IASTexpression newWriteField(IASTCclassDefinition clazz,
+                                  String fieldName,
+                                  IASTexpression target, 
+                                  IASTexpression value);
 
-     IASTexpression newWriteField(String fieldName,
-                                        IASTexpression object, 
-                                        IASTexpression value);
-
-     IASTexpression newSelf(IASTvariable variable);
+     IASTexpression newSelf();
 
      IASTexpression newSend(String message, 
-                                  IASTexpression receiver,
-                                  IASTexpression[] arguments);
+                            IASTexpression receiver,
+                            IASTexpression[] arguments);
     
      IASTexpression newSuper();
 }

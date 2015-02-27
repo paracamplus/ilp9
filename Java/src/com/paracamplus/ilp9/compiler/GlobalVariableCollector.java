@@ -5,9 +5,12 @@ import java.util.Set;
 
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldRead;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldWrite;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCinstantiation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
@@ -23,6 +26,8 @@ import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
 import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
+import com.paracamplus.ilp9.interfaces.IASTfieldRead;
+import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTinstantiation;
@@ -33,7 +38,6 @@ import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTfieldRead;
 import com.paracamplus.ilp9.interfaces.IASTself;
 import com.paracamplus.ilp9.interfaces.IASTsend;
 import com.paracamplus.ilp9.interfaces.IASTsequence;
@@ -42,7 +46,6 @@ import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTtry;
 import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
-import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
 
 public class GlobalVariableCollector 
 implements IASTCvisitor<Set<IASTCglobalVariable>, 
@@ -287,41 +290,77 @@ implements IASTCvisitor<Set<IASTCglobalVariable>,
     }
     
     // Class related
-    
-    public Set<IASTCglobalVariable> visit(IASTfieldWrite iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
-        return result;
+
+    public Set<IASTCglobalVariable> visit(IASTinstantiation iast,
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        if ( iast instanceof IASTCinstantiation ) {
+            return visit((IASTCinstantiation) iast, result);
+        } else {
+            throw new CompilationException("should not occur");
+        }
     }
-    public Set<IASTCglobalVariable> visit(IASTsuper iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
-        return result;
-    }
-    public Set<IASTCglobalVariable> visit(IASTsend iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
-        return result;
-    }
-    public Set<IASTCglobalVariable> visit(IASTfieldRead iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
+    public Set<IASTCglobalVariable> visit(IASTCinstantiation iast,
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        for ( IASTexpression expr : iast.getArguments() ) {
+            result = expr.accept(this, result);
+        }
         return result;
     }
 
-    public Set<IASTCglobalVariable> visit(IASTinstantiation iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
+    public Set<IASTCglobalVariable> visit(IASTfieldRead iast,
+            Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        if ( iast instanceof IASTCfieldRead ) {
+            return visit((IASTCfieldRead) iast, result);
+        } else {
+            throw new RuntimeException("Should not occur");
+        }
+    }
+    public Set<IASTCglobalVariable> visit(IASTCfieldRead iast,
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        result = iast.getTarget().accept(this, result);
+        return result;
+    }
+
+    public Set<IASTCglobalVariable> visit(IASTfieldWrite iast,
+            Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        if ( iast instanceof IASTCfieldWrite ) {
+            return visit((IASTCfieldWrite) iast, result);
+        } else {
+            throw new RuntimeException("Should not occur");
+        }
+    }
+    public Set<IASTCglobalVariable> visit(IASTCfieldWrite iast,
+                                          Set<IASTCglobalVariable> result)
+        throws CompilationException {
+        result = iast.getTarget().accept(this, result);
+        result = iast.getValue().accept(this, result);
+        return result;
+    }
+    
+    public Set<IASTCglobalVariable> visit(IASTsend iast,
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        result = iast.getReceiver().accept(this, result);
+        for ( IASTexpression expr : iast.getArguments() ) {
+            result = expr.accept(this, result);
+        }
         return result;
     }
     
     public Set<IASTCglobalVariable> visit(IASTself iast,
-            Set<IASTCglobalVariable> result) throws CompilationException {
-        // TODO Auto-generated method stub
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
         return result;
     }
-
-
-
-
+    
+    public Set<IASTCglobalVariable> visit(IASTsuper iast,
+                                          Set<IASTCglobalVariable> result) 
+                    throws CompilationException {
+        return result;
+    }
 }

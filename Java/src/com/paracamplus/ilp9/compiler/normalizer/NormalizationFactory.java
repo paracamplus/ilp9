@@ -1,6 +1,5 @@
 package com.paracamplus.ilp9.compiler.normalizer;
 
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.paracamplus.ilp9.ast.ASTalternative;
@@ -11,46 +10,59 @@ import com.paracamplus.ilp9.ast.ASTfloat;
 import com.paracamplus.ilp9.ast.ASTinteger;
 import com.paracamplus.ilp9.ast.ASTloop;
 import com.paracamplus.ilp9.ast.ASToperator;
+import com.paracamplus.ilp9.ast.ASTself;
+import com.paracamplus.ilp9.ast.ASTsend;
 import com.paracamplus.ilp9.ast.ASTsequence;
 import com.paracamplus.ilp9.ast.ASTstring;
+import com.paracamplus.ilp9.ast.ASTsuper;
 import com.paracamplus.ilp9.ast.ASTtry;
 import com.paracamplus.ilp9.ast.ASTunaryOperation;
 import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.ast.ASTCblock;
+import com.paracamplus.ilp9.compiler.ast.ASTCclassDefinition;
 import com.paracamplus.ilp9.compiler.ast.ASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.ast.ASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.ast.ASTCfieldRead;
+import com.paracamplus.ilp9.compiler.ast.ASTCfieldWrite;
 import com.paracamplus.ilp9.compiler.ast.ASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCinstantiation;
 import com.paracamplus.ilp9.compiler.ast.ASTClambda;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.ast.ASTClocalVariable;
+import com.paracamplus.ilp9.compiler.ast.ASTCmethodDefinition;
 import com.paracamplus.ilp9.compiler.ast.ASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.ast.ASTCprimitiveInvocation;
 import com.paracamplus.ilp9.compiler.ast.ASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCblock;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCclassDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcodefinitions;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCcomputedInvocation;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldRead;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCfieldWrite;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCfunctionDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCglobalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCinstantiation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalFunctionVariable;
 import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCmethodDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCnamedLambda;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprimitiveInvocation;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCprogram;
 import com.paracamplus.ilp9.compiler.interfaces.IASTCvariable;
-import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
-import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
-import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASToperator;
+import com.paracamplus.ilp9.interfaces.IASTself;
+import com.paracamplus.ilp9.interfaces.IASTsend;
+import com.paracamplus.ilp9.interfaces.IASTsuper;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 
 public class NormalizationFactory
@@ -62,8 +74,8 @@ implements INormalizationFactory {
     protected AtomicInteger count;
     
     public IASTCprogram newProgram(
-            IASTfunctionDefinition[] functions,
-            Map<String, IASTclassDefinition> clazzes, 
+            IASTCfunctionDefinition[] functions,
+            IASTCclassDefinition[] clazzes, 
             IASTexpression expression) {
         return new ASTCprogram(functions, clazzes, expression); 
     }
@@ -82,16 +94,18 @@ implements INormalizationFactory {
         return new ASTClocalVariable(newName);
     }
     public IASTCglobalVariable newGlobalVariable(String name) {
-        String newName = name;
-        return new ASTCglobalVariable(newName);
+        return new ASTCglobalVariable(name);
     }
     public IASTCglobalFunctionVariable newGlobalFunctionVariable(String name) {
-        String newName = name;
-        return new ASTCglobalFunctionVariable(newName);
+        return new ASTCglobalFunctionVariable(name);
     }
     public String newGlobalClosureName() {
         String newName = "ilpclosure" + count.incrementAndGet();
         return newName;
+    }
+    public IASTCglobalFunctionVariable newMethodVariable(String methodName) {
+        String newName = methodName + "_" + count.incrementAndGet();
+        return new ASTCglobalFunctionVariable(newName);
     }
     
     public IASToperator newOperator(String name) {
@@ -216,50 +230,62 @@ implements INormalizationFactory {
     }
 
     // Class related
-    
-    public IASTclassDefinition newClassDefinition(String className,
-            String superClassName, String[] fieldNames,
-            IASTmethodDefinition[] methodDefinitions) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+
+    public IASTCclassDefinition newClassDefinition(
+            String className,
+            IASTCclassDefinition superClass, 
+            String[] fieldNames,
+            IASTCmethodDefinition[] methodDefinitions) {
+        return new ASTCclassDefinition(
+                className,
+                superClass,
+                fieldNames,
+                methodDefinitions );
     }
-    
-    public IASTmethodDefinition newMethodDefinition(String methodName,
-            IASTvariable[] variables, IASTexpression body) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+
+    public IASTCmethodDefinition newMethodDefinition(
+            IASTvariable methodVariable,
+            IASTvariable[] variables, 
+            IASTexpression body,
+            String methodName,
+            IASTCclassDefinition definingClass ) {
+        return new ASTCmethodDefinition(
+                methodVariable, variables, body, methodName, definingClass);
     }
-    
-    public IASTexpression newInstantiation(String className,
+
+    public IASTCinstantiation newInstantiation(
+            IASTCclassDefinition clazz,
             IASTexpression[] arguments) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTCinstantiation(clazz, arguments);
     }
-    
-    public IASTexpression newReadField(String fieldName, IASTexpression object) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+
+    public IASTCfieldRead newReadField(
+            IASTCclassDefinition clazz,
+            String fieldName, 
+            IASTexpression target) {
+        return new ASTCfieldRead(clazz, fieldName, target);
     }
-    
-    public IASTexpression newWriteField(String fieldName,
-            IASTexpression object, IASTexpression value) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+
+    public IASTCfieldWrite newWriteField(
+            IASTCclassDefinition clazz,
+            String fieldName,
+            IASTexpression target, 
+            IASTexpression value) {
+        return new ASTCfieldWrite(clazz, fieldName, target, value);
     }
-    
-    public IASTexpression newSelf(IASTvariable variable) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
-    }
-    
-    public IASTexpression newSend(String message, IASTexpression receiver,
+
+    public IASTsend newSend(
+            String message, 
+            IASTexpression receiver,
             IASTexpression[] arguments) {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+        return new ASTsend(message, receiver, arguments);
     }
-    
-    public IASTexpression newSuper() {
-        // TODO Auto-generated method stub
-        throw new RuntimeException("NYI");
+
+    public IASTself newSelf() {
+        return new ASTself();
+    }
+
+    public IASTsuper newSuper() {
+        return new ASTsuper();
     }
 }

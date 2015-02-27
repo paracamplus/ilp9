@@ -27,4 +27,8 @@ implements IASTCfunctionDefinition {
     public void setClosedVariables(Set<IASTClocalVariable> closedVariables) {
         this.closedVariables.addAll(closedVariables);
     }
+
+    public String getCName() {
+        return "ilp__" + getFunctionVariable().getMangledName();
+    }
 }

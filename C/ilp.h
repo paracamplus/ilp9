@@ -178,34 +178,17 @@ typedef struct ILP_Class##i {                                   \
      }                  _content;                               \
 } *ILP_Class##i
 
-#define ILP_FindAndCallSuperMethod(i) \
+#define ILP_FindAndCallSuperMethod() \
   (((ilp_SuperMethod != NULL) \
-    ? (*ILP_find_and_call_super_method##i) \
+    ? (*ILP_find_and_call_super_method) \
     : (*ILP_dont_call_super_method) )( \
-   ilp_Self, ilp_CurrentMethod, ilp_SuperMethod, ilp_CurrentArguments))
+   ilp_CurrentMethod, ilp_SuperMethod, ilp_CurrentArguments))
 
-extern ILP_Object ILP_find_and_call_super_method0(
-     ILP_Object self,
-     ILP_Method current_method,
-     ILP_general_function super_method,
-     ILP_Object arguments[] );
-extern ILP_Object ILP_find_and_call_super_method1(
-     ILP_Object self,
-     ILP_Method current_method,
-     ILP_general_function super_method,
-     ILP_Object arguments[] );
-extern ILP_Object ILP_find_and_call_super_method2(
-     ILP_Object self,
-     ILP_Method current_method,
-     ILP_general_function super_method,
-     ILP_Object arguments[] );
-extern ILP_Object ILP_find_and_call_super_method3(
-     ILP_Object self,
+extern ILP_Object ILP_find_and_call_super_method(
      ILP_Method current_method,
      ILP_general_function super_method,
      ILP_Object arguments[] );
 extern ILP_Object ILP_dont_call_super_method(
-     ILP_Object self,
      ILP_Method current_method,
      ILP_general_function super_method,
      ILP_Object arguments[] );
@@ -215,7 +198,10 @@ extern ILP_Object ILP_dont_call_super_method(
  */
 
 #define ILP_IsA(o,c) \
-  ILP_is_a(o, &ILP_object_##c##_class)
+     ILP_is_a(o, (ILP_Class)(&ILP_object_##c##_class))
+
+#define ILP_MakeInstance(c) \
+     ILP_make_instance((ILP_Class) &ILP_object_##c##_class)
 
 /** Booléens. */
 
@@ -408,7 +394,9 @@ extern ILP_Object ILP_or (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_xor (ILP_Object o1, ILP_Object o2);
 extern ILP_Object ILP_newline ();
 extern ILP_Object ILP_print (ILP_Object self);
+extern ILP_Object ILPm_print (ILP_Closure useless, ILP_Object self);
 extern ILP_Object ILP_classOf (ILP_Object self);
+extern ILP_Object ILPm_classOf (ILP_Closure useless, ILP_Object self);
 
 extern ILP_Object ILP_malloc (int size, ILP_Class class);
 extern ILP_Object ILP_make_instance (ILP_Class class);

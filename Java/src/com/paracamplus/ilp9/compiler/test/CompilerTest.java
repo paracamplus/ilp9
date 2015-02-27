@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,15 +19,22 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.paracamplus.ilp9.compiler.CompilationException;
 import com.paracamplus.ilp9.compiler.Compiler;
 import com.paracamplus.ilp9.compiler.GlobalVariableEnvironment;
 import com.paracamplus.ilp9.compiler.GlobalVariableStuff;
 import com.paracamplus.ilp9.compiler.OperatorEnvironment;
 import com.paracamplus.ilp9.compiler.OperatorStuff;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCclassDefinition;
+import com.paracamplus.ilp9.compiler.interfaces.IASTClocalVariable;
+import com.paracamplus.ilp9.compiler.interfaces.IASTCmethodDefinition;
 import com.paracamplus.ilp9.compiler.interfaces.IGlobalVariableEnvironment;
 import com.paracamplus.ilp9.compiler.interfaces.IOperatorEnvironment;
 import com.paracamplus.ilp9.compiler.optimizer.IdentityOptimizer;
+import com.paracamplus.ilp9.interfaces.IASTexpression;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
+import com.paracamplus.ilp9.interfaces.IASTvariable;
+import com.paracamplus.ilp9.interfaces.IASTvisitor;
 import com.paracamplus.ilp9.parser.IParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
 import com.paracamplus.ilp9.tools.FileTool;
@@ -52,6 +61,110 @@ public class CompilerTest {
     }
     protected IParser parser;
     
+    protected IASTCclassDefinition createObjectClass() {
+        IASTCclassDefinition oc = new IASTCclassDefinition() {
+            public String getName() {
+                return "Object";
+            }
+            public IASTCclassDefinition getSuperClass() {
+                throw new RuntimeException("No super class for Object");
+            }
+            public String[] getProperFieldNames() {
+                return new String[0];
+            }
+            public String[] getTotalFieldNames() {
+                return getProperFieldNames();
+            }
+            public int getFieldOffset(String fieldName)
+                    throws CompilationException {
+                String msg = "No such field " + fieldName;
+                throw new CompilationException(msg);
+            }
+            public IASTCmethodDefinition[] getProperMethodDefinitions() {
+                return predefinedMethods;
+            }
+            public IASTCmethodDefinition[] getNewProperMethodDefinitions() {
+                return predefinedMethods;
+            }
+            protected IASTCmethodDefinition[] predefinedMethods =
+                    new IASTCmethodDefinition[2];
+            public IASTCmethodDefinition[] getTotalMethodDefinitions() {
+                return getProperMethodDefinitions();
+            }
+        };
+        IASTCmethodDefinition mdprint = new ASTCprimitiveMethodDefinition(
+                "print", "ILPm_print", oc);
+        oc.getProperMethodDefinitions()[0] = mdprint;
+        IASTCmethodDefinition mdclassOf = new ASTCprimitiveMethodDefinition(
+                "classOf", "ILPm_classOf", oc);
+        oc.getProperMethodDefinitions()[1] = mdclassOf;
+        return oc;
+    }
+    
+    public static class ASTCprimitiveMethodDefinition 
+    implements IASTCmethodDefinition {
+        public ASTCprimitiveMethodDefinition(
+                String methodName,
+                String cName,
+                IASTCclassDefinition clazz ) {
+            this.methodName = methodName;
+            this.cName = cName;
+            this.clazz = clazz;
+        }
+        private final String methodName;
+        private final String cName;
+        private final IASTCclassDefinition clazz;
+
+        public String getMethodName() {
+            return methodName;
+        }
+        public String getName() {
+            return cName;
+        }
+        public String getCName() {
+            return cName;
+        }
+        // FIXME Missing getMangledName() ???
+        public IASTCclassDefinition getDefiningClass() {
+            return clazz;
+        }
+        public String getDefiningClassName() {
+            return clazz.getName();
+        }
+        public IASTvariable getFunctionVariable() {
+            return methodVariable;
+        }
+        IASTvariable methodVariable = new IASTvariable() {
+            public String getName() {
+                return cName;
+            }
+            public <Result, Data, Anomaly extends Throwable> Result 
+            accept(IASTvisitor<Result, Data, Anomaly> visitor, Data data)
+                    throws Anomaly {
+                return visitor.visit(this, data);
+            }
+        };
+        public IASTvariable[] getVariables() {
+            throw new RuntimeException("NYI"); // FIXME
+        }
+        public IASTexpression getBody() {
+            throw new RuntimeException("NYI"); // FIXME
+        }
+        public Set<IASTvariable> getClosedVariables() {
+            return closedVariables;
+        }
+        public void setClosedVariables(Set<IASTClocalVariable> newvars) {
+            this.closedVariables.addAll(closedVariables);
+        }
+        private final Set<IASTvariable> closedVariables =
+                new HashSet<>();
+        public IASTCmethodDefinition findSuperMethod() 
+                throws CompilationException {
+            String msg = "No super method";
+            throw new CompilationException(msg);
+        }
+    }
+    
     @Test
     public void processFile () throws Throwable {
         System.err.println("Testing " + file.getAbsolutePath() + " ...");
@@ -69,13 +182,15 @@ public class CompilerTest {
         GlobalVariableStuff.fillGlobalVariables(gve);
         Compiler compiler = new Compiler(ioe, gve);
         compiler.setOptimizer(new IdentityOptimizer());
-        String compiled = compiler.compile(program);
+        IASTCclassDefinition objectClass = createObjectClass();
+        String compiled = compiler.compile(program, objectClass);
         File cFile = changeSuffix(file, "c");
         FileTool.stuffFile(cFile, compiled);
         
         String indentProgram = "indent " + cFile.getAbsolutePath();
         ProgramCaller pcindent = new ProgramCaller(indentProgram);
         pcindent.run();
+        assertEquals("Comparing return code", 0, pcindent.getExitValue());
         System.out.println(FileTool.slurpFile(cFile));
 
         String compileProgram = "bash C/compileThenRun.sh +gc "
@@ -97,10 +212,6 @@ public class CompilerTest {
     
     @Parameters(name = "{0}")
     public static Collection<File[]> data() throws Exception {
-        //Path currentRelativePath = Paths.get("");
-        //String s = currentRelativePath.toAbsolutePath().toString();
-        //System.err.println("Current relative path is: " + s);
-        
         final Pattern p = Pattern.compile("^" + pattern + ".xml$");
         final FilenameFilter ff = new FilenameFilter() {
             public boolean accept (File dir, String name) {

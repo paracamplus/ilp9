@@ -10,17 +10,20 @@ implements IASTmethodDefinition {
     public ASTmethodDefinition(IASTvariable methodVariable, 
                                IASTvariable[] variables,
                                IASTexpression body,
+                               String methodName,
                                String definingClassName ) {
         super(methodVariable, variables, body);
         this.definingClassName = definingClassName;
+        this.methodName = methodName;
     }
-    private final String definingClassName;    
+    private final String definingClassName;
+    private final String methodName;
 
     public String getDefiningClassName() {
         return definingClassName;
     }
     
     public String getMethodName() {
-        return getFunctionVariable().getName();
+        return methodName;
     }
 }

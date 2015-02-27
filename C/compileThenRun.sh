@@ -47,7 +47,7 @@ do
     esac
 done
 
-CFLAGS='-Wall -Wno-unused-variable -Wno-unused-label -std=c99 -pedantic -g '
+CFLAGS='-Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-label -std=c99 -pedantic -g '
 # NOTE: Il y a des tests avec des variables inutilisees, ne pas
 # attirer l'attention dessus.
 
