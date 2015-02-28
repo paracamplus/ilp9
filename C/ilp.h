@@ -1,4 +1,5 @@
-/*  -*- coding: utf-8 -*- $Id: ilpObj.h 1238 2012-09-12 15:31:08Z queinnec $ */
+/*  -*- coding: utf-8 -*- 
+ */
 
 #ifndef ILPOBJ_H
 #define ILPOBJ_H
@@ -9,31 +10,26 @@
 #include <string.h>
 #include <setjmp.h>
 
-/** Compatibilite inter-plateforme */
+/** Compatibility */
 #if !defined(__APPLE_CC__)
 extern int snprintf(char *str, size_t size, const char *format, ...);
 #endif
 
-/** Les fonctions d'ILP sont représentées en C par des fonctions qui
- * prennent des ILP_Object et renvoie un ILP_Object. */
+/** ILP functions take ILP_Object arguments and yield an ILP_Object. */
 
 typedef struct ILP_Object* (*ILP_general_function)();
 
-/** Il y a deux sortes de booléens et ces deux constantes les repèrent. */
+/** Boolean */
 
 enum ILP_BOOLEAN_VALUE {
      ILP_BOOLEAN_FALSE_VALUE = 0,
      ILP_BOOLEAN_TRUE_VALUE  = 1
 };
 
-
 #define ILP_EXCEPTION_BUFFER_LENGTH    1000
 #define ILP_EXCEPTION_CULPRIT_LENGTH     10
 
-
-/** Toutes les valeurs manipulées ont cette forme: 
- * un entête indiquant la classe suivi des champs appropriés.
- */
+/** The structure of ILP objects: a header and additional fields. */
 
 typedef struct ILP_Object {
      struct ILP_Class*  _class;
@@ -83,9 +79,8 @@ typedef struct ILP_Object {
      }                  _content;
 } *ILP_Object;
 
-/** On identifie ces structures car la sémantique de C ne permet de
- * faire d'allocations statiques pour une variante d'union (autre que
- * la première). */
+/** In C99, we cannot statically allocate a variant of a union (only
+ * the first variant of this union) so we create individual types */
 
 typedef struct ILP_Exception {
      struct ILP_Class* _class;
@@ -155,13 +150,7 @@ typedef struct ILP_Box {
      }                 _content;
 } *ILP_Box;
 
-/** Engendrer le type des classes à i méthodes. 
- *
- * C'est nécessaire car gcc maintenant supprime les initialisations
- * superflues. Il faut donc soit allouer et initialiser dynamiquement
- * les classes soit créer autant de types que nécessaires (comment
- * éviter les doublons ?)
- */ 
+/** Generate the type of classes with <i> methods. */ 
 
 #define ILP_GenerateClass(i) \
 typedef struct ILP_Class##i {                                   \
@@ -194,7 +183,7 @@ extern ILP_Object ILP_dont_call_super_method(
      ILP_Object arguments[] );
 
 /** -------------------------------------------
- * Des macros pour manipuler toutes ces valeurs. 
+ * Macros to hide the implementation of operations on ILP values
  */
 
 #define ILP_IsA(o,c) \
@@ -203,7 +192,7 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_MakeInstance(c) \
      ILP_make_instance((ILP_Class) &ILP_object_##c##_class)
 
-/** Booléens. */
+/** Boolean */
 
 #define ILP_Boolean2ILP(b) \
   ILP_make_boolean(b)
@@ -226,7 +215,7 @@ extern ILP_Object ILP_dont_call_super_method(
        ILP_domain_error("Not a boolean", o); \
   };
 
-/** Entiers */
+/** Integer */
 
 #define ILP_Integer2ILP(i) \
   ILP_make_integer(i)
@@ -272,14 +261,14 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_SetBoxedValue(box, o) \
      (((ILP_Box)(box))->_content.asBox.value = (o))
 
-/** Closures */
+/** Closure */
 
 #define ILP_AllocateClosure(count) \
      ILP_malloc(sizeof(struct ILP_Closure) \
                 + ((count) * sizeof(struct ILP_Object)), \
                 &ILP_object_Closure_class)
 
-/** Strings */
+/** String */
 
 #define ILP_String2ILP(s) \
   ILP_make_string(s)
@@ -296,7 +285,7 @@ extern ILP_Object ILP_dont_call_super_method(
        ILP_domain_error("Not a string", o); \
   };
 
-/** Opérateurs unaires */
+/** Unary operators */
 
 #define ILP_Opposite(o) \
   ILP_make_opposite(o)
@@ -304,7 +293,7 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_Not(o) \
   ILP_make_negation(o)
 
-/** Opérateurs binaires */
+/** Binary operators */
 
 #define ILP_Plus(o1,o2) \
   ILP_make_addition(o1, o2)
@@ -348,7 +337,7 @@ extern ILP_Object ILP_dont_call_super_method(
 #define ILP_Xor(o1,o2) \
   ILP_xor(o1,o2)
 
-/** Constantes de classes. */
+/** Constant predefined classes */
 
 extern struct ILP_Class ILP_object_Object_class;
 extern struct ILP_Class ILP_object_Class_class;
@@ -410,10 +399,10 @@ extern ILP_Object ILP_make_closure(ILP_general_function f,
 extern ILP_Object ILP_invoke(ILP_Object f, int argc, ...);
 extern ILP_Object ILP_make_box(ILP_Object o);
 
-/** Mecanisme d'allocation */
+/** Allocation */
 
 #ifdef WITH_GC
-   /* Le GC de Boehm se trouve là: */
+   /* If Boehm's GC is present: */
 #  include "include/gc.h"
 #  define ILP_START_GC GC_init()
 #  define ILP_MALLOC GC_malloc

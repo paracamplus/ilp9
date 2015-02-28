@@ -1,19 +1,10 @@
-/* -*- coding: utf-8 -*-
-   $Id: ilpObj.c 1057 2011-08-19 12:14:07Z queinnec $ */
-/* ******************************************************************
- * ILP -- Implantation d'un langage de programmation.
- * Copyright (C) 2004 <Christian.Queinnec@lip6.fr>
- * $Id: ilpObj.c 1057 2011-08-19 12:14:07Z queinnec $
- * GPL version>=2
- * ******************************************************************/
-
-/** Ce fichier constitue la bibliothèque d'exécution d'ILP6. */
-
+/* -*- coding: utf-8 -*- */
+   
 #include "ilp.h"
 
 char *ilpObj_Id = "$Id: ilpObj.c 1057 2011-08-19 12:14:07Z queinnec $";
 
-/** Les classes de base. */
+/** Predefined classes */
 
 extern struct ILP_Class ILP_object_Object_class;
 
@@ -138,11 +129,9 @@ struct ILP_Class ILP_object_Exception_class = {
            ILP_classOf } } }
 };
 
-/** Les champs prédéfinis. 
+/** Predefined fields
  *
- * Tous les champs des structures C qui ne mènent pas à des valeurs
- * d'ILP ne sont pas considérés comme des champs. C'est pourquoi (1)
- * ces champs sont regroupés en tête de structure et (2) il y en a peu.
+ * Fields yielding non-ILP values are not considered as fields.
  */
 
 struct ILP_Field ILP_object_super_field = {
@@ -185,18 +174,17 @@ struct ILP_Field ILP_object_value_field = {
          0 } }
 };
 
-/** Les méthodes prédéfinies. 
- *
- * Il n'y en a que deux (pour l'instant) d'arité nulle:
- *     o.print() qui imprime l'objet
- *     o.getClass() qui renvoie sa classe.
+/** Predefined methods 
+ * 
+ *     o.print() prints the object o
+ *     o.getClass() yields the class of o
  */
 
 struct ILP_Method ILP_object_print_method = {
      &ILP_object_Method_class,
      { { &ILP_object_Object_class,
          "print",
-         1,       /* arité (incluant self) */
+         1,       /* arity */
          0        /* offset */
      } }
 };
@@ -205,14 +193,13 @@ struct ILP_Method ILP_object_classOf_method = {
      &ILP_object_Method_class,
      { { &ILP_object_Object_class,
          "classOf",
-         1,       /* arité (incluant self) */
+         1,       /* arity */
          1        /* offset */
      } }
 };
 
-/** Booléens.
+/** Boolean
  * 
- * On alloue statiquement les deux booléens. 
  */
 
 struct ILP_Object ILP_object_true = {
@@ -227,8 +214,7 @@ struct ILP_Object ILP_object_false = {
 
 /** Exceptions
  *
- * L'exception courante. 
- * NOTA: il serait mieux qu'elle soit dynamiquement allouée. 
+ * There is only one current exception. This prevents multi-threading.
  */
 
 static struct ILP_Exception ILP_the_exception =  {
@@ -237,9 +223,9 @@ static struct ILP_Exception ILP_the_exception =  {
          { NULL } } }
 };
 
-/** Ces variables globales contiennent:
- *  -- le rattrapeur d'erreur courant
- *  -- l'exception courante (lorsque signalée)
+/** Global variables
+ *  -- current exception catcher
+ *  -- current exception
  */
 
 static struct ILP_catcher ILP_the_original_catcher = {
@@ -249,7 +235,7 @@ struct ILP_catcher *ILP_current_catcher = &ILP_the_original_catcher;
 
 ILP_Object ILP_current_exception = NULL;
 
-/** Signaler une exception. */
+/** Raise exception. */
 
 ILP_Object
 ILP_throw (ILP_Object exception)
@@ -263,7 +249,7 @@ ILP_throw (ILP_Object exception)
      return NULL;
 }
 
-/** Chaîner le nouveau rattrapeur courant avec l'ancien. */
+/** Install a new catcher */
 
 void
 ILP_establish_catcher (struct ILP_catcher *new_catcher)
@@ -272,7 +258,7 @@ ILP_establish_catcher (struct ILP_catcher *new_catcher)
      ILP_current_catcher = new_catcher;
 }
 
-/** Remettre en place un rattrapeur. */
+/** Reset an old catcher. */
 
 void
 ILP_reset_catcher (struct ILP_catcher *catcher)
@@ -280,9 +266,7 @@ ILP_reset_catcher (struct ILP_catcher *catcher)
      ILP_current_catcher = catcher;
 }
 
-/** 
- * Signalement d'une erreur.
- */
+/** Signal an error. */
 
 ILP_Object
 ILP_error (char *message)
@@ -296,7 +280,7 @@ ILP_error (char *message)
      return ILP_throw((ILP_Object) &ILP_the_exception);
 }
 
-/** Une fonction pour signaler qu'un argument n'est pas du type attendu. */
+/** Signal a type error. */
 
 ILP_Object
 ILP_domain_error (char *message, ILP_Object o)
@@ -311,7 +295,7 @@ ILP_domain_error (char *message, ILP_Object o)
      return ILP_throw((ILP_Object) &ILP_the_exception);
 }
 
-/** Une fonction pour stopper abruptement l'application. */
+/** Abort abruptly the whole computation. */
 
 ILP_Object
 ILP_die (char *message)
@@ -322,8 +306,7 @@ ILP_die (char *message)
      exit(EXIT_FAILURE);
 }
 
-/** Vérifier si une instance est d'une certaine classe. 
- * Cet algorithme est linéaire: on peut faire mieux! */
+/** Check whether o is of class class. */
 
 int /* boolean */
 ILP_is_a (ILP_Object o, ILP_Class class)
@@ -333,7 +316,7 @@ ILP_is_a (ILP_Object o, ILP_Class class)
           return 1;
      } else {
           oclass = oclass->_content.asClass.super;
-          /* Object a NULL pour superclasse. */
+          /* Object's superclass is NULL */
           while ( oclass ) {
                if ( oclass == class ) {
                     return 1;
@@ -351,7 +334,7 @@ ILP_is_subclass_of (ILP_Class oclass, ILP_Class otherclass)
           return 1;
      } else {
           oclass = oclass->_content.asClass.super;
-          /* Object a NULL pour superclasse. */
+          /* Object's superclass is NULL */
           while ( oclass ) {
                if ( oclass == otherclass ) {
                     return 1;
@@ -362,7 +345,7 @@ ILP_is_subclass_of (ILP_Class oclass, ILP_Class otherclass)
      }
 }          
 
-/** Déterminer une méthode. */
+/** Find the appropriate method */
 
 ILP_general_function
 ILP_find_method (ILP_Object receiver,
@@ -571,6 +554,8 @@ ILP_invoke (ILP_Object closure, int argc, ... )
      return result;
 }
 
+/** Allocate a box with initial value o */
+
 ILP_Object
 ILP_make_box (ILP_Object o)
 {
@@ -579,9 +564,7 @@ ILP_make_box (ILP_Object o)
      return box;
 }
 
-/** Allocateurs. ILP_malloc est paramétré par l'allocateur de bas
- * niveau employé, par défaut: malloc() mais ce peut être GC_malloc() 
- * Cf. ilpObj.h pour plus de détails sur l'emploi d'un GC. */
+/** Allocators. */
 
 ILP_Object
 ILP_malloc (int size, ILP_Class class)
@@ -601,8 +584,6 @@ ILP_make_instance (ILP_Class class)
      size += sizeof(ILP_Object) * class->_content.asClass.fields_count;
      return ILP_malloc(size, class);
 }
-
-/** Ce n'est pas une vraie allocation mais une simple conversion. */
 
 ILP_Object
 ILP_make_boolean (int b)
@@ -667,7 +648,7 @@ ILP_concatenate_strings (ILP_Object o1, ILP_Object o2)
      return result;
 }
 
-/** Opérateurs unaires. */
+/** Unary operators */
 
 ILP_Object
 ILP_make_opposite (ILP_Object o)
@@ -693,10 +674,10 @@ ILP_make_negation (ILP_Object o)
      }
 }
 
-/** Opérateurs binaires. */
+/** Binary operators */
 
-/* DefineOperator(addition, +) est incorrect car + représente également
- * la concaténation des chaînes de caractères. */
+/* DefineOperator(addition, +) is incorrect since + may (as in javascript)
+ * concatenate strings. */
 
 ILP_Object
 ILP_make_addition (ILP_Object o1, ILP_Object o2)
@@ -781,8 +762,8 @@ DefineOperator(subtraction, -)
 DefineOperator(multiplication, *)
 DefineOperator(division, /)
 
-/* DefineOperator(modulo, %) est incorrect car le modulo ne se prend
- * que sur de entiers. */
+/* DefineOperator(modulo, %) is incorrect since modulo works only on
+ * integers. */
 
 ILP_Object
 ILP_make_modulo (ILP_Object o1, ILP_Object o2)
@@ -887,7 +868,7 @@ ILP_newline ()
      return ILP_FALSE;
 }
 
-/** Imprimer le contenu d'une instance. */
+/** Print an instance */
 
 void
 ILP_print_fields (ILP_Object o,
@@ -900,9 +881,6 @@ ILP_print_fields (ILP_Object o,
      fprintf(stdout, ":%s=", last->_content.asField.name);
      ILP_print(o->_content.asInstance.field[last->_content.asField.offset]);
 }
-
-/** Cette fonction peut être utilisée comme une méthode. Elle imprime
- * le receveur sur le flux de sortie. */
 
 ILP_Object
 ILP_print (ILP_Object self)
@@ -935,8 +913,8 @@ ILPm_print (ILP_Closure useless, ILP_Object self)
      return ILP_print(self);
 }
 
-/** Cette fonction renvoie la classe du receveur. La classe est
- * également un objet obéissant au modèle ObjVlisp. */
+/** Yields the class of an object. The class is also an object
+ * as advocated by ObjVlisp. */
 
 ILP_Object
 ILP_classOf (ILP_Object self) 
