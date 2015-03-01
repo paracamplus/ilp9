@@ -7,8 +7,8 @@
 (defclass Point Object
   (x:x y)
   (define (print)
-    8450 ) )
-(send "print" (new Point 11 22))
+    (oget (self) x:x) ) )
+(send "print" (new Point 8450 22))
 ;;; end of u8450-6.scm
 
  -->
@@ -25,15 +25,19 @@
 ><variables
 ></variables
 ><body
-><integer value='8450'
-/></body
+><fieldRead field='x:x'
+><target
+><self
+/></target
+></fieldRead
+></body
 ></method
 ></methods
 ></classDefinition
 ><send message='print'
 ><receiver
 ><instantiation class='Point'
-><integer value='11'
+><integer value='8450'
 /><integer value='22'
 /></instantiation
 ></receiver

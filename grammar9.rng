@@ -3,9 +3,11 @@
   <!--
     -*- coding: utf-8 -*-
     ******************************************************************
-    ILP - Implantation d'un langage de programmation.
-    GPL version 2
-    ******************************************************************
+    ILP9 - Implantation d'un langage de programmation.
+    by Christian.Queinnec@paracamplus.com
+    See http://mooc.paracamplus.com/ilp9
+    GPL version 3
+    ****************************************************************** 
   -->
   <start>
     <ref name="program"/>
@@ -478,4 +480,4 @@
     </element>
   </define>
 </grammar>
-<!-- fin de grammar9.rnc -->
+<!-- end of grammar9.rnc -->

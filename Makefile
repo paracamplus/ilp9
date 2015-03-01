@@ -1,5 +1,11 @@
-work : nothing 
-clean :: cleanMakefile
+#******************************************************************
+# ILP9 - Implantation d'un langage de programmation.
+# by Christian.Queinnec@paracamplus.com
+# See http://mooc.paracamplus.com/ilp9
+# GPL version 3
+#****************************************************************** 
+
+work : grammar9.rng validate.xml.files recompile.C.code
 
 JAVA		=	java
 TRANG		=	Java/jars/trang.jar
@@ -34,5 +40,8 @@ validate.xml.files : grammar9.rng generate.xml.files
 generate.xml.files :
 	-cd Samples/ && rm *.xml *.print *.result
 	cd Samples/Scheme ; make 
+
+recompile.C.code :
+	cd C/ && make
 
 # end of Makefile
