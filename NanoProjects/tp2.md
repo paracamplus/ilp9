@@ -2,9 +2,7 @@
 Course 2 lab session (2 hours + group work)
 ===========================================
 
-These nano-projects focus on the interpreter. Nano-projects 1-4 aim
-at simplifying AST while nano-projects 5-8 ask for additional
-primitives.
+These nano-projects focus on the interpreter.
 
 NanoProjects
 ------------

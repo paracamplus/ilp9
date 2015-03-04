@@ -192,12 +192,16 @@ public class CompilerTest {
         String compiled = compiler.compile(program, objectClass);
         File cFile = changeSuffix(file, "c");
         FileTool.stuffFile(cFile, compiled);
-        
-        String indentProgram = "indent " + cFile.getAbsolutePath();
-        ProgramCaller pcindent = new ProgramCaller(indentProgram);
-        pcindent.run();
-        assertEquals("Comparing return code", 0, pcindent.getExitValue());
-        System.out.println(FileTool.slurpFile(cFile));
+
+        try {
+          String indentProgram = "indent " + cFile.getAbsolutePath();
+          ProgramCaller pcindent = new ProgramCaller(indentProgram);
+          pcindent.run();
+          System.out.println(FileTool.slurpFile(cFile));
+        } catch (Exception exc) {
+          // program 'indent' is probably absent, ignore!
+          System.out.println(compiled);
+        }
 
         String compileProgram = "bash C/compileThenRun.sh +gc "
             + cFile.getAbsolutePath();

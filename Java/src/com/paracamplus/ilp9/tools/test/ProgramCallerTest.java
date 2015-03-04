@@ -82,7 +82,7 @@ public class ProgramCallerTest extends TestCase {
         System.err.println("Errors: " + errors); // DEBUG
         assertNotNull(errors);
         assertTrue(errors.length() > 0);
-        Pattern p = Pattern.compile(".*gcc.*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*(clang|gcc).*", Pattern.DOTALL);
         Matcher m = p.matcher(errors);
         assertTrue(m.matches());
     }
@@ -97,7 +97,7 @@ public class ProgramCallerTest extends TestCase {
         System.err.println("Errors: " + errors); // DEBUG
         assertNotNull(errors);
         assertTrue(errors.length() > 0);
-        Pattern p = Pattern.compile(".*gcc.*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(".*(gcc|clang).*", Pattern.DOTALL);
         Matcher m = p.matcher(errors);
         assertTrue(m.matches());
     }
