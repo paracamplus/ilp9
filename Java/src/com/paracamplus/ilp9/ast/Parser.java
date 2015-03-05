@@ -26,35 +26,15 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import com.paracamplus.ilp9.interfaces.IAST;
-import com.paracamplus.ilp9.interfaces.IASTalternative;
-import com.paracamplus.ilp9.interfaces.IASTassignment;
-import com.paracamplus.ilp9.interfaces.IASTbinaryOperation;
-import com.paracamplus.ilp9.interfaces.IASTblock;
 import com.paracamplus.ilp9.interfaces.IASTblock.IASTbinding;
-import com.paracamplus.ilp9.interfaces.IASTboolean;
 import com.paracamplus.ilp9.interfaces.IASTclassDefinition;
-import com.paracamplus.ilp9.interfaces.IASTcodefinitions;
 import com.paracamplus.ilp9.interfaces.IASTexpression;
-import com.paracamplus.ilp9.interfaces.IASTfieldRead;
-import com.paracamplus.ilp9.interfaces.IASTfieldWrite;
-import com.paracamplus.ilp9.interfaces.IASTfloat;
 import com.paracamplus.ilp9.interfaces.IASTfunctionDefinition;
-import com.paracamplus.ilp9.interfaces.IASTinstantiation;
-import com.paracamplus.ilp9.interfaces.IASTinteger;
-import com.paracamplus.ilp9.interfaces.IASTinvocation;
 import com.paracamplus.ilp9.interfaces.IASTlambda;
-import com.paracamplus.ilp9.interfaces.IASTloop;
 import com.paracamplus.ilp9.interfaces.IASTmethodDefinition;
 import com.paracamplus.ilp9.interfaces.IASTnamedLambda;
 import com.paracamplus.ilp9.interfaces.IASToperator;
 import com.paracamplus.ilp9.interfaces.IASTprogram;
-import com.paracamplus.ilp9.interfaces.IASTself;
-import com.paracamplus.ilp9.interfaces.IASTsend;
-import com.paracamplus.ilp9.interfaces.IASTsequence;
-import com.paracamplus.ilp9.interfaces.IASTstring;
-import com.paracamplus.ilp9.interfaces.IASTsuper;
-import com.paracamplus.ilp9.interfaces.IASTtry;
-import com.paracamplus.ilp9.interfaces.IASTunaryOperation;
 import com.paracamplus.ilp9.interfaces.IASTvariable;
 import com.paracamplus.ilp9.parser.AbstractExtensibleParser;
 import com.paracamplus.ilp9.parser.IParserFactory;
@@ -178,11 +158,11 @@ public class Parser extends AbstractExtensibleParser {
                 classDefinitions.toArray(new IASTclassDefinition[0]);
         IASTexpression[] exprs = 
             expressions.toArray(new IASTexpression[0]);
-        IASTsequence body = getFactory().newSequence(exprs);
+        IASTexpression body = getFactory().newSequence(exprs);
         return getFactory().newProgram(defs, clazzes, body);
     }
 
-	public IASTalternative alternative (Element e) throws ParseException {
+	public IASTexpression alternative (Element e) throws ParseException {
         IAST iastc = findThenParseChildContent(e, "condition");
         IASTexpression condition = narrowToIASTexpression(iastc);
         IASTexpression[] iaste = 
@@ -200,7 +180,7 @@ public class Parser extends AbstractExtensibleParser {
         }
     }
 	
-	public IASTsequence sequence (Element e) throws ParseException {
+	public IASTexpression sequence (Element e) throws ParseException {
 	    final IAST[] iasts = parseAll(e.getChildNodes());
 	    List<IASTexpression> exprs = new Vector<>();
 	    for ( IAST iast : iasts ) {
@@ -212,22 +192,22 @@ public class Parser extends AbstractExtensibleParser {
 	    return getFactory().newSequence(expressions);
 	}
 	
-	public IASTinteger integerConstant (Element e) throws ParseException {
+	public IASTexpression integerConstant (Element e) throws ParseException {
 	    final String description = e.getAttribute("value");
 	    return getFactory().newIntegerConstant(description);
 	}
 
-    public IASTfloat floatConstant (Element e) throws ParseException {
+    public IASTexpression floatConstant (Element e) throws ParseException {
         final String description = e.getAttribute("value");
         return getFactory().newFloatConstant(description);
     }
 
-    public IASTstring stringConstant (Element e) throws ParseException {
+    public IASTexpression stringConstant (Element e) throws ParseException {
         final String description = e.getTextContent();
         return getFactory().newStringConstant(description);
     }
 
-    public IASTboolean booleanConstant (Element e) throws ParseException {
+    public IASTexpression booleanConstant (Element e) throws ParseException {
         final String description = e.getAttribute("value");
         return getFactory().newBooleanConstant(description);
     }
@@ -238,7 +218,7 @@ public class Parser extends AbstractExtensibleParser {
         return variable;
     }
     
-    public IASTunaryOperation unaryOperation (Element e) 
+    public IASTexpression unaryOperation (Element e) 
             throws ParseException {
         IAST iast = findThenParseChildContent(e, "operand");
         IASTexpression operand = narrowToIASTexpression(iast);
@@ -247,7 +227,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newUnaryOperation(operator, operand);
     }
 
-    public IASTbinaryOperation binaryOperation (Element e) 
+    public IASTexpression binaryOperation (Element e) 
             throws ParseException {
         IAST iast1 = findThenParseChildContent(e, "leftOperand");
         IASTexpression operand1 = narrowToIASTexpression(iast1);
@@ -258,7 +238,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newBinaryOperation(operator, operand1, operand2);
     }
     
-    public IASTblock block (Element e) throws ParseException {
+    public IASTexpression block (Element e) throws ParseException {
         IAST[] iastbindings = findThenParseChildAsArray(e, "bindings");
         List<IASTbinding> b = new Vector<>();
         for ( IAST iastb : iastbindings ) {
@@ -271,7 +251,7 @@ public class Parser extends AbstractExtensibleParser {
         }
         IASTbinding[] bindings = b.toArray(new IASTbinding[0]);
         IASTexpression[] iasts = findThenParseChildAsExpressions(e, "body");
-        IASTsequence body = getFactory().newSequence(iasts);
+        IASTexpression body = getFactory().newSequence(iasts);
         return getFactory().newBlock(bindings, body);
     }
     
@@ -285,7 +265,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newBinding(variable, exp);
     }
 
-    public IASTinvocation invocation (Element e) throws ParseException {
+    public IASTexpression invocation (Element e) throws ParseException {
         // Casts ensured by grammar9:
         IASTexpression fun = narrowToIASTexpression(
                 findThenParseChildContent(e, "function"));
@@ -294,7 +274,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newInvocation(fun, iasts);
     }
     
-    public IASTassignment assignment (Element e) throws ParseException {
+    public IASTexpression assignment (Element e) throws ParseException {
         String name = e.getAttribute("name");
         IASTexpression value = narrowToIASTexpression(
                 findThenParseChildContent(e, "value"));
@@ -302,7 +282,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newAssignment(variable, value);
     }
     
-    public IASTloop loop (Element e) throws ParseException {
+    public IASTexpression loop (Element e) throws ParseException {
         IASTexpression condition = narrowToIASTexpression(
                 findThenParseChildContent(e, "condition"));
         IASTexpression[] expressions = 
@@ -334,7 +314,7 @@ public class Parser extends AbstractExtensibleParser {
                 functionVariable, variables, body);
     }
     
-    public IASTtry tryInstruction (Element e) throws ParseException {
+    public IASTexpression tryInstruction (Element e) throws ParseException {
         IASTexpression[] expressions =
                 findThenParseChildAsExpressions(e, "body");
         IASTexpression body = getFactory().newSequence(expressions);
@@ -381,7 +361,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newLambda(variables, body);
     }
     
-    public IASTcodefinitions codefinitions (Element e) throws ParseException {
+    public IASTexpression codefinitions (Element e) throws ParseException {
         List<IASTnamedLambda> fs = new Vector<>();
         for ( IAST ifd : findThenParseChildAsArray(e, "functions")) {
             // cast ensured by grammar9
@@ -465,7 +445,7 @@ public class Parser extends AbstractExtensibleParser {
                 name, definingClassName);
     }
     
-    public IASTinstantiation instantiation (Element e)
+    public IASTexpression instantiation (Element e)
             throws ParseException {
         String className = e.getAttribute("class");
         final IAST[] iasts = parseAll(e.getChildNodes());
@@ -479,7 +459,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newInstantiation(className, arguments);
     }
     
-    public IASTfieldRead fieldRead (Element e)
+    public IASTexpression fieldRead (Element e)
             throws ParseException {
         String fieldName = e.getAttribute("field");
         IASTexpression target = narrowToIASTexpression(
@@ -487,7 +467,7 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newReadField(fieldName, target);
     }
     
-    public IASTfieldWrite fieldWrite (Element e)
+    public IASTexpression fieldWrite (Element e)
             throws ParseException {
         String fieldName = e.getAttribute("field");
         IASTexpression target = narrowToIASTexpression(
@@ -498,7 +478,7 @@ public class Parser extends AbstractExtensibleParser {
     
     }
     
-    public IASTsend send (Element e)
+    public IASTexpression send (Element e)
             throws ParseException {
         String messageName = e.getAttribute("message");
         IASTexpression receiver = narrowToIASTexpression(
@@ -507,12 +487,12 @@ public class Parser extends AbstractExtensibleParser {
         return getFactory().newSend(messageName, receiver, arguments);
     }
     
-    public IASTself self (Element e)
+    public IASTvariable self (Element e)
             throws ParseException {
         return getFactory().newSelf();
     }
     
-    public IASTsuper superInvocation (Element e)
+    public IASTexpression superInvocation (Element e)
             throws ParseException {
         return getFactory().newSuper();
     }

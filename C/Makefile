@@ -15,6 +15,7 @@ work : clean libilp.a
 
 clean :
 	-rm -f *.o libilp.a HOSTTYPE gc-7.2/gc.a
+	-rm -rf include
 
 # Libraries will be compiled in debug mode to help students.
 

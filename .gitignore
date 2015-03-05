@@ -1,6 +1,9 @@
 .DS_store
+*.QNC
 *~
 *.o
 *.a
 Samples/*.c
 C/HOSTTYPE
+*.class
+*BAK

@@ -140,7 +140,7 @@ import com.paracamplus.ilp9.interfaces.IASTvariable;
                                   IASTexpression target, 
                                   IASTexpression value);
 
-     IASTexpression newSelf();
+     IASTvariable newSelf();
 
      IASTexpression newSend(String message, 
                             IASTexpression receiver,

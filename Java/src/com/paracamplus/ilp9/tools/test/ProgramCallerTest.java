@@ -73,6 +73,9 @@ public class ProgramCallerTest extends TestCase {
         assertEquals(result.trim(), "");
     }
 
+    // MacOSX says clang instead of gcc:
+    private String gccPattern = ".*(clang|gcc).*";
+    
     public void testProgramCallerGccOnStderr () {
         final ProgramCaller pc = new ProgramCaller("gcc -c unexistent.c");
         assertNotNull(pc);
@@ -82,7 +85,7 @@ public class ProgramCallerTest extends TestCase {
         System.err.println("Errors: " + errors); // DEBUG
         assertNotNull(errors);
         assertTrue(errors.length() > 0);
-        Pattern p = Pattern.compile(".*(clang|gcc).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(gccPattern, Pattern.DOTALL);
         Matcher m = p.matcher(errors);
         assertTrue(m.matches());
     }
@@ -97,7 +100,7 @@ public class ProgramCallerTest extends TestCase {
         System.err.println("Errors: " + errors); // DEBUG
         assertNotNull(errors);
         assertTrue(errors.length() > 0);
-        Pattern p = Pattern.compile(".*(gcc|clang).*", Pattern.DOTALL);
+        Pattern p = Pattern.compile(gccPattern, Pattern.DOTALL);
         Matcher m = p.matcher(errors);
         assertTrue(m.matches());
     }

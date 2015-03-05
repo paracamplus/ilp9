@@ -9,8 +9,9 @@ NanoProjects
 
 ### NanoProject 1 ###
 
-Currently, some sequences may contain only one expression. Modify the
-system so sequences can only contain more than one expression.
+Currently, some sequences may contain only one expression. A sequence
+with a single expression can be replaced by this expression. Modify
+the system so sequences can only contain more than one expression.
 
 ### NanoProject 2 ###
 
@@ -37,9 +38,10 @@ Adjoin a new primitive function to the system. This primitive named
 
 ### NanoProject 6 ###
 
-Adjoin a new primitive function to the system. This primitive named
-`implies` takes two values and return false only when the first
-argument is true and the second argument is false.
+Adjoin a new primitive function to the system. This primitive, a
+predicate (with a boolean result) named `implies` takes two values and
+return false only when the first argument is true and the second
+argument is false.
 
 ### NanoProject 7 ###
 
