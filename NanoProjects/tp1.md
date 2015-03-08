@@ -23,18 +23,34 @@ NanoProject
 
 There is only one nano-project for all groups for this first course.
 
-### NanoProject 1 - question 1 ###
+### NanoProject 1 - question 1.1 ###
 
-Write an XML program that binds three numbers to the local variables
-`a`, `b` and `c` (standing for the coefficients of the equation `ax^2+bx+c`),
-computes the discriminant (`b2-4ac`) and outputs the number of (real)
-roots of the equation.
+Write an XML program that introduces one local variable, say `a`,
+binds it to 3 then multiplies `a` by 2. Something that may be expressed
+as (in Caml):
 
-### NanoProject 1 - question 2 ###
+```caml
+let a = 3 
+in 2 * a
+```
 
-Turn this program into an additional test. Make sure you know how to
-run the entire test suite (including that new test) or just this new
-single test.
+### NanoProject 1 - question 1.2 ###
+
+Turn this program into an additional test (name that test `u00-1.xml`).
+Make sure you know how to run the entire test suite (including that
+new test) or just this new single test.
+
+
+Hints
+-----
+
+Study the `grammar9.rnc` to know the tags to use to write the program.
+
+Don't forget to write also files `u00-1.result` and `u00-1.print`.
+Look at other tests (in `Samples/`) and study the entry point
+`InterpreterTest` to see why they are needed.
+
+Good luck.
 
 
 
