@@ -2,7 +2,7 @@
 Course 2 lab session (2 hours + group work)
 ===========================================
 
-These nano-projects focus on the interpreter.
+These nano-projects focus on the interpreter. Ignore the compiler for now.
 
 NanoProjects
 ------------
@@ -60,9 +60,10 @@ may be replaced directly by
 
 ### NanoProject 2.3 ###
 
-Currently, a block may contain no binding. If a block does not
-introduce new local variables then it is similar to a sequence.
-Modify the system in order to remove blocks without bindings.
+Currently, a block may contain no binding. When a block does not
+introduce new local variables then it is similar to a sequence of
+instructions. Modify the system in order to remove blocks without
+bindings.
 
 ### NanoProject 2.4 ###
 
@@ -92,3 +93,21 @@ sine of a number.
 Adjoin the `hypotenuse` primitive to the system. That primitive takes
 two numbers, say `a` and `b` and computes the square root of `a^2 + b^2`.
 
+
+Hints
+-----
+
+The entry point for tests is the class `InterpreterTest`, look at it
+to find where you may add your own code.
+
+No need to alter the grammar for this lab session.
+
+Don't forget that, in ILP9, every value is true but `Boolean.FALSE`.
+Don't forget that, in ILP9, values are represented by `BigInteger`,
+`BigDecimal`, `String` and `Boolean`.
+
+Of course, your code must be tested, automatically! If you write new
+ILP9 programs, name them `u00xyz-1.xml` (where xyz is some number) and
+write their associated `u00xyz-1.result` and `u00xyz-1.print` files.
+
+Good luck.
