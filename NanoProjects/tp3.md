@@ -3,7 +3,7 @@ Course 3 lab session (2 hours)
 ==============================
 
 This lab session focuses on the interpreter (you may safely ignore the
-compiler ) in order to add new features to the ILP9 language. This
+compiler) in order to add new features to the ILP9 language. This
 often implies to extend the grammar, the parser and the interpreter.
 
 ### Nano-Project 3.1 ###
