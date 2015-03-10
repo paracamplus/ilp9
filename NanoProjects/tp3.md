@@ -1,5 +1,5 @@
 
-Course 3 lab session (2 hours)
+Course 3 lab session (2+2 hours + workgroup)
 ==============================
 
 This lab session focuses on the interpreter (you may safely ignore the
