@@ -4,8 +4,8 @@ Course 3 lab session (2+2 hours + workgroup)
 
 This lab session focuses on the interpreter (you may safely ignore the
 compiler) in order to add new features to the ILP9 language. This
-often implies to extend the grammar, the parser, the interpreter and
-its runtime library.
+implies to extend the grammar, the parser, the interpreter and its
+runtime library.
 
 ### Nano-Project 3.1 ###
 
@@ -17,9 +17,7 @@ Add a `do-while` loop. Nota: this is not a `while-do` loop!
 
 ### Nano-Project 3.3 ###
 
-Add instructions `break` and `continue`. Harder: implement loops,
-`break` and `continue` with a label allowing to escape from the
-associated loop.
+Add instructions `break` and `continue`. 
 
 ### Nano-Project 3.4 ###
 
@@ -28,12 +26,13 @@ every lexical context that is, even if there is a `v` local variable.
 
 ### Nano-Project 3.5 ###
 
-Reading the value of a non-initialized variable should raise an
-exception. Make it happen!
+Add a parallel assignment. This allows to swap two variables as in
+`a,b = b,a`.
 
 ### Nano-Project 3.6 ###
 
-Predefined global variables should not be mutable. Make it happen!
+Introduce a `constant` keyword that qualifies a global variable that
+must not be mutated.
 
 ### Nano-Project 3.7 ###
 
