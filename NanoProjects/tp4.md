@@ -1,6 +1,6 @@
 
-Course 4 lab session (2 hours + group work)
-===========================================
+Course 4 lab session (2 hours)
+==============================
 
 These nano-projects focus on the compiler (you may safely ignore the
 interpreter) in order to add new features to the ILP9 language. This

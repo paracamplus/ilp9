@@ -11,23 +11,59 @@ runtime library.
 
 Add a `repeat-until` loop.
 
+```ilp
+repeat {
+   instructions...
+} until ( condition );
+```
+
 ### Nano-Project 3.2 ###
 
 Add a `do-while` loop. Nota: this is not a `while-do` loop!
 
+```ilp
+do {
+  instructions...
+} while ( condition );
+```
+
 ### Nano-Project 3.3 ###
 
-Add instructions `break` and `continue`. 
+Add instructions `break` and `continue` (as in C or Java).
+
+```ilp
+loop {
+  instructions
+  if ( condition ) {
+    break
+  }
+}
+```
 
 ### Nano-Project 3.4 ###
 
 Add `global v` which yields the global value of the variable `v` in
 every lexical context that is, even if there is a `v` local variable.
 
+```ilp
+function foo (pi) {
+  return (pi + global pi)
+}
+print foo(1); // prints 4.14159265...
+```
+
 ### Nano-Project 3.5 ###
 
-Add a parallel assignment. This allows to swap two variables as in
-`a,b = b,a`.
+Add a parallel binary assignment. This allows to swap two variables as
+in `a,b = b,a`.
+
+```ilp
+{ 
+  a,b = 3,5;
+  a,b = b,2*a
+  print a; print b; // prints 5, 6
+}
+```
 
 ### Nano-Project 3.6 ###
 
