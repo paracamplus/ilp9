@@ -66,7 +66,8 @@ in `a,b = b,a`.
 ### NanoProject 5.5 ###
 
 Introduce a new toplevel keyword `define` keyword that allows to
-declare a global variable and initialize it with some expression.
+declare a global immutable variable and initialize it with some
+expression.
 
 ```ilp
 function foo(x) {
@@ -111,24 +112,17 @@ esac
 
 ### NanoProject 5.8 ###
 
-Introduce a new keyword, say `letuninitialized` to introduce some
-local, non-initialized, variables. Of course, reading an uninitialized
-variable should raise an error.
+Introduce the `return` keyword as in C or Java.
 
 ```ilp
-function seeX () {
-   try {
-     x = x + 1
-   } catch (e) {
-    print "OK"  // since x is unitialized
-    x = 0
-}
-letuninitialized (x, y) {
-   seeX()
-   print x      // prints 0
-   seeX()
-   print x      // prints 1
-   print y      // error
+function foo(x) {
+  while ( x > 0 ) {
+    if ( bar(x) ) {
+      return x
+      print x   // never called!
+    }
+    x = x - 1
+  }
 }
 ```
 
