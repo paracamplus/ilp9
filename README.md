@@ -10,3 +10,8 @@ This is the code of a compiler (and an interpreter) for a simple programming lan
 - the compiler produces C code.
 
 This course draws on a course that presented compilation via a series of languages where features were incrementally added. The '9' in 'ilp9' stands for the ultimate version of that series of systems.
+
+A companion site with some resources (slides, videos) is hosted on 
+   http://compiler-reading-1.appspot.com/
+
+
