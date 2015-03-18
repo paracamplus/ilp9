@@ -12,16 +12,17 @@ NanoProjects
 ### NanoProject 4.1 ###
 
 Adjoin a new primitive function to the system. This primitive, named
-`atoi`, behaves similarly to the `atoi` function of C that is, 
-`atoi("813")` returns the integer `813`.
+`string2int`, behaves similarly to the `atoi` function of C that is, 
+`string2int("813")` returns the integer `813`.
 
 ### NanoProject 4.2 ###
 
 Adjoin a new primitive function to the system. This primitive, named
-`strstr`, behaves similarly to the `strstr` function of C that is,
-`strstr(haystack, needle)` returns the offset (a zero-based integer)
-of the first occurrence of the substring needle in the string
-haystack.
+`offsetOf`, behaves similarly to the `strstr` function of C that is,
+`offsetOf(haystack, needle)` returns the offset (a zero-based integer)
+of the first occurrence of the substring `needle` in the string
+`haystack`. You may return `false` when the `needle` cannot be found in the
+`haystack`.
 
 ### NanoProject 4.3 ###
 
@@ -46,7 +47,7 @@ argument is true and the second argument is false.
 
 ### NanoProject 4.7 ###
 
-Adjoin the `sin` primitive to the system. That primitive computes the
+Adjoin the `sinus` primitive to the system. That primitive computes the
 sine of a number.
 
 ### NanoProject 4.8 ###
