@@ -253,7 +253,7 @@ ILP_throw (ILP_Object exception)
      };
      longjmp(ILP_current_catcher->_jmp_buf, 1);
      /** UNREACHABLE */
-     return NULL;
+     return ILP_die("longjmp botch");
 }
 
 /** Install a new catcher */
