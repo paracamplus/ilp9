@@ -13,20 +13,20 @@ Projects
 
 ### Project 1 ###
 
+Devise and implement a concrete syntax for ILP9. You may use ANTLR as
+a parser generator.
+
+### Project 2 ###
+
 The binary boolean operators require, in order to be applied, the
 evaluation of both their operands. Very often, in programming
 languages, `and` and `or` are specific keywords with a short-circuit
 semantics that is, the left operand is always evaluated but, whenever
-the final result is known, the evaluation of the right operand is not
+the final result may be known, the evaluation of the right operand is not
 performed. For example, `false and ...` is always false independently
 of what `...` might be. Similarly `true or ...` is always true.
 
 Implement these new keywords `and` and `or`.
-
-### Project 2 ###
-
-Devise and implement a concrete syntax for ILP9. You may use ANTLR as
-a parser generator.
 
 ### Project 3 ###
 
@@ -61,6 +61,8 @@ write vectors and also obtain the length of a vector as in:
 let v = [1, "a" + "b"]
 in v[1] = v.length * v[0];
 ```
+
+Most of these new characteristics may be implemented as functions.
 
 ### Project 6 ###
 
@@ -105,6 +107,8 @@ while ( true ) {
 }
 ```
 
+You may use the `Samples/Scheme/bu8999-6.scm` file for benchmarks.
+
 ### Project 7 ###
 
 Retarget the compiler to generate Java code instead of C code.
@@ -125,7 +129,7 @@ in print date.getTime;
 Hints
 -----
 
-You have to formally present your work on these projects at the final
+Remember that you have to formally present your projects at the final
 meeting of April 1st. Code, test, prepare the presentation, rehearse!
 
 Don't forget to precise the license (GPL3 is suggested) for your code,
