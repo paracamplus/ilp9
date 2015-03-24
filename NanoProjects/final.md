@@ -132,6 +132,8 @@ Hints
 Remember that you have to formally present your projects at the final
 meeting of April 1st. Code, test, prepare the presentation, rehearse!
 
+Organize your work in small steps so you have at least one thing to show.
+
 Don't forget to precise the license (GPL3 is suggested) for your code,
 Your code might be useful for new editions of this course.
 
