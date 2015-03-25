@@ -1,4 +1,4 @@
-Final projects to be presented on April 1st
+Final projects to be presented on March 26
 ===========================================
 
 The projects focus on the compiler (you may safely ignore the

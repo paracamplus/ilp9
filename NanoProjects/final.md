@@ -1,5 +1,5 @@
-Final projects to be presented on April 1st
-===========================================
+Final projects
+==============
 
 The projects focus on the compiler (you may safely ignore the
 interpreter) or on the interpreter (you may then safely ignore the
@@ -13,7 +13,7 @@ Projects
 
 ### Project 1 ###
 
-Devise and implement a concrete syntax for (a subset of) ILP9. You may
+Devise and implement a concrete syntax for ILP9. You may
 use ANTLR as a parser generator.
 
 ### Project 2 ###
