@@ -1,11 +1,12 @@
-Final projects to be presented on March 26
+
+Course 4 lab session (2 hours + group work)
 ===========================================
 
 The projects focus on the compiler (you may safely ignore the
 interpreter) or on the interpreter (you may then safely ignore the
 compiler) in order to add new features to the ILP9 language. This
 implies to extend the grammar, the parser, the compiler (for projects
-1-6) or the interpreter (for projects 7-8) and their respective
+2-7) or the interpreter (for projects 8) and their respective
 runtime library.
 
 Projects

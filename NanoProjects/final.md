@@ -5,7 +5,7 @@ The projects focus on the compiler (you may safely ignore the
 interpreter) or on the interpreter (you may then safely ignore the
 compiler) in order to add new features to the ILP9 language. This
 implies to extend the grammar, the parser, the compiler (for projects
-1-6) or the interpreter (for projects 7-8) and their respective
+2-7) or the interpreter (for projects 8) and their respective
 runtime library.
 
 Projects
@@ -30,15 +30,15 @@ Implement these new keywords `and` and `or`.
 
 ### Project 3 ###
 
-Enrich the definition of functions to allow default values (constants
-only) for missing variables. For instance,
+Enrich the definition of functions to allow default values
+for missing variables. For instance,
 
 ```ilp
-let f = function (x, y = 4, z = "foo") {
+let f = function (x, y = 4, z = 2*x) {
            print x, y, z
         }
-in         f(1);      // prints 1, 4, foo
-           f(1,2);    // prints 1, 2, foo
+in         f(1);      // prints 1, 4, 2
+           f(1,2);    // prints 1, 2, 2
            f(1,2,3);  // prints 1, 2, 3
 ```
 
@@ -111,15 +111,13 @@ You may use the `Samples/Scheme/bu8999-6.scm` file for benchmarks.
 
 ### Project 7 ###
 
-Retarget the compiler to generate Java code instead of C code (for a
-subset of ILP9).
+Retarget the compiler to generate Java code instead of C code.
 
 ### Project 8 ###
 
 Embed ILP9 as a scripting language of the JVM according to JSR 223.
 The embedding should provide shared global variables between Java and
-ILP9. 
-
+ILP9.
 
 Hints
 -----
