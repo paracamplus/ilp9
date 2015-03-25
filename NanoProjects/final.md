@@ -117,7 +117,14 @@ Retarget the compiler to generate Java code instead of C code.
 
 Embed ILP9 as a scripting language of the JVM according to JSR 223.
 The embedding should provide shared global variables between Java and
-ILP9.
+ILP9. It must also be possible to call regular Java methods from ILP9
+as in:
+
+```
+d = new java.util.Date()
+print d.getTime()
+```
+
 
 Hints
 -----
