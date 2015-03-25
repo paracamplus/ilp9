@@ -13,8 +13,8 @@ Projects
 
 ### Project 1 ###
 
-Devise and implement a concrete syntax for ILP9. You may use ANTLR as
-a parser generator.
+Devise and implement a concrete syntax for (a subset of) ILP9. You may
+use ANTLR as a parser generator.
 
 ### Project 2 ###
 
@@ -30,15 +30,15 @@ Implement these new keywords `and` and `or`.
 
 ### Project 3 ###
 
-Enrich the definition of functions to allow default values for missing
-variables. For instance,
+Enrich the definition of functions to allow default values (constants
+only) for missing variables. For instance,
 
 ```ilp
-let f = function (x, y = 4, z = 2*x) {
+let f = function (x, y = 4, z = "foo") {
            print x, y, z
         }
-in         f(1);      // prints 1, 4, 2
-           f(1,2);    // prints 1, 2, 2
+in         f(1);      // prints 1, 4, foo
+           f(1,2);    // prints 1, 2, foo
            f(1,2,3);  // prints 1, 2, 3
 ```
 
@@ -111,19 +111,14 @@ You may use the `Samples/Scheme/bu8999-6.scm` file for benchmarks.
 
 ### Project 7 ###
 
-Retarget the compiler to generate Java code instead of C code.
+Retarget the compiler to generate Java code instead of C code (for a
+subset of ILP9).
 
 ### Project 8 ###
 
 Embed ILP9 as a scripting language of the JVM according to JSR 223.
-The embedding should allow to share global variables between Java and
-ILP9. It should also be possible for ILP9 to use classes and methods
-from Java. 
-
-```ilp
-let date = new java::lang::Date()
-in print date.getTime;
-```
+The embedding should provide shared global variables between Java and
+ILP9. 
 
 
 Hints
