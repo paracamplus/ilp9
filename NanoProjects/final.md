@@ -115,10 +115,10 @@ Retarget the compiler to generate Java code instead of C code.
 
 ### Project 8 ###
 
-Embed ILP9 as a scripting language of the JVM according to JSR 223.
-The embedding should allow to share global variables between Java and
-ILP9. It should also be possible for ILP9 to use classes and methods
-from Java. 
+Embed ILP9 as a scripting language of the JVM according to [JSR
+223](https://www.jcp.org/en/jsr/detail?id=223). The embedding should
+allow to share global variables between Java and ILP9. It should also
+be possible for ILP9 to use classes and methods from Java.
 
 ```ilp
 let date = new java::lang::Date()
