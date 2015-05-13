@@ -40,10 +40,11 @@ In other words, this is a program transformation where blocks like
    instruction1
    instruction2
    instruction3
+   instruction4
 }
 ```
 
-may be replaced directly by 
+can be replaced directly by 
 
 ```C
 { 
