@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- 
+
+;;; $Id$
+(comment "Essai de la variable print")
+(let ((p print))
+  (p 5921) )
+
+;;; end of u5921-2.scm
+
+ -->
+<program
+><!-- test:name description='Essai de la variable print' 
+--><block
+><bindings
+><binding
+><variable name='p'
+/><initialisation
+><variable name='print'
+/></initialisation
+></binding
+></bindings
+><body
+><invocation
+><function
+><variable name='p'
+/></function
+><arguments
+><integer value='5921'
+/></arguments
+></invocation
+></body
+></block
+></program
+>
