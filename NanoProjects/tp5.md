@@ -1,16 +1,19 @@
 
-Course 5 lab session (2 hours + group work)
-===========================================
+Course 5 lab session (group work)
+=================================
 
-These nano-projects focus on the compiler (you may safely ignore the
-interpreter) in order to add new features to the ILP9 language. This
+These nano-projects focus on the compiler 
+in order to add new features to the ILP9 language. This
 implies to extend the grammar, the parser, the compiler and its
 runtime library.
+
+NanoProjects extending a previous NanoProject should also enrich the 
+interpreter. The other NanoProjects may safely ignore the interpreter.
 
 NanoProjects
 ------------
 
-### NanoProject 5.1 ###
+### NanoProject 5.1 (extends 3.1) ###
 
 Add a `repeat-until` loop. 
 
@@ -20,7 +23,7 @@ repeat {
 } until ( condition );
 ```
 
-### NanoProject 5.2 ###
+### NanoProject 5.2 (extends 3.3) ###
 
 Add instructions `break label` and `continue label`. They may be used
 in a `loop label` loop.
@@ -37,7 +40,7 @@ loop A: {
 }
 ```
 
-### NanoProject 5.3 ###
+### NanoProject 5.3 (extends 3.4) ###
 
 Add a new keyword such as `global v` which yields the global value of
 the variable `v` in every lexical context that is, even if there is a
@@ -50,7 +53,7 @@ function foo (pi) {
 print foo(1); // prints 4.14159265...
 ```
 
-### NanoProject 5.4 ###
+### NanoProject 5.4 (extends 3.5) ###
 
 Add a parallel binary assignment. This allows to swap two variables as
 in `a,b = b,a`.
