@@ -3,13 +3,16 @@ Course 2 lab session (2 hours + group work)
 ===========================================
 
 These nano-projects focus on the interpreter. Ignore the compiler for now.
+Words in italics refer to the terms used in `grammar9.rnc`.
+NanoProjects 2.1 to 2.4 are program transformations while NanoProjects 2.5 to 2.8 
+enrich the runtime library.
 
 NanoProjects
 ------------
 
 ### NanoProject 2.1 ###
 
-Currently, some sequences may contain only one expression. A sequence
+Currently, some sequences may contain only one expression. A _sequence_
 with a single expression can be replaced by this expression. Modify
 the system so sequences can only contain more than one expression.
 
@@ -29,7 +32,7 @@ instruction
 
 ### NanoProject 2.2 ###
 
-Currently, some sequences may contain an arbitrary number of
+Currently, a _sequence_ may contain an arbitrary number of
 expressions. Modify the system so sequences can only contain two
 expressions.
 
@@ -61,14 +64,14 @@ can be replaced directly by
 
 ### NanoProject 2.3 ###
 
-Currently, a block may contain no binding. When a block does not
+Currently, a _block_ may contain no _binding_. When a block does not
 introduce new local variables then it is similar to a sequence of
 instructions. Modify the system in order to remove blocks without
-bindings.
+bindings in favor of sequences.
 
 ### NanoProject 2.4 ###
 
-Currently, a codefinition may exist without any local function
+Currently, a _codefinition_ may exist without any local _function_
 definition. This codefinition is therefore equivalent to a sequence.
 Modify the system in order to remove these useless codefinitions.
 
