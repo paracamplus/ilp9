@@ -70,7 +70,7 @@ esac
 
 # Si les .c ne sont pas compilés pour l'architecture courante, on les
 # recompile à la volée.
-( cd $COMMAND_DIR/
+( cd "$COMMAND_DIR"/
   RECOMPILE=true
   if [ -r ./HOSTTYPE ]
   then if [ "$(< ./HOSTTYPE)" = "`uname -s -r -v -m`" ]
