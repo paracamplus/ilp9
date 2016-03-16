@@ -64,7 +64,7 @@ case "$COMMAND_DIR" in
         true
         ;;
     *)
-        COMMAND_DIR=`pwd -P`/$COMMAND_DIR
+        COMMAND_DIR=`pwd -P`/"$COMMAND_DIR"
         ;;
 esac
 
@@ -90,7 +90,7 @@ esac
   fi 1>&2
 )
 
-if [ ! -r $COMMAND_DIR/libilp.a ]
+if [ ! -r "$COMMAND_DIR"/libilp.a ]
 then 
     echo Bibliotheque introuvable: $COMMAND_DIR/libilp.a >&2
     exit 3
@@ -98,7 +98,7 @@ fi
 
 if $WITH_GC
 then
-    if [ -r $COMMAND_DIR/$LIB_GC ]
+    if [ -r "$COMMAND_DIR"/$LIB_GC ]
     then
         CFLAGS="-DWITH_GC $CFLAGS"
     else
@@ -141,7 +141,7 @@ done
 
 OTHER_LIBS=${OTHER_LIBS:- -lm}
 if $WITH_GC
-then OTHER_LIBS="$OTHER_LIBS $COMMAND_DIR/$LIB_GC"
+then OTHER_LIBS="$OTHER_LIBS C/$LIB_GC"
 fi
 
 AOUT=${TMPDIR:-/tmp}/test$USER
@@ -152,14 +152,14 @@ fi
 if $VERBOSE
 then 
     echo gcc ${CFLAGS} -o $AOUT \
-    -I. -I$COMMAND_DIR \
-    $FILES $COMMAND_DIR/libilp.a $OTHER_LIBS '&&' $AOUT
+    -I. -I"$COMMAND_DIR" \
+    $FILES "$COMMAND_DIR"/libilp.a $OTHER_LIBS '&&' $AOUT
 fi
 
 #echo Trying to compile $FILE ... >&2
 gcc ${CFLAGS} -o $AOUT \
-    -I. -I$COMMAND_DIR \
-    $FILES $COMMAND_DIR/libilp.a $OTHER_LIBS && \
+    -I. -I"$COMMAND_DIR" \
+    $FILES "$COMMAND_DIR"/libilp.a $OTHER_LIBS && \
 $AOUT
 
 # end of compileThenRun.sh
