@@ -5,7 +5,7 @@
 # GPL version 3
 #****************************************************************** 
 
-work : grammar9.rng validate.xml.files recompile.C.code
+work : grammar9.rng recompile.C.code
 
 JAVA		=	java
 TRANG		=	Java/jars/trang.jar
