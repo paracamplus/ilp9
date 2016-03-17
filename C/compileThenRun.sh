@@ -116,7 +116,7 @@ do
       -D*)
           CFLAGS="$CFLAGS $file "
           ;;
-      /*.[coah])
+      *[/\\]*.[coah])
           FILES="$FILES $file"
           if [ ! -r $file ]
           then 
