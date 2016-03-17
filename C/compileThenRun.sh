@@ -92,7 +92,7 @@ esac
 
 if [ ! -r "$COMMAND_DIR"/libilp.a ]
 then 
-    echo Bibliotheque introuvable: $COMMAND_DIR/libilp.a >&2
+    echo Bibliotheque introuvable: "$COMMAND_DIR"/libilp.a >&2
     exit 3
 fi
 
