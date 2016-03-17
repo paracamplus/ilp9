@@ -1,10 +1,9 @@
-
 Course 2 lab session (2 hours + group work)
 ===========================================
 
 These nano-projects focus on the interpreter. Ignore the compiler for now.
 Words in italics refer to the terms used in `grammar9.rnc`.
-NanoProjects 2.1 to 2.4 are program transformations while NanoProjects 2.5 to 2.8 
+NanoProjects 2.1 to 2.5 are program transformations while NanoProjects 2.6 to 2.9 
 enrich the runtime library.
 
 NanoProjects
@@ -77,22 +76,28 @@ Modify the system in order to remove these useless codefinitions.
 
 ### NanoProject 2.5 ###
 
+Currently, alternatives may be binary or ternary depending on whether
+they have an alternant or not. Transform all alternatives so they all
+have an alternant.
+
+### NanoProjet 2.6 ###
+
 Adjoin a new primitive function to the system. This primitive named
 `now` will return the current time of the day (expressed in milliseconds).
 
-### NanoProject 2.6 ###
+### NanoProject 2.7 ###
 
 Adjoin a new primitive function to the system. This primitive, a
 predicate (with a boolean result) named `implies` takes two values and
 return false only when the first argument is true and the second
 argument is false.
 
-### NanoProject 2.7 ###
+### NanoProject 2.8 ###
 
 Adjoin the `sin` primitive to the system. That primitive computes the
 sine of a number.
 
-### NanoProject 2.8 ###
+### NanoProject 2.9 ###
 
 Adjoin the `hypotenuse` primitive to the system. That primitive takes
 two numbers, say `a` and `b` and computes the square root of `a^2 + b^2`.

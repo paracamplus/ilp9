@@ -1,4 +1,3 @@
-
 Course 3 lab session (2+2 hours + workgroup)
 ==============================
 
@@ -60,7 +59,7 @@ in `a,b = b,a`.
 ```ilp
 { 
   a,b = 3,5;
-  a,b = b,2*a
+  a,b = b,2*a;
   print a; print b; // prints 5, 6
 }
 ```
@@ -72,13 +71,43 @@ must not be mutated.
 
 ### Nano-Project 3.7 ###
 
-Add the ternary operator `?:` that is, the alternative as an
-expression as in C.
+Introduce a new keyword named `loop` that iterates infinitely its body. The
+associated `exit` keyword exits the loop and provides the value of the `loop`
+construct. Hence:
+
+```ilp
+let c = 3
+  let r = loop {
+     if ( c > 0 ) {
+        print(c)
+        c--
+     } else {
+        exit "OK"
+     }
+  }
+  // prints 3, 2, 1
+  // r is "OK"
+}
+```
 
 ### Nano-Project 3.8 ###
 
 Raising an exception is currently done via the function `throw`, turn
 `throw` into a new keyword.
+
+### Nano-Project 3.9 ###
+
+Allow default value for missing arguments of unary functions. 
+When invoked without argument, the variable will be bound to the default value.
+Hence
+
+```ilp
+function f (x = 1) {
+  return x;
+}
+f(2)  // yields 2
+f()   // yields 1
+```
 
 
 Hints

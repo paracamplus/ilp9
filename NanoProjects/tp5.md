@@ -1,4 +1,3 @@
-
 Course 5 lab session (group work)
 =================================
 
@@ -66,7 +65,7 @@ in `a,b = b,a`.
 }
 ```
 
-### NanoProject 5.5 ###
+### NanoProject 5.5 (extends 3.6) ###
 
 Introduce a new toplevel keyword `define` keyword that allows to
 declare a global immutable variable and initialize it with some
@@ -82,12 +81,12 @@ print foo(2 * cst) // prints something around 29.61
 
 ### NanoProject 5.6 ###
 
-Introduce a `remanent` keyword that qualifies a variable that keeps
+Introduce a `letremanent in` keyword that qualifies a variable that keeps
 its value across multiple evaluations.
 
 ```ilp
 function foo(x) {
-  remanent r = 2 {
+  letremanent r = 2 in {
     if (< r x) {
        r = x
     }
@@ -128,6 +127,22 @@ function foo(x) {
   }
 }
 ```
+
+### NanoProjet 5.9 (extends 3.9) ###
+
+Allow default value for missing arguments of unary functions. 
+When invoked without argument, the variable will be bound to the 
+default value. Hence
+
+```ilp
+function f (x, y = 2) {
+  return x * y
+ }
+ f(3)   // yields 6 
+ f(3,3) // yields 9
+ ```
+ 
+
 
 Hints
 -----

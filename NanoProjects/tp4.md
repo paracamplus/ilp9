@@ -1,4 +1,3 @@
-
 Course 4 lab session (2 hours)
 ==============================
 
@@ -55,6 +54,9 @@ sine of a number.
 Adjoin the `hypotenuse` primitive to the system. That primitive takes
 two numbers, say `a` and `b` and computes the square root of `a^2 + b^2`.
 
+### NanoProject 4.9 ###
+
+Extend the `-` operator so that `"foobar" - 2` returns `"foob"`.
 
 Hints
 -----
