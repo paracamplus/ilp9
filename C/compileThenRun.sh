@@ -11,6 +11,8 @@ usage () {
     cat <<EOF
 Usage: $0 [ +gc ] [ +v ] foo.c [baz.c -Dq=3 ...]
 Compile les fichiers C, cree puis lance l'executable /tmp/test$USER
+Ce script suppose que tous les fichiers .c, .h, .a sont sous le
+repertoire parent de ce script (celui ou se trouvent C/ et Samples/).
 
 +gc est une option incluant le GC de Boehm (si utilisable)
 +v montre sans l'executer la commande gcc synthetisee
@@ -74,7 +76,7 @@ then if [ "$(< C/HOSTTYPE)" = "`uname -s -r -v -m`" ]
      then SAME_HOSTTYPE=true
      fi
 else
-     uname -s -r -v -m > C/HOSTTYPE	
+    uname -s -r -v -m > C/HOSTTYPE	
 fi
 
 # On essaye toujours de regenerer libilp.a
@@ -82,41 +84,41 @@ fi
   make libilp.a >/dev/null 
   if [ ! -r ./libilp.a ]
   then 
-       echo "Compilation incorrecte de C/ilp.[ch]" >&2
-       exit 15
+      echo "Compilation incorrecte de C/ilp.[ch]" >&2
+      exit 15
   fi
 )
 
-# On essaye de compiler le GC seulement si l'on n'a pas deja essaye.
+# On essaye de compiler le GC mais seulement si l'on n'a pas deja essaye.
 # NOTA si `pwd` contient des blancs, la compilation ne reussira pas.
 RECOMPILE_GC=false
 if $SAME_HOSTTYPE
 then if [ ! -r C/$LIB_GC ]
      then 
-       if [ -r C/compilingGC... ]
-       then
-            echo "Compilation du GC non possible" >&2
+        if [ -r C/compilingGC... ]
+        then
+            echo "Compilation du GC incorrecte!" >&2
             WITH_GC=false
-       else
+        else
             RECOMPILE_GC=true
-       fi
-     fi
+        fi
+    fi
 else
-  RECOMPILE_GC=true
+    RECOMPILE_GC=true
 fi
 
 if $RECOMPILE_GC
 then
-  echo "Compilation du GC" >&2
-  touch C/compilingGC... 
-  (cd C ; make compile.gc)
-  if [ -r C/$LIB_GC ]
-  then 
-     rm C/compilingGC... 
-  else
-     echo "GC non compilable: option +gc non possible!" >&2
-     WITH_GC=false
-  fi
+    echo "Compilation du GC" >&2
+    touch C/compilingGC... 
+    (cd C ; make compile.gc)
+    if [ -r C/$LIB_GC ]
+    then 
+        rm C/compilingGC... 
+    else
+        echo "GC non compilable: option +gc non possible!" >&2
+        WITH_GC=false
+    fi
 fi
 
 # Collecter les fichiers (.o, .a .h ou .c) à incorporer:
