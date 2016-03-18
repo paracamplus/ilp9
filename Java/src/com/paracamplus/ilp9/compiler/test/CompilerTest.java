@@ -194,7 +194,7 @@ public class CompilerTest {
         FileTool.stuffFile(cFile, compiled);
 
         try {
-          String indentProgram = "indent " + cFile.getAbsolutePath();
+          String indentProgram = "indent " + cFile.getPath();
           ProgramCaller pcindent = new ProgramCaller(indentProgram);
           pcindent.run();
           System.out.println(FileTool.slurpFile(cFile));
@@ -203,8 +203,8 @@ public class CompilerTest {
           System.out.println(compiled);
         }
 
-        String compileProgram = "bash C/compileThenRun.sh +gc "
-            + cFile.getAbsolutePath();
+        String compileProgram = "bash -x C/compileThenRun2.sh +gc " 
+                + cFile.getPath();
         ProgramCaller pc = new ProgramCaller(compileProgram);
         pc.setVerbose();
         pc.run();
@@ -267,6 +267,16 @@ public class CompilerTest {
         }
         String newName = parent + File.separator + basename + '.' + suffix;
         return new File(newName);
+    }
+    
+    public static String computeRelativePath(File file) {
+        // Assume all generated C files to be in Samples/
+        String sfile = file.getAbsolutePath();
+        int offset = sfile.indexOf("Samples/");
+        if ( 0 < offset ) {
+            return sfile.substring(offset);
+        }
+        return sfile;
     }
 
     public static String readExpectedPrinting (File file)

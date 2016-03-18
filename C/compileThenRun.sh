@@ -35,7 +35,7 @@ WITH_GC=false
 # Montre-t-on la commande gcc synthetisee
 VERBOSE=false
 
-# Y a-t-il des options comme +gc ou +v ?
+# Y a-t-il des options comme +gc ou +v en tete des options ?
 while [ $# -gt 0 ]
 do 
     case "$1" in 
@@ -57,77 +57,79 @@ CFLAGS='-Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-labe
 # NOTE: Il y a des tests avec des variables inutilisees, ne pas
 # attirer l'attention dessus.
 
-COMMAND_DIR=`dirname $0`
-case "$COMMAND_DIR" in
-    # rendre le repertoire qui contient compileThenRun.sh absolu:
-    /*)
-        true
-        ;;
-    *)
-        COMMAND_DIR=`pwd -P`/"$COMMAND_DIR"
-        ;;
-esac
+# On se déplace dans le répertoire contenant C, Java, Samples.
 
-# Si les .c ne sont pas compilés pour l'architecture courante, on les
-# recompile à la volée.
-( cd "$COMMAND_DIR"/
-  RECOMPILE=true
-  if [ -r ./HOSTTYPE ]
-  then if [ "$(< ./HOSTTYPE)" = "`uname -s -r -v -m`" ]
-       then RECOMPILE=false
-       fi
-  fi
-  if $RECOMPILE
+cd `dirname $0`/../
+if [ -d C -a -d Samples ]
+then true
+else
+    echo "Je ne trouve pas les repertoires C et Samples" >&2
+    exit 9
+fi
+
+# Sommes-nous sur la meme machine ?
+SAME_HOSTTYPE=false
+if [ -r C/HOSTTYPE ]
+then if [ "$(< C/HOSTTYPE)" = "`uname -s -r -v -m`" ]
+     then SAME_HOSTTYPE=true
+     fi
+else
+     uname -s -r -v -m > C/HOSTTYPE	
+fi
+
+# On essaye toujours de regenerer libilp.a
+( cd C
+  make libilp.a >/dev/null 
+  if [ ! -r ./libilp.a ]
   then 
-      echo "Compilation de la bibliotheque d'execution d'ILP..." >&2
-      make clean
-      if make work
-      then :
-      else
-          echo "GC non compilable: option +gc non possible!" >&2
-          exit 13
-      fi
-  fi 1>&2
+       echo "Compilation incorrecte de C/ilp.[ch]" >&2
+       exit 15
+  fi
 )
 
-if [ ! -r "$COMMAND_DIR"/libilp.a ]
-then 
-    echo Bibliotheque introuvable: "$COMMAND_DIR"/libilp.a >&2
-    exit 3
+# On essaye de compiler le GC seulement si l'on n'a pas deja essaye.
+# NOTA si `pwd` contient des blancs, la compilation ne reussira pas.
+RECOMPILE_GC=false
+if $SAME_HOSTTYPE
+then if [ ! -r C/$LIB_GC ]
+     then 
+       if [ -r C/compilingGC... ]
+       then
+            echo "Compilation du GC non possible" >&2
+            WITH_GC=false
+       else
+            RECOMPILE_GC=true
+       fi
+     fi
+else
+  RECOMPILE_GC=true
 fi
 
-if $WITH_GC
+if $RECOMPILE_GC
 then
-    if [ -r "$COMMAND_DIR"/$LIB_GC ]
-    then
-        CFLAGS="-DWITH_GC $CFLAGS"
-    else
-        echo "GC introuvable (consulter Makefile): $COMMAND_DIR/$LIB_GC" >&2
-        # On continue sans GC puisque non compilé!
-        WITH_GC=false
-    fi
+  echo "Compilation du GC" >&2
+  touch C/compilingGC... 
+  (cd C ; make compile.gc)
+  if [ -r C/$LIB_GC ]
+  then 
+     rm C/compilingGC... 
+  else
+     echo "GC non compilable: option +gc non possible!" >&2
+     WITH_GC=false
+  fi
 fi
 
-# Collecter les fichiers (.o, .a .h ou .c) à incorporer et les rendre absolus:
+# Collecter les fichiers (.o, .a .h ou .c) à incorporer:
 FILES=${FILES:-}
-for file
+for file in "$@"
 do
   case "$file" in
       -D*)
           CFLAGS="$CFLAGS $file "
           ;;
-      *[/\\]*.[coah])
-          FILES="$FILES $file"
-          if [ ! -r $file ]
-          then 
-              echo Fichier introuvable: $file >&2
-              exit 7
-          fi
-          ;;
       *.[coah])
-          file=`pwd -P`/$file
           FILES="$FILES $file"
-          if [ ! -r $file ]
+          if [ ! -r "$file" ]
           then 
               echo Fichier introuvable: $file >&2
               exit 7
@@ -152,14 +154,14 @@ fi
 if $VERBOSE
 then 
     echo gcc ${CFLAGS} -o $AOUT \
-    -I. -I"$COMMAND_DIR" \
-    $FILES "$COMMAND_DIR"/libilp.a $OTHER_LIBS '&&' $AOUT
+    -I. -IC \
+    $FILES C/libilp.a $OTHER_LIBS '&&' $AOUT
 fi
 
 #echo Trying to compile $FILE ... >&2
 gcc ${CFLAGS} -o $AOUT \
-    -I. -I"$COMMAND_DIR" \
-    $FILES "$COMMAND_DIR"/libilp.a $OTHER_LIBS && \
+    -I. -IC \
+    $FILES C/libilp.a $OTHER_LIBS && \
 $AOUT
 
 # end of compileThenRun.sh
