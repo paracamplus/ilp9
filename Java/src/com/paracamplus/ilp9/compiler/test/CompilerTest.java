@@ -203,7 +203,7 @@ public class CompilerTest {
           System.out.println(compiled);
         }
 
-        String compileProgram = "bash -x C/compileThenRun2.sh +gc " 
+        String compileProgram = "bash C/compileThenRun.sh +gc "
                 + cFile.getPath();
         ProgramCaller pc = new ProgramCaller(compileProgram);
         pc.setVerbose();
